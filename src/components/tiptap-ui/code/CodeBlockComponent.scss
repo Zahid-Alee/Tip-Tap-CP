@@ -1,0 +1,195 @@
+.tiptap {
+    :first-child {
+        margin-top: 0;
+    }
+
+    pre {
+        // background: var(--black);
+        border-radius: 0.5rem;
+        color: var(--white);
+        font-family: 'JetBrainsMono', monospace;
+        margin: 1.5rem 0;
+        padding: 0.75rem 1rem;
+
+        code {
+            background: none;
+            color: inherit;
+            font-size: 0.8rem;
+            padding: 0;
+            
+        }
+
+        /* Code styling - Dark mode only */
+        .hljs-quote {
+            color: #424242;
+        }
+
+        .hljs-variable,
+        .hljs-template-variable,
+        .hljs-attribute,
+        .hljs-tag,
+        .hljs-name,
+        .hljs-regexp,
+        .hljs-link,
+        .hljs-name,
+        .hljs-selector-id,
+        .hljs-selector-class {
+            color: #d87e7e;
+        }
+
+        .hljs-number,
+        .hljs-meta,
+        .hljs-built_in,
+        .hljs-builtin-name,
+        .hljs-literal,
+        .hljs-type,
+        .hljs-params {
+            color: #d8743e;
+        }
+
+        .hljs-string,
+        .hljs-symbol,
+        .hljs-bullet {
+            color: #7fe384;
+        }
+
+        .hljs-title,
+        .hljs-section {
+            color: #fed46b;
+        }
+
+        .hljs-keyword,
+        .hljs-selector-tag {
+            color: #62b4e3;
+        }
+
+        .hljs-emphasis {
+            font-style: italic;
+        }
+
+        .hljs-strong {
+            font-weight: 700;
+        }
+    }
+}
+
+.code-block {
+    position: relative;
+    margin: 1rem 0;
+    background-color: #292a36;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--tt-codeblock-border);
+    border-radius: 10px;
+
+    .code-block-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem;
+        background-color: #292a36;
+        border-bottom: 1px solid var(--tiptap-code-block-border-dark, #3a3b47);
+    }
+
+    .code-block-language {
+        appearance: none;
+        background-color: var(--tiptap-code-block-select-bg-dark, #1e1e2e);
+        border: 1px solid var(--tiptap-code-block-select-border-dark, #4b5563);
+        border-radius: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        color: var(--tiptap-code-block-select-text-dark, #d1d5db);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 100px;
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+            border-color: var(--tiptap-code-block-select-focus-dark, #60a5fa);
+        }
+
+        // Styling the dropdown arrow
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23d1d5db'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1rem;
+        padding-right: 2rem;
+
+        // Styling options
+        option {
+            background-color: var(--tiptap-code-block-select-bg-dark, #1e1e2e);
+            color: var(--tiptap-code-block-select-text-dark, #d1d5db);
+        }
+    }
+
+    .code-block-copy {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--tiptap-code-block-copy-bg, transparent);
+        color: var(--tiptap-code-block-copy-text-dark, #9ca3af);
+        border: 1px solid var(--tiptap-code-block-copy-border-dark, #4b5563);
+        border-radius: 0.25rem;
+        padding: 0.25rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background-color: var(--tiptap-code-block-copy-hover-bg-dark, #2d2d3a);
+            color: var(--tiptap-code-block-copy-hover-text-dark, #e5e7eb);
+        }
+    }
+
+    .code-block-pre {
+        margin: 0;
+        padding: 0.5rem !important;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: var(--tiptap-code-block-text-dark, #f3f4f6);
+    }
+
+    .code-block-content {
+        display: block;
+        min-height: 1.5rem;
+        
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: var(--tiptap-code-comment-dark, #9ca3af);
+        }
+
+        .token.punctuation {
+            color: var(--tiptap-code-punctuation-dark, #cbd5e1);
+        }
+
+        .token.keyword {
+            color: var(--tiptap-code-keyword-dark, #c4b5fd);
+        }
+
+        .token.string {
+            color: var(--tiptap-code-string-dark, #6ee7b7);
+        }
+
+        .token.function {
+            color: var(--tiptap-code-function-dark, #93c5fd);
+        }
+    }
+
+    #code-block-copy {
+        display: none;
+    }
+}
+
+.read-only-container {
+    .code-block-header {
+        display: none;
+    }
+
+    #code-block-copy {
+        display: block;
+    }
+}

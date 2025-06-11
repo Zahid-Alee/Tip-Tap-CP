@@ -1,0 +1,96 @@
+.image-view {
+  position: relative;
+  display: inline-block;
+  transition: all 0.2s ease;
+}
+
+.image-view__body {
+  position: relative;
+  display: inline-block;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
+}
+
+.image-view__body--focused {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+}
+
+.image-view__body--resizing {
+  cursor: ew-resize;
+}
+
+.image-view__body__image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  transition: opacity 0.2s ease;
+}
+
+.image-resizer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.image-resizer__handler {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #3b82f6;
+  border: 2px solid white;
+  border-radius: 50%;
+  pointer-events: all;
+  cursor: grab;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.image-resizer__handler:hover {
+  background: #2563eb;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.image-resizer__handler:active {
+  cursor: grabbing;
+  transform: scale(1.2);
+}
+
+.image-resizer__handler--tl {
+  top: -6px;
+  left: -6px;
+  cursor: nw-resize;
+}
+
+.image-resizer__handler--tr {
+  top: -6px;
+  right: -6px;
+  cursor: ne-resize;
+}
+
+.image-resizer__handler--bl {
+  bottom: -6px;
+  left: -6px;
+  cursor: sw-resize;
+}
+
+.image-resizer__handler--br {
+  bottom: -6px;
+  right: -6px;
+  cursor: se-resize;
+}
+
+.image-resizer__handler--tl:hover,
+.image-resizer__handler--br:hover {
+  cursor: nw-resize;
+}
+
+.image-resizer__handler--tr:hover,
+.image-resizer__handler--bl:hover {
+  cursor: ne-resize;
+}

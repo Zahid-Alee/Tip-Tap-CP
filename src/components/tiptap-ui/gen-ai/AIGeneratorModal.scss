@@ -1,0 +1,359 @@
+// Variables
+$purple-50: #f8f5ff;
+$purple-100: #f0e6ff;
+$purple-200: #e1ccff;
+$purple-300: #c9abff;
+$purple-500: #8b42ff;
+$purple-600: #7129e6;
+$purple-700: #5c1ecc;
+$purple-800: #4a18a7;
+$gray-500: rgba(0, 0, 0, 0.2);
+$gray-700: #4a5568;
+$gray-800: #2d3748;
+$white: #ffffff;
+
+// Mixins
+@mixin focus-ring {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(113, 41, 230, 0.5);
+}
+
+@mixin button-base {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@mixin button-primary {
+  @include button-base;
+  background: linear-gradient(to right, $purple-600, $purple-700);
+  color: $white;
+  box-shadow: 0 4px 6px rgba(113, 41, 230, 0.15);
+  
+  &:hover {
+    background: linear-gradient(to right, $purple-700, $purple-800);
+    box-shadow: 0 4px 8px rgba(113, 41, 230, 0.25);
+  }
+  
+  &:focus {
+    @include focus-ring;
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-secondary {
+  @include button-base;
+  background-color: $white;
+  color: $purple-700;
+  border: 1px solid $purple-300;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  
+  &:hover {
+    background-color: $purple-50;
+  }
+  
+  &:focus {
+    @include focus-ring;
+  }
+}
+
+@mixin button-toggle {
+  @include button-base;
+  padding: 0.5rem 1rem;
+  
+  &.active {
+    background-color: $purple-600;
+    color: $white;
+    box-shadow: 0 2px 4px rgba(113, 41, 230, 0.2);
+  }
+  
+  &:not(.active) {
+    background-color: $purple-50;
+    color: $purple-700;
+    border: 1px solid $purple-200;
+    
+    &:hover {
+      background-color: $purple-100;
+    }
+  }
+}
+
+// Modal styles
+.ai-generator-modal {
+  &__overlay {
+    position: fixed;
+    inset: 0;
+    background-color: $gray-500;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  
+  &__container {
+    background-color: $white;
+    border-radius: 0.75rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    width: 100%;
+    max-width: 42rem;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid $purple-100;
+  }
+  
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(to right, $purple-50, $purple-100);
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    
+    &-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      
+      &-icon {
+        padding: 0.5rem;
+        background-color: $purple-100;
+        border-radius: 50%;
+        
+        svg {
+          height: 1.25rem;
+          width: 1.25rem;
+          color: $purple-600;
+        }
+      }
+      
+      h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: $gray-800;
+        margin: 0;
+      }
+    }
+    
+    &-close {
+      background: none;
+      border: none;
+      color: $purple-500;
+      cursor: pointer;
+      
+      &:hover {
+        color: $purple-700;
+      }
+      
+      svg {
+        height: 1.25rem;
+        width: 1.25rem;
+      }
+    }
+  }
+  
+  &__form {
+    padding: 1.5rem;
+    
+    &-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    &-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      
+      @media (max-width: 768px) {
+        flex-direction: column;
+      }
+      
+      &-col {
+        flex: 1;
+      }
+    }
+    
+    &-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: $gray-800;
+      margin-bottom: 0.5rem;
+    }
+    
+    &-input, &-select, &-textarea {
+      display: block;
+      width: 100%;
+      padding: 0.5rem 1rem;
+      background-color: $white;
+      border: 1px solid $purple-200;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      color: $gray-800;
+      
+      &:focus {
+        @include focus-ring;
+        border-color: $purple-500;
+      }
+      
+      &::placeholder {
+        color: rgba(113, 41, 230, 0.3);
+      }
+    }
+    
+    &-textarea {
+      padding: 0.75rem 1rem;
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    &-range {
+      width: 100%;
+      height: 0.5rem;
+      background-color: $purple-100;
+      border-radius: 9999px;
+      appearance: none;
+      cursor: pointer;
+      
+      &::-webkit-slider-thumb {
+        appearance: none;
+        height: 1rem;
+        width: 1rem;
+        border-radius: 50%;
+        background-color: $purple-600;
+        cursor: pointer;
+      }
+      
+      &::-moz-range-thumb {
+        height: 1rem;
+        width: 1rem;
+        border-radius: 50%;
+        background-color: $purple-600;
+        cursor: pointer;
+        border: none;
+      }
+    }
+    
+    &-checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+    
+    &-checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    &-checkbox {
+      height: 1rem;
+      width: 1rem;
+      color: $purple-600;
+      border: 1px solid $purple-300;
+      border-radius: 0.25rem;
+      
+      &:focus {
+        @include focus-ring;
+      }
+    }
+    
+    &-checkbox-label {
+      font-size: 0.875rem;
+      color: $gray-700;
+    }
+    
+    &-toggle-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+    
+    &-advanced-toggle {
+      font-size: 0.875rem;
+      color: $purple-600;
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 0;
+      
+      &:hover {
+        color: $gray-800;
+      }
+      
+      svg {
+        height: 1rem;
+        width: 1rem;
+        margin-right: 0.25rem;
+        color: $purple-500;
+        transition: transform 0.2s ease;
+        
+        &.open {
+          transform: rotate(180deg);
+        }
+      }
+    }
+    
+    &-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid $purple-100;
+      
+      &-cancel {
+        @include button-secondary;
+      }
+      
+      &-submit {
+        @include button-primary;
+      }
+    }
+  }
+  
+  &__section-options {
+    &-inline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+  }
+}
+
+// Utility classes
+.toggle-button {
+  @include button-toggle;
+}
+
+.rotate-icon {
+  transition: transform 0.2s ease;
+  
+  &.open {
+    transform: rotate(180deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
