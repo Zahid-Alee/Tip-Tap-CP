@@ -10,6 +10,60 @@ import {
   posToDOMRect,
 } from "@tiptap/react"
 
+
+export const LANGUAGES = [
+  { code: "BG", name: "Bulgarian", localName: "български" },
+  { code: "CS", name: "Czech", localName: "Čeština" },
+  { code: "DA", name: "Danish", localName: "Dansk" },
+  { code: "DE", name: "German", localName: "Deutsch" },
+  { code: "EL", name: "Greek", localName: "Ελληνικά" },
+  { code: "EN-GB", name: "English (British)", localName: "English (British)" },
+  {
+    code: "EN-US",
+    name: "English (American)",
+    localName: "English (American)",
+  },
+  { code: "ES", name: "Spanish", localName: "Español" },
+  { code: "ET", name: "Estonian", localName: "Eesti" },
+  { code: "FI", name: "Finnish", localName: "Suomi" },
+  { code: "FR", name: "French", localName: "Français" },
+  { code: "HU", name: "Hungarian", localName: "Magyar" },
+  { code: "ID", name: "Indonesian", localName: "Bahasa Indonesia" },
+  { code: "IT", name: "Italian", localName: "Italiano" },
+  { code: "JA", name: "Japanese", localName: "日本語" },
+  { code: "KO", name: "Korean", localName: "한국어" },
+  { code: "LT", name: "Lithuanian", localName: "Lietuvių" },
+  { code: "LV", name: "Latvian", localName: "Latviešu" },
+  { code: "NB", name: "Norwegian", localName: "Norsk" },
+  { code: "NL", name: "Dutch", localName: "Nederlands" },
+  { code: "PL", name: "Polish", localName: "Polski" },
+  {
+    code: "PT-BR",
+    name: "Portuguese (Brazilian)",
+    localName: "Português (Brasil)",
+  },
+  {
+    code: "PT-PT",
+    name: "Portuguese (European)",
+    localName: "Português (Portugal)",
+  },
+  { code: "RO", name: "Romanian", localName: "Română" },
+  { code: "RU", name: "Russian", localName: "Русский" },
+  { code: "SK", name: "Slovak", localName: "Slovenčina" },
+  { code: "SL", name: "Slovenian", localName: "Slovenščina" },
+  { code: "SV", name: "Swedish", localName: "Svenska" },
+  { code: "TR", name: "Turkish", localName: "Türkçe" },
+  { code: "UK", name: "Ukrainian", localName: "Українська" },
+  { code: "ZH", name: "Chinese (simplified)", localName: "中文 (简体)" },
+];
+
+// Translation service options
+export const TRANSLATION_SERVICES = [
+  { id: "deepl", name: "DeepL" },
+  { id: "chatgpt", name: "ChatGPT" },
+];
+
+
 export const COLLAB_DOC_PREFIX =
   import.meta.env.NEXT_PUBLIC_COLLAB_DOC_PREFIX || ""
 export const TIPTAP_COLLAB_APP_ID =

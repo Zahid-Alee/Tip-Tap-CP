@@ -47,6 +47,11 @@
             color: #d8743e;
         }
 
+        .hljs-comment{
+
+            color: gray;
+        }
+
         .hljs-string,
         .hljs-symbol,
         .hljs-bullet {
@@ -159,7 +164,8 @@
         .token.prolog,
         .token.doctype,
         .token.cdata {
-            color: var(--tiptap-code-comment-dark, #9ca3af);
+            color: var(--tiptap-code-comment-dark, #6b7280); // Changed from #9ca3af to #6b7280 for better contrast
+            font-style: italic; // Added italic style to make comments more distinguishable
         }
 
         .token.punctuation {
