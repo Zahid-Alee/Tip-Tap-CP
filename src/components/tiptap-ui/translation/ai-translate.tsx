@@ -25,6 +25,7 @@ import {
 } from "@/components/tiptap-ui-primitive/popover";
 import { Button } from "@/components/tiptap-ui-primitive/button";
 import { LANGUAGES, TRANSLATION_SERVICES } from "../../../lib/tiptap-utils";
+import axios from "axios";
 
 export const TranslationModule = ({
   editor,
@@ -148,6 +149,7 @@ export const TranslationModule = ({
   };
 
   const updateTranslationWithAudio = (index, audioUrl) => {
+    console.log("Updating translation with audio:", index, audioUrl);
     setTranslationHistory((prev) =>
       prev.map((item, i) => (i === index ? { ...item, audio: audioUrl } : item))
     );
@@ -158,35 +160,24 @@ export const TranslationModule = ({
     setError(null);
 
     try {
-      // Strip HTML tags for text-to-speech
-      const textContent = text.replace(/<[^>]*>/g, '').trim();
-      
+      const textContent = text.replace(/<[^>]*>/g, "").trim();
+
       if (!textContent) {
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await fetch("/api/generate/text-to-speech", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text: textContent }),
-      });
+      const response = await axios.post(
+        "/api/gen/text-to-speech",
+        { text: textContent }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `Audio generation failed: ${response.status}`
-        );
+      if (!response.data.success) {
+        throw new Error(`Audio generation failed`);
       }
 
-      const data = await response.json();
-      
-      if (data.success && data.audioUrl) {
-        updateTranslationWithAudio(translationIndex, data.audioUrl);
-      } else {
-        throw new Error("Invalid response from audio generation service");
-      }
+      const data = response.data;
+      updateTranslationWithAudio(translationIndex, data?.data?.audio_url);
+
     } catch (err) {
       console.error("Audio Generation Error:", err);
       setError(`Audio generation failed: ${err.message || "Unknown error"}`);
@@ -197,7 +188,7 @@ export const TranslationModule = ({
 
   const handlePlayAudio = (audioUrl, index) => {
     // Stop any currently playing audio
-    Object.values(audioRefs).forEach(audio => {
+    Object.values(audioRefs).forEach((audio) => {
       if (audio && !audio.paused) {
         audio.pause();
         audio.currentTime = 0;
@@ -210,13 +201,13 @@ export const TranslationModule = ({
     }
 
     const audio = new Audio(audioUrl);
-    setAudioRefs(prev => ({ ...prev, [index]: audio }));
-    
-    audio.addEventListener('ended', () => {
+    setAudioRefs((prev) => ({ ...prev, [index]: audio }));
+
+    audio.addEventListener("ended", () => {
       setPlayingAudio(null);
     });
-    
-    audio.addEventListener('error', () => {
+
+    audio.addEventListener("error", () => {
       setError("Failed to play audio");
       setPlayingAudio(null);
     });
@@ -289,9 +280,7 @@ export const TranslationModule = ({
         translatedContent = data.data.translations[0].text;
         detectedSourceLang = data.data.translations[0].detected_source_language;
       } else {
-        throw new Error(
-          "Invalid response format from translation service"
-        );
+        throw new Error("Invalid response format from translation service");
       }
 
       if (translationHistory?.length < 1) {
@@ -482,11 +471,12 @@ export const TranslationModule = ({
                                     </span>
                                   )}
                                 </span>
-                                {lang.localName && lang.localName !== lang.name && (
-                                  <span className="text-xs text-gray-500">
-                                    {lang.localName}
-                                  </span>
-                                )}
+                                {lang.localName &&
+                                  lang.localName !== lang.name && (
+                                    <span className="text-xs text-gray-500">
+                                      {lang.localName}
+                                    </span>
+                                  )}
                               </div>
                               {targetLanguage === lang.code && (
                                 <Check className="w-4 h-4 text-purple-600" />
@@ -533,8 +523,9 @@ export const TranslationModule = ({
                   </div>
 
                   <p className="text-xs text-gray-500 mt-2">
-                    Translates your entire document while preserving HTML structure
-                    using {translationService === "deepl" ? "DeepL" : "ChatGPT"}.
+                    Translates your entire document while preserving HTML
+                    structure using{" "}
+                    {translationService === "deepl" ? "DeepL" : "ChatGPT"}.
                   </p>
                 </div>
               </>
@@ -586,11 +577,13 @@ export const TranslationModule = ({
                               {translation.service}
                             </span>
                           </div>
-                          
+
                           <div className="flex items-center gap-2">
                             {translation.audio ? (
                               <Button
-                                onClick={() => handlePlayAudio(translation.audio, index)}
+                                onClick={() =>
+                                  handlePlayAudio(translation.audio, index)
+                                }
                                 className="!p-2 !bg-green-100 !hover:bg-green-200 !text-green-700 !rounded-md"
                                 disabled={isGeneratingAudio}
                               >
@@ -602,17 +595,21 @@ export const TranslationModule = ({
                               </Button>
                             ) : (
                               <Button
-                                onClick={() => generateAudio(translation.text, index)}
+                                onClick={() =>
+                                  generateAudio(translation.text, index)
+                                }
                                 disabled={isGeneratingAudio}
                                 className="!p-2 !bg-blue-100 !hover:bg-blue-200 !text-blue-700 !rounded-md"
                               >
                                 <Volume2 className="w-4 h-4" />
                               </Button>
                             )}
-                            
+
                             {translation.audio && (
                               <Button
-                                onClick={() => generateAudio(translation.text, index)}
+                                onClick={() =>
+                                  generateAudio(translation.text, index)
+                                }
                                 disabled={isGeneratingAudio}
                                 className="!p-2 !bg-gray-100 !hover:bg-gray-200 !text-gray-600 !rounded-md"
                                 title="Regenerate audio"
@@ -620,9 +617,11 @@ export const TranslationModule = ({
                                 <RotateCcw className="w-4 h-4" />
                               </Button>
                             )}
-                            
+
                             <span className="text-xs text-gray-500 flex-1 truncate">
-                              {translation.audio ? "Audio ready" : "Generate audio"}
+                              {translation.audio
+                                ? "Audio ready"
+                                : "Generate audio"}
                             </span>
                           </div>
                         </div>
@@ -632,7 +631,8 @@ export const TranslationModule = ({
                 )}
 
                 <p className="text-xs text-gray-500 mt-4">
-                  Generate audio narration for your translations using text-to-speech.
+                  Generate audio narration for your translations using
+                  text-to-speech.
                 </p>
               </div>
             )}

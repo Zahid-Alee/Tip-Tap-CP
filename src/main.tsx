@@ -70,7 +70,7 @@ const App = () => {
                     </ul>
                   <p>Enjoy writing!</p>`,
     title: "My Text Lecture",
-    translations: fakeTranslationHistory,
+    translations: [],
   });
 
   const [isInitialized, setIsInitialized] = useState(false);

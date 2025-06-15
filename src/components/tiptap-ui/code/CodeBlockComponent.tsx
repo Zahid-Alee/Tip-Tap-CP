@@ -12,7 +12,7 @@ const CodeBlockComponent = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);
-  const isReadOnly = true;
+  const isReadOnly = false;
 
   const handleCopy = () => {
     if (codeRef.current) {
