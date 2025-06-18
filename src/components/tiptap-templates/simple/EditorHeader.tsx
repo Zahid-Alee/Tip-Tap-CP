@@ -10,12 +10,6 @@ import {
   Globe,
   Check,
   ChevronDown,
-  Volume2,
-  Pause,
-  Play,
-  VolumeX,
-  Headphones,
-  Speech,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -44,24 +38,6 @@ const SaveIcon = () => (
   </svg>
 );
 
-// Audio visualizer component
-const AudioVisualizer = ({ isPlaying }) => (
-  <div className="flex items-center gap-0.5 ml-2">
-    {[...Array(3)].map((_, i) => (
-      <div
-        key={i}
-        className={`w-0.5 bg-blue-500 rounded-full transition-all duration-200 ${
-          isPlaying ? `h-3 animate-pulse` : "h-1"
-        }`}
-        style={{
-          animationDelay: `${i * 0.15}s`,
-          animationDuration: "0.6s",
-        }}
-      />
-    ))}
-  </div>
-);
-
 export function EditorHeader({
   title = "Document Editor",
   saveUrl,
@@ -74,35 +50,14 @@ export function EditorHeader({
   isGenerating = true,
   setSaveStatus,
   translationHistory,
+  currentTranslationIndex,
+  onTranslationChange,
+  setIsUpdatingFromTranslation
 }) {
   const [isSaving, setIsSaving] = React.useState(false);
-  const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
-    React.useState(false);
-  const [currentTranslationIndex, setCurrentTranslationIndex] =
-    React.useState(-1);
-  const [originalContent, setOriginalContent] = React.useState("");
-  const [playingAudioIndex, setPlayingAudioIndex] = React.useState(null);
-  const [audioElements, setAudioElements] = React.useState(new Map());
-  const [audioProgress, setAudioProgress] = React.useState(new Map());
-
-  React.useEffect(() => {
-    if (editor && !originalContent && translationHistory.length > 0) {
-      setOriginalContent(editor.getHTML());
-    }
-  }, [editor, originalContent, translationHistory]);
-
-  // Cleanup audio elements on unmount
-  React.useEffect(() => {
-    return () => {
-      audioElements.forEach((audio) => {
-        audio.pause();
-        audio.src = "";
-      });
-    };
-  }, []);
+  const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] = React.useState(false);
 
   const handleOpenAIModal = () => {
-    console.log("true");
     setIsAIModalOpen(true);
   };
 
@@ -124,7 +79,11 @@ export function EditorHeader({
       const response = await fetch(saveUrl, {
         method: "POST",
         headers: requestHeaders,
-        body: JSON.stringify({ content, translation: translationHistory }),
+        body: JSON.stringify({ 
+          content, 
+          translation: translationHistory,
+          currentTranslationIndex: currentTranslationIndex 
+        }),
       });
 
       if (!response.ok) {
@@ -151,73 +110,15 @@ export function EditorHeader({
 
   const handleApplyTranslation = (index) => {
     if (translationHistory[index]) {
-      if (!originalContent) {
-        setOriginalContent(editor.getHTML());
-      }
-
+      setIsUpdatingFromTranslation(true);
       editor.commands.setContent(translationHistory[index].text, false);
-      setCurrentTranslationIndex(index);
+      onTranslationChange(index);
       setIsTranslationDropdownOpen(false);
+      
+      // Reset the flag after content is set
+      setTimeout(() => setIsUpdatingFromTranslation(false), 100);
     }
   };
-
-  const handleAudioToggle = (index, audioUrl) => {
-    // Stop any currently playing audio
-    if (playingAudioIndex !== null && playingAudioIndex !== index) {
-      const currentAudio = audioElements.get(playingAudioIndex);
-      if (currentAudio) {
-        currentAudio.pause();
-      }
-    }
-
-    let audio = audioElements.get(index);
-
-    if (!audio) {
-      // Create new audio element
-      audio = new Audio(audioUrl);
-
-      // Add progress tracking
-      audio.addEventListener("timeupdate", () => {
-        const progress = (audio.currentTime / audio.duration) * 100;
-        setAudioProgress((prev) => new Map(prev.set(index, progress)));
-      });
-
-      audio.addEventListener("ended", () => {
-        setPlayingAudioIndex(null);
-        setAudioProgress((prev) => new Map(prev.set(index, 0)));
-      });
-
-      audio.addEventListener("error", (e) => {
-        console.error("Audio playback error:", e);
-        setPlayingAudioIndex(null);
-      });
-
-      setAudioElements((prev) => new Map(prev.set(index, audio)));
-    }
-
-    if (playingAudioIndex === index) {
-      // Currently playing this audio, pause it
-      audio.pause();
-      setPlayingAudioIndex(null);
-    } else {
-      // Play this audio
-      audio.currentTime = 0;
-      audio.play().catch((error) => {
-        console.error("Audio play error:", error);
-        setPlayingAudioIndex(null);
-      });
-      setPlayingAudioIndex(index);
-    }
-  };
-
-  // Get current translation with audio
-  const currentTranslationWithAudio =
-    currentTranslationIndex >= 0
-      ? translationHistory[currentTranslationIndex]
-      : null;
-
-  // Check if any translation has audio
-  const hasAudioTranslations = translationHistory.some((t) => t.audio);
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
@@ -229,7 +130,6 @@ export function EditorHeader({
         <div className="flex gap-2">
           {translationHistory.length > 0 && (
             <div className="flex items-center gap-2">
-              {/* Translation Dropdown */}
               <div className="relative">
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -240,17 +140,15 @@ export function EditorHeader({
                       >
                         <DropdownMenuTrigger asChild>
                           <Button
-                            className={`flex items-center px-3 py-2 font-medium rounded-md transition-colors ${
-                              hasAudioTranslations
-                                ? "bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 text-blue-600 border border-blue-200"
-                                : "bg-blue-50 hover:bg-blue-100 text-blue-600"
-                            }`}
+                            className="flex items-center px-3 py-2 font-medium rounded-md transition-colors bg-blue-50 hover:bg-blue-100 text-blue-600"
                           >
                             <Globe className="h-4 w-4 mr-2" />
-                            <span>Language</span>
-                            {hasAudioTranslations && (
-                              <Headphones className="h-3 w-3 ml-1 text-purple-500" />
-                            )}
+                            <span>
+                              {currentTranslationIndex >= 0 
+                                ? translationHistory[currentTranslationIndex].title.split("to")[1]
+                                : "Language"
+                              }
+                            </span>
                             <ChevronDown className="h-3 w-3 ml-1" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -273,13 +171,10 @@ export function EditorHeader({
                                   <span className="font-medium text-sm">
                                     {translation.title.split("to")[1]}
                                   </span>
-                                  {translation.audio && (
-                                    <div className="flex items-center gap-1">
-                                      <Volume2 className="w-3 h-3 text-purple-500" />
-                                      <span className="text-xs text-purple-600 bg-purple-100 px-1.5 py-0.5 rounded-full">
-                                        Audio
-                                      </span>
-                                    </div>
+                                  {translation.lastModified && (
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                      Modified
+                                    </span>
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1">
@@ -295,56 +190,10 @@ export function EditorHeader({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>
-                      {hasAudioTranslations
-                        ? "Available translations with audio support"
-                        : "Available translations"}
-                    </p>
+                    <p>Available translations</p>
                   </TooltipContent>
                 </Tooltip>
               </div>
-
-              {/* Audio Player - Only show when a translation with audio is selected */}
-              {currentTranslationWithAudio?.audio && (
-                <div className="flex items-center gap-2 mx-3 border-purple-200 rounded-md">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() =>
-                          handleAudioToggle(
-                            currentTranslationIndex,
-                            currentTranslationWithAudio.audio
-                          )
-                        }
-                        className={`tiptap-button relative ${
-                          playingAudioIndex === currentTranslationIndex
-                            ? "!bg-purple-100"
-                            : ""
-                        }`}
-                      >
-                        {playingAudioIndex === currentTranslationIndex ? (
-                          <>
-                            <div className="w-2 h-2 absolute right-1 top-1 animate-ping rounded-full bg-purple-500"></div>
-
-                            <Speech className="tiptap-button-icon !text-purple-600 relative" />
-                          </>
-                        ) : (
-                          <Speech className="tiptap-button-icon" />
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        {playingAudioIndex === currentTranslationIndex
-                          ? "Pause audio"
-                          : `Play ${
-                              currentTranslationWithAudio.title.split("to")[1]
-                            } audio`}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
             </div>
           )}
 

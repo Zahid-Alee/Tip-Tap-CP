@@ -67,8 +67,38 @@ import { TableExtensions } from "@/components/tiptap-extension/table-extension";
 import { ResizableImage } from "../../tiptap-extension/Image/ImageExtension";
 import { ImageBubbleMenu } from "../../tiptap-extension/Image/ImageBubbleMenu";
 
-
 const lowlight = createLowlight(all);
+
+// Utility function for debouncing
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: Parameters<T>) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Utility function for throttling
+function throttle<T extends (...args: any[]) => any>(
+  func: T,
+  limit: number
+): (...args: Parameters<T>) => void {
+  let inThrottle: boolean;
+  return function executedFunction(...args: Parameters<T>) {
+    if (!inThrottle) {
+      func(...args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+}
 
 interface EditorRefHandle {
   getEditor: () => any;
@@ -129,10 +159,53 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     const [isEditorLoading, setIsEditorLoading] = React.useState(true);
     const [isAIModalOpen, setIsAIModalOpen] = React.useState<boolean>(false);
     const [isGenerating, setIsGenerating] = React.useState<boolean>(false);
-    const [translationHistory, setTranslationHistory] =
-      React.useState(translations);
+    const [translationHistory, setTranslationHistory] = React.useState(translations);
+    
+    // New state for tracking current translation
+    const [currentTranslationIndex, setCurrentTranslationIndex] = React.useState(-1);
+    const [originalContent, setOriginalContent] = React.useState("");
+    const [isUpdatingFromTranslation, setIsUpdatingFromTranslation] = React.useState(false);
 
     const editorRef = React.useRef<any>(null);
+
+    // Determine initial content based on translation history
+    const getInitialEditorContent = React.useCallback(() => {
+      if (translations && translations.length > 0) {
+        // If translations exist, use the first translation's text
+        return translations[0].text || "";
+      }
+      // Otherwise use the passed initialContent
+      return initialContent || "";
+    }, [translations, initialContent]);
+
+    // Debounced function to update translation (increased delay for better performance)
+    const updateTranslationDebounced = React.useMemo(
+      () =>
+        debounce((content: string, translationIndex: number) => {
+          if (translationIndex >= 0 && translationHistory[translationIndex]) {
+            setTranslationHistory(prev => {
+              const updated = [...prev];
+              updated[translationIndex] = {
+                ...updated[translationIndex],
+                text: content,
+                lastModified: new Date().toISOString()
+              };
+              return updated;
+            });
+          }
+        }, 1000), // Increased debounce delay to 1000ms for better performance
+      [translationHistory]
+    );
+
+    // Throttled function for immediate UI feedback (optional)
+    const updateTranslationThrottled = React.useMemo(
+      () =>
+        throttle((content: string, translationIndex: number) => {
+          // This could be used for immediate UI feedback if needed
+          // For now, we'll rely on debouncing for actual updates
+        }, 100),
+      []
+    );
 
     const handleGenerateContent = React.useCallback(
       async (formData: AIFormData) => {
@@ -146,11 +219,12 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           if (generateResponse && generateResponse.content) {
             Promise.resolve().then(() => {
+              setIsUpdatingFromTranslation(true);
+              
               if (generateResponse.replaceExisting) {
                 currentEditor.commands.setContent(generateResponse.content);
               } else {
                 const currentContent = currentEditor.getHTML();
-
                 const needsSeparator =
                   !currentContent.trim().endsWith("</p>") &&
                   !currentContent.trim().endsWith("</h1>") &&
@@ -163,7 +237,6 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
                   !currentContent.trim().endsWith("</ol>");
 
                 let combinedContent;
-
                 if (needsSeparator) {
                   combinedContent = `${currentContent}<p></p>${generateResponse.content}`;
                 } else {
@@ -171,11 +244,18 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
                 }
 
                 currentEditor.commands.setContent(combinedContent);
-
                 const docSize = currentEditor.state.doc.content.size;
                 currentEditor.commands.setTextSelection(docSize);
               }
+              
               setIsAIModalOpen(false);
+              
+              if (currentTranslationIndex >= 0) {
+                const newContent = currentEditor.getHTML();
+                updateTranslationDebounced(newContent, currentTranslationIndex);
+              }
+              
+              setTimeout(() => setIsUpdatingFromTranslation(false), 100);
             });
           }
         } catch (error) {
@@ -185,7 +265,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
           setIsGenerating(false);
         }
       },
-      []
+      [currentTranslationIndex, updateTranslationDebounced]
     );
 
     React.useImperativeHandle(ref, () => ({
@@ -193,7 +273,9 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
       getContent: () => editorRef.current?.getHTML(),
       setContent: (content) => {
         if (editorRef.current) {
+          setIsUpdatingFromTranslation(true);
           editorRef.current.commands.setContent(content);
+          setTimeout(() => setIsUpdatingFromTranslation(false), 100);
         }
       },
     }));
@@ -249,10 +331,18 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
         Link.configure({ openOnClick: false }),
         ...TableExtensions,
       ],
-      content: initialContent,
+      content: getInitialEditorContent(), // Use the computed initial content
       onTransaction: () => {
         if (saveStatus) {
           setSaveStatus(null);
+        }
+      },
+      onUpdate: ({ editor }) => {
+        // Only update translation if not updating from translation and there's a current translation
+        if (!isUpdatingFromTranslation && currentTranslationIndex >= 0) {
+          const content = editor.getHTML();
+          // Use debounced update for better performance
+          updateTranslationDebounced(content, currentTranslationIndex);
         }
       },
       onCreate: () => {
@@ -260,6 +350,11 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
           editorRef.current = editor;
           setEditorInitialized(true);
           setIsEditorLoading(false);
+
+          // Set initial translation index if translations exist
+          if (translations && translations.length > 0) {
+            setCurrentTranslationIndex(0);
+          }
 
           if (onReady) {
             onReady();
@@ -287,9 +382,40 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
       }
     }, [isMobile, mobileView]);
 
+    // Update translation history when translations prop changes
+    React.useEffect(() => {
+      setTranslationHistory(translations);
+      
+      // Update initial content and translation index when translations change
+      if (editor && translations && translations.length > 0) {
+        const newContent = translations[0].text || "";
+        if (newContent !== editor.getHTML()) {
+          setIsUpdatingFromTranslation(true);
+          editor.commands.setContent(newContent);
+          setCurrentTranslationIndex(0);
+          setTimeout(() => setIsUpdatingFromTranslation(false), 100);
+        }
+      } else if (editor && (!translations || translations.length === 0)) {
+        // Reset to initial content if no translations
+        const content = initialContent || "";
+        if (content !== editor.getHTML()) {
+          setIsUpdatingFromTranslation(true);
+          editor.commands.setContent(content);
+          setCurrentTranslationIndex(-1);
+          setTimeout(() => setIsUpdatingFromTranslation(false), 100);
+        }
+      }
+    }, [translations, editor, initialContent]);
+
+    const handleTranslationChange = React.useCallback((index: number) => {
+      setCurrentTranslationIndex(index);
+    }, []);
+
     if (isEditorLoading) {
       return <EditorLoader />;
     }
+
+    console.log('translation', translationHistory);
 
     return (
       <EditorContext.Provider value={{ editor }}>
@@ -306,6 +432,11 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
             setIsAIModalOpen={setIsAIModalOpen}
             setSaveStatus={setSaveStatus}
             translationHistory={translationHistory}
+            currentTranslationIndex={currentTranslationIndex}
+            onTranslationChange={handleTranslationChange}
+            setOriginalContent={setOriginalContent}
+            originalContent={originalContent}
+            setIsUpdatingFromTranslation={setIsUpdatingFromTranslation}
           />
 
           <Toolbar

@@ -7,7 +7,6 @@ const getCsrfToken = () => {
   return metaTag ? metaTag.getAttribute("content") : null;
 };
 
-
 const fakeTranslationHistory = [
   {
     title: "English to Spanish",
@@ -40,7 +39,7 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: 'null',
+    saveUrl: null,
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },

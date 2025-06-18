@@ -4,7 +4,6 @@
     }
 
     pre {
-        // background: var(--black);
         border-radius: 0.5rem;
         color: var(--white);
         font-family: 'JetBrainsMono', monospace;
@@ -121,7 +120,6 @@
         background-size: 1rem;
         padding-right: 2rem;
 
-        // Styling options
         option {
             background-color: var(--tiptap-code-block-select-bg-dark, #1e1e2e);
             color: var(--tiptap-code-block-select-text-dark, #d1d5db);

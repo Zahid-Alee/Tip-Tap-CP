@@ -35,7 +35,7 @@ export const TranslationModule = ({
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [error, setError] = React.useState(null);
+  const [error, setError] = React.useState<string | null>(null);
   const [targetLanguage, setTargetLanguage] = React.useState("ES");
   const [progress, setProgress] = React.useState(0);
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
@@ -124,6 +124,10 @@ export const TranslationModule = ({
     return translationHistory.some((item) => item.targetLanguage === code);
   };
 
+  const getExistingTranslationIndex = (code) => {
+    return translationHistory.findIndex((item) => item.targetLanguage === code);
+  };
+
   const saveToHistory = (
     htmlContent,
     langCode,
@@ -144,8 +148,24 @@ export const TranslationModule = ({
       audio: audioUrl,
     };
 
-    setTranslationHistory((prev) => [...prev, newTranslation]);
-    setCurrentTranslationIndex((prev) => prev + 1);
+    // Check if translation for this language already exists
+    const existingIndex = getExistingTranslationIndex(langCode);
+    
+    if (existingIndex >= 0) {
+      // Replace existing translation, preserving audio if it exists
+      setTranslationHistory((prev) => 
+        prev.map((item, index) => 
+          index === existingIndex 
+            ? { ...newTranslation, audio: item.audio || audioUrl }
+            : item
+        )
+      );
+      setCurrentTranslationIndex(existingIndex);
+    } else {
+      // Add new translation
+      setTranslationHistory((prev) => [...prev, newTranslation]);
+      setCurrentTranslationIndex(translationHistory.length);
+    }
   };
 
   const updateTranslationWithAudio = (index, audioUrl) => {
@@ -168,7 +188,7 @@ export const TranslationModule = ({
 
       const response = await axios.post(
         "/api/gen/text-to-speech",
-        { text: textContent }
+        { text: textContent, voice: "alloy",path:'/app/course/1000/narrations' }
       );
 
       if (!response.data.success) {
@@ -176,8 +196,7 @@ export const TranslationModule = ({
       }
 
       const data = response.data;
-      updateTranslationWithAudio(translationIndex, data?.data?.audio_url);
-
+      updateTranslationWithAudio(translationIndex, data?.data);
     } catch (err) {
       console.error("Audio Generation Error:", err);
       setError(`Audio generation failed: ${err.message || "Unknown error"}`);
@@ -235,8 +254,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "http://lms.localhost:8000/api/translate/deepl"
-          : "http://lms.localhost:8000/api/translate/chatgpt";
+          ? "/api/translate/deepl"
+          : "/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
@@ -284,7 +303,7 @@ export const TranslationModule = ({
       }
 
       if (translationHistory?.length < 1) {
-        saveToHistory(editor.getHTML(), "English", "English", "original");
+        saveToHistory(editor.getHTML(), "English", "English", "English");
       }
 
       editor.commands.setContent(translatedContent, false);
@@ -571,7 +590,7 @@ export const TranslationModule = ({
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium text-gray-700">
-                              {translation.title}
+                              {translation.title.split('to')[1]}
                             </span>
                             <span className="text-xs text-gray-500">
                               {translation.service}
@@ -600,8 +619,9 @@ export const TranslationModule = ({
                                 }
                                 disabled={isGeneratingAudio}
                                 className="!p-2 !bg-blue-100 !hover:bg-blue-200 !text-blue-700 !rounded-md"
-                              >
-                                <Volume2 className="w-4 h-4" />
+                              > 
+
+                               Generate Narration
                               </Button>
                             )}
 
