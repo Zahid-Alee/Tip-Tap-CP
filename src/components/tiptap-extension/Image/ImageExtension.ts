@@ -1,6 +1,6 @@
-import { Node, mergeAttributes } from '@tiptap/core';
-import { ReactNodeViewRenderer } from '@tiptap/react';
-import { ResizableImageView } from './ResizableImageView';
+import { Node, mergeAttributes } from "@tiptap/core";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import { ResizableImageView } from "./ResizableImageView";
 
 export interface ResizableImageOptions {
   inline: boolean;
@@ -8,7 +8,7 @@ export interface ResizableImageOptions {
   HTMLAttributes: Record<string, any>;
 }
 
-declare module '@tiptap/core' {
+declare module "@tiptap/core" {
   interface Commands<ReturnType> {
     resizableImage: {
       /**
@@ -20,18 +20,21 @@ declare module '@tiptap/core' {
         title?: string;
         width?: number;
         height?: number;
-        align?: 'left' | 'center' | 'right';
+        align?: "left" | "center" | "right";
         flipX?: boolean;
         flipY?: boolean;
+        href?: string;
       }) => ReturnType;
-      
-      setImageAlign: (align: 'left' | 'center' | 'right') => ReturnType;
+
+      setImageAlign: (align: "left" | "center" | "right") => ReturnType;
+      setImageLink: (href: string) => ReturnType;
+      removeImageLink: () => ReturnType;
     };
   }
 }
 
 export const ResizableImage = Node.create<ResizableImageOptions>({
-  name: 'resizableImage',
+  name: "resizableImage",
 
   addOptions() {
     return {
@@ -46,7 +49,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
   },
 
   group() {
-    return this.options.inline ? 'inline' : 'block';
+    return this.options.inline ? "inline" : "block";
   },
 
   draggable: true,
@@ -69,7 +72,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         default: null,
       },
       align: {
-        default: 'left',
+        default: "left",
       },
       flipX: {
         default: false,
@@ -77,24 +80,54 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
       flipY: {
         default: false,
       },
+      href: {
+        default: null,
+      },
     };
   },
 
   parseHTML() {
     return [
       {
-        tag: this.options.inline ? 'img[src]:not([src^="data:"])' : 'img[src]',
+        tag: "a img[src]", // Parse images inside anchor tags
+        getAttrs: (element) => {
+          const img = element as HTMLImageElement;
+          const anchor = img.parentElement as HTMLAnchorElement;
+          return {
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt"),
+            title: img.getAttribute("title"),
+            width: img.getAttribute("width")
+              ? parseInt(img.getAttribute("width")!, 10)
+              : null,
+            height: img.getAttribute("height")
+              ? parseInt(img.getAttribute("height")!, 10)
+              : null,
+            align: img.getAttribute("data-align") || "left",
+            flipX: img.getAttribute("data-flip-x") === "true",
+            flipY: img.getAttribute("data-flip-y") === "true",
+            href: anchor?.getAttribute("href"),
+          };
+        },
+      },
+      {
+        tag: this.options.inline ? 'img[src]:not([src^="data:"])' : "img[src]",
         getAttrs: (element) => {
           const img = element as HTMLImageElement;
           return {
-            src: img.getAttribute('src'),
-            alt: img.getAttribute('alt'),
-            title: img.getAttribute('title'),
-            width: img.getAttribute('width') ? parseInt(img.getAttribute('width')!, 10) : null,
-            height: img.getAttribute('height') ? parseInt(img.getAttribute('height')!, 10) : null,
-            align: img.getAttribute('data-align') || 'left',
-            flipX: img.getAttribute('data-flip-x') === 'true',
-            flipY: img.getAttribute('data-flip-y') === 'true',
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt"),
+            title: img.getAttribute("title"),
+            width: img.getAttribute("width")
+              ? parseInt(img.getAttribute("width")!, 10)
+              : null,
+            height: img.getAttribute("height")
+              ? parseInt(img.getAttribute("height")!, 10)
+              : null,
+            align: img.getAttribute("data-align") || "left",
+            flipX: img.getAttribute("data-flip-x") === "true",
+            flipY: img.getAttribute("data-flip-y") === "true",
+            href: null, // No href for standalone images
           };
         },
       },
@@ -102,20 +135,30 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { align, flipX, flipY, ...attrs } = HTMLAttributes;
-    
-    return [
-      'img',
-      mergeAttributes(
-        this.options.HTMLAttributes,
-        attrs,
-        {
-          'data-align': align,
-          'data-flip-x': flipX,
-          'data-flip-y': flipY,
-        }
-      ),
+    const { align, flipX, flipY, href, ...attrs } = HTMLAttributes;
+
+    const imgElement = [
+      "img",
+      mergeAttributes(this.options.HTMLAttributes, attrs, {
+        "data-align": align,
+        "data-flip-x": flipX,
+        "data-flip-y": flipY,
+      }),
     ];
+
+    if (href) {
+      return [
+        "a",
+        {
+          href: href,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        },
+        imgElement,
+      ];
+    }
+
+    return imgElement;
   },
 
   addCommands() {
@@ -132,6 +175,16 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         (align) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, { align });
+        },
+      setImageLink:
+        (href) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { href });
+        },
+      removeImageLink:
+        () =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { href: null });
         },
     };
   },

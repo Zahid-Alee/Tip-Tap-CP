@@ -60,6 +60,7 @@ export function ResizableImageView(props: any) {
 
   const imgAttrs = useMemo(() => {
     const { src, alt, width: w, height: h, flipX, flipY } = props?.node?.attrs;
+    console.log("Image attributes:", props?.node?.attrs);
 
     const width = isNumber(w) ? `${w}px` : w;
     const height = isNumber(h) ? `${h}px` : h;
