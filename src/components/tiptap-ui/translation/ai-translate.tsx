@@ -305,8 +305,7 @@ export const TranslationModule = ({
       if (translationHistory?.length < 1) {
         saveToHistory(editor.getHTML(), "English", "English", "English");
       }
-
-      editor.commands.setContent(translatedContent, false);
+      
       saveToHistory(
         translatedContent,
         targetLanguage,

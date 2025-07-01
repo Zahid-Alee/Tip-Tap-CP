@@ -69,7 +69,6 @@ import { ImageBubbleMenu } from "../../tiptap-extension/Image/ImageBubbleMenu";
 
 const lowlight = createLowlight(all);
 
-// Utility function for debouncing
 function debounce<T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -85,7 +84,6 @@ function debounce<T extends (...args: any[]) => any>(
   };
 }
 
-// Utility function for throttling
 function throttle<T extends (...args: any[]) => any>(
   func: T,
   limit: number
@@ -160,25 +158,19 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     const [isAIModalOpen, setIsAIModalOpen] = React.useState<boolean>(false);
     const [isGenerating, setIsGenerating] = React.useState<boolean>(false);
     const [translationHistory, setTranslationHistory] = React.useState(translations);
-    
-    // New state for tracking current translation
     const [currentTranslationIndex, setCurrentTranslationIndex] = React.useState(-1);
     const [originalContent, setOriginalContent] = React.useState("");
     const [isUpdatingFromTranslation, setIsUpdatingFromTranslation] = React.useState(false);
 
     const editorRef = React.useRef<any>(null);
 
-    // Determine initial content based on translation history
     const getInitialEditorContent = React.useCallback(() => {
       if (translations && translations.length > 0) {
-        // If translations exist, use the first translation's text
         return translations[0].text || "";
       }
-      // Otherwise use the passed initialContent
       return initialContent || "";
     }, [translations, initialContent]);
 
-    // Debounced function to update translation (increased delay for better performance)
     const updateTranslationDebounced = React.useMemo(
       () =>
         debounce((content: string, translationIndex: number) => {
@@ -193,18 +185,8 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
               return updated;
             });
           }
-        }, 1000), // Increased debounce delay to 1000ms for better performance
+        }, 1000), 
       [translationHistory]
-    );
-
-    // Throttled function for immediate UI feedback (optional)
-    const updateTranslationThrottled = React.useMemo(
-      () =>
-        throttle((content: string, translationIndex: number) => {
-          // This could be used for immediate UI feedback if needed
-          // For now, we'll rely on debouncing for actual updates
-        }, 100),
-      []
     );
 
     const handleGenerateContent = React.useCallback(
@@ -331,17 +313,15 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
         Link.configure({ openOnClick: false }),
         ...TableExtensions,
       ],
-      content: getInitialEditorContent(), // Use the computed initial content
+      content: getInitialEditorContent(),
       onTransaction: () => {
         if (saveStatus) {
           setSaveStatus(null);
         }
       },
       onUpdate: ({ editor }) => {
-        // Only update translation if not updating from translation and there's a current translation
         if (!isUpdatingFromTranslation && currentTranslationIndex >= 0) {
           const content = editor.getHTML();
-          // Use debounced update for better performance
           updateTranslationDebounced(content, currentTranslationIndex);
         }
       },
@@ -351,7 +331,6 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
           setEditorInitialized(true);
           setIsEditorLoading(false);
 
-          // Set initial translation index if translations exist
           if (translations && translations.length > 0) {
             setCurrentTranslationIndex(0);
           }
@@ -382,11 +361,9 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
       }
     }, [isMobile, mobileView]);
 
-    // Update translation history when translations prop changes
     React.useEffect(() => {
       setTranslationHistory(translations);
       
-      // Update initial content and translation index when translations change
       if (editor && translations && translations.length > 0) {
         const newContent = translations[0].text || "";
         if (newContent !== editor.getHTML()) {
@@ -396,7 +373,6 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
           setTimeout(() => setIsUpdatingFromTranslation(false), 100);
         }
       } else if (editor && (!translations || translations.length === 0)) {
-        // Reset to initial content if no translations
         const content = initialContent || "";
         if (content !== editor.getHTML()) {
           setIsUpdatingFromTranslation(true);
@@ -414,8 +390,6 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     if (isEditorLoading) {
       return <EditorLoader />;
     }
-
-    console.log('translation', translationHistory);
 
     return (
       <EditorContext.Provider value={{ editor }}>

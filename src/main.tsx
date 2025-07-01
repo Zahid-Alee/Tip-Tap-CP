@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 import { useEffect, useRef, useState } from "react";
 import EditorLoader from "./components/tiptap-ui/Loader/EditorLoader";
+
 const getCsrfToken = () => {
   const metaTag = document.querySelector('meta[name="csrf-token"]');
   return metaTag ? metaTag.getAttribute("content") : null;
@@ -39,7 +40,7 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: "null",
+    saveUrl: 'null',
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
@@ -87,9 +88,7 @@ const App = () => {
           ...prevConfig,
           ...event.data.config,
         }));
-
         configReceivedRef.current = true;
-
         event.source.postMessage(
           { type: "EDITOR_CONFIG_RECEIVED" },
           event.origin
