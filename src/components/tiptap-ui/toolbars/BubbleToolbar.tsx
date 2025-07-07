@@ -3,7 +3,6 @@ import { BubbleMenu, Editor } from "@tiptap/react";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { NodeButton } from "@/components/tiptap-ui/node-button";
 import { HighlightPopover } from "@/components/tiptap-ui/highlight-popover";
-import { LinkPopover } from "@/components/tiptap-ui/link-popover";
 import TextColorPopover from "../font/TextColorPopover";
 import "./toolbar.scss";
 
@@ -36,6 +35,9 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
 
         if (editor.isActive("resizableImage")) return false;
 
+        if(editor.isActive("link")) return false;
+        if(editor.isActive("code-block")) return false;
+
         return true;
 
       }}
@@ -54,7 +56,7 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
       </div>
 
       <div className="flex items-center gap-1">
-        <LinkPopover />
+        {/* <LinkPopover /> */}
         <NodeButton type="codeBlock" size="sm" />
       </div>
     </BubbleMenu>
