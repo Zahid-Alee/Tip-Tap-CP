@@ -36,10 +36,10 @@ const calculateMaxTokens = (sectionCount, sectionLength) => {
         medium: 500,
         long: 800
     };
-    
+
     const tokensPerSection = baseTokens[sectionLength] || 500;
     const headerFooterTokens = 200;
-    
+
     return Math.min((sectionCount * tokensPerSection) + headerFooterTokens, 4000);
 };
 
@@ -74,29 +74,29 @@ const saveToLocalStorage = () => {
 /**
  * Save generation history entry
  */
-const saveGenerationHistory = (userPrompt, aiResponse, formData) => {
-    const historyEntry = {
-        id: Date.now().toString(),
-        timestamp: new Date().toISOString(),
-        userPrompt: userPrompt,
-    };
+// const saveGenerationHistory = (userPrompt, aiResponse, formData) => {
+//     const historyEntry = {
+//         id: Date.now().toString(),
+//         timestamp: new Date().toISOString(),
+//         userPrompt: userPrompt,
+//     };
 
-    generationHistory.unshift(historyEntry);
-    
-    if (generationHistory.length > 100) {
-        generationHistory = generationHistory.slice(0, 100);
-    }
+//     generationHistory.unshift(historyEntry);
 
-    saveToLocalStorage();
-    return historyEntry;
-};
+//     if (generationHistory.length > 100) {
+//         generationHistory = generationHistory.slice(0, 100);
+//     }
 
-/**
- * Estimate token count (rough approximation: 1 token ≈ 4 characters)
- */
-const estimateTokenCount = (text) => {
-    return Math.ceil(text.length / 4);
-};
+//     saveToLocalStorage();
+//     return historyEntry;
+// };
+
+// /**
+//  * Estimate token count (rough approximation: 1 token ≈ 4 characters)
+//  */
+// const estimateTokenCount = (text) => {
+//     return Math.ceil(text.length / 4);
+// };
 
 /**
  * Get all generation history
@@ -137,50 +137,50 @@ export const deleteHistoryEntry = (id) => {
 /**
  * Create user-friendly prompt summary from form data
  */
-const createUserPromptSummary = (formData) => {
-    const {
-        topic,
-        sectionCount,
-        sectionTypes,
-        sectionLength,
-        tone,
-        targetAudience,
-        language,
-        additionalInstructions
-    } = formData;
+// const createUserPromptSummary = (formData) => {
+//     const {
+//         topic,
+//         sectionCount,
+//         sectionTypes,
+//         sectionLength,
+//         tone,
+//         targetAudience,
+//         language,
+//         additionalInstructions
+//     } = formData;
 
-    let summary = `Generate educational content about "${topic}"`;
-    
-    if (targetAudience) {
-        summary += ` for ${targetAudience}`;
-    }
-    
-    if (sectionCount) {
-        summary += ` with ${sectionCount} sections`;
-    }
-    
-    if (sectionTypes && sectionTypes.length > 0) {
-        summary += ` (${sectionTypes.join(', ')})`;
-    }
-    
-    if (sectionLength) {
-        summary += ` in ${sectionLength} format`;
-    }
-    
-    if (tone) {
-        summary += ` using ${tone} tone`;
-    }
-    
-    if (language && language !== 'english') {
-        summary += ` in ${language}`;
-    }
-    
-    if (additionalInstructions) {
-        summary += `. Additional instructions: ${additionalInstructions}`;
-    }
+//     let summary = `Generate educational content about "${topic}"`;
 
-    return summary;
-};
+//     if (targetAudience) {
+//         summary += ` for ${targetAudience}`;
+//     }
+
+//     if (sectionCount) {
+//         summary += ` with ${sectionCount} sections`;
+//     }
+
+//     if (sectionTypes && sectionTypes.length > 0) {
+//         summary += ` (${sectionTypes.join(', ')})`;
+//     }
+
+//     if (sectionLength) {
+//         summary += ` in ${sectionLength} format`;
+//     }
+
+//     if (tone) {
+//         summary += ` using ${tone} tone`;
+//     }
+
+//     if (language && language !== 'english') {
+//         summary += ` in ${language}`;
+//     }
+
+//     if (additionalInstructions) {
+//         summary += `. Additional instructions: ${additionalInstructions}`;
+//     }
+
+//     return summary;
+// };
 
 // Initialize by loading existing history
 loadGenerationHistory();
@@ -189,7 +189,7 @@ export const generateAiContent = async (formData) => {
     const { model = 'openai', language = 'english', replaceExisting = false, ...contentParams } = formData;
 
     try {
-        const userPrompt = createUserPromptSummary(formData);
+        // const userPrompt = createUserPromptSummary(formData);
         const aiPrompt = createOptimizedPrompt(contentParams, language);
         const modelConfig = API_CONFIG[model];
 
@@ -240,6 +240,7 @@ export const generateAiContent = async (formData) => {
 /**
  * Optimized prompt creation with better educational focus
  */
+
 const createOptimizedPrompt = (formData, language = 'english') => {
     const {
         topic,
@@ -286,14 +287,14 @@ const createOptimizedPrompt = (formData, language = 'english') => {
     };
 
     const audienceGuidance = {
-        'beginners': 'Use foundational language, define all terms, build from basic principles with scaffolded learning.',
-        'intermediate': 'Assume basic knowledge, introduce complexity gradually, connect to prior learning.',
-        'advanced': 'Engage with sophisticated concepts, explore nuances, address exceptions and edge cases.',
-        'professionals': 'Focus on practical applications, industry standards, best practices, and actionable insights.',
-        'students': 'Structure content for academic learning with clear objectives and assessment-ready material.',
+        beginners: 'Use foundational language, define all terms, build from basic principles with scaffolded learning.',
+        intermediate: 'Assume basic knowledge, introduce complexity gradually, connect to prior learning.',
+        advanced: 'Engage with sophisticated concepts, explore nuances, address exceptions and edge cases.',
+        professionals: 'Focus on practical applications, industry standards, best practices, and actionable insights.',
+        students: 'Structure content for academic learning with clear objectives and assessment-ready material.',
     }[targetAudience] || 'Adapt content appropriately for the specified audience level.';
 
-    const languageInstruction = language !== 'english' 
+    const languageInstruction = language !== 'english'
         ? `Generate ALL content in ${language}. Use proper grammar, appropriate vocabulary, and culturally relevant examples for ${language} speakers.`
         : '';
 
@@ -312,12 +313,16 @@ ${audienceGuidance}
 
 ${languageInstruction}
 
+=====================
 CONTENT STRUCTURE REQUIREMENTS:
+=====================
 - Create EXACTLY ${sectionCount} sections using these types: ${sectionTypesArray.join(', ')}
 - Each section type should follow this guidance:
 ${sectionTypesArray.map(type => `  • ${type}: ${sectionTypeGuidance[type] || 'Provide relevant, high-quality content for this section type.'}`).join('\n')}
 
-SECTION GUIDELINES:
+=====================
+SECTION STYLE & TONE:
+=====================
 - ${lengthGuidance}
 - ${toneGuidance}
 - Use clear topic sentences and logical flow
@@ -325,34 +330,50 @@ SECTION GUIDELINES:
 - Maintain academic rigor while ensuring accessibility
 - ${includeEmojis ? 'Include strategic emojis to enhance engagement and highlight key concepts.' : 'Do not include emojis.'}
 
-STRUCTURAL REQUIREMENTS:
+=====================
+STRUCTURAL ELEMENTS:
+=====================
 - ${includeHeader ? 'Begin with an engaging introduction that establishes context, learning objectives, and relevance.' : 'Start directly with the main content sections.'}
 - ${includeFooter ? 'End with a comprehensive summary that reinforces key concepts and provides clear takeaways.' : 'End with the final main content section.'}
-
 ${rulerInstruction}
 
+=====================
+TEXT STYLING REQUIREMENTS:
+=====================
+- <strong>BOLD all important concepts or terminology<strong>
+- <i>Italicize all definitions or first-time explanations of terms</i>
+- These must appear inside <p> tags as HTML:
+  - Use <strong>Important Concept</strong>
+  - Use <em>Term being defined</em>
+- Ensure bold and italic formatting is used naturally and consistently throughout paragraphs
+
+=====================
 HTML FORMATTING REQUIREMENTS:
-- Output ONLY the HTML content wrapped in a single \`\`\`html code block
-- Use semantic HTML structure:
-  • Each section: <section class="[section-type]">
-  • Section headings: <h2> or <h3> with descriptive titles
-  • Paragraphs: <p> with appropriate classes for key concepts
-  • Lists: <ul>/<ol> with <li> for organized information
-  • Emphasis: <strong> for important terms, <em> for definitions
-  • Code examples: <pre><code class="language-[lang]"> with proper indentation
-  • Tables: <table> with <th>, <tr>, <td> for structured data
-- Add <hr class="section-divider" /> at the end of each section EXCEPT the last one
-- No empty elements, placeholder content, or unnecessary markup
-- No DOCTYPE, html, head, or body tags needed
+=====================
+- Output ALL content in a single \`\`\`html code block
+- Use semantic HTML only:
+  • Section container: <section class="[section-type]">
+  • Headings: <h2> or <h3>
+  • Paragraphs: <p>
+  • Lists: <ul>/<ol> with <li>
+  • Emphasis:
+    - <strong> for important words or phrases
+    - <em> for definitions and new terms
+  • Code: Use <pre><code class="language-[language]"> with correct indentation
+  • Tables: <table> with <thead>, <tbody>, <tr>, <th>, <td>
+  • Add <hr class="section-divider" /> at end of each section EXCEPT the last
 
+=====================
 CODE BLOCK FORMATTING:
+=====================
 - Use <pre><code class="language-[language]"> for all code examples
-- Ensure proper 2-space indentation and meaningful comments
-- Include complete, functional examples where applicable
+- Indent code using 2 spaces
+- Add meaningful comments
+- Provide complete, functional examples when possible
 
-${additionalInstructions ? `ADDITIONAL REQUIREMENTS:\n${additionalInstructions}` : ''}
+${additionalInstructions ? `=====================\nADDITIONAL NOTES:\n=====================\n${additionalInstructions}` : ''}
 
-Focus on creating educational content that is both informative and engaging, with clear learning outcomes for the specified audience.
+Focus on making the content engaging, clear, and educational, with well-formatted HTML output and consistent visual styling.
 `.trim();
 };
 
@@ -362,13 +383,13 @@ Focus on creating educational content that is both informative and engaging, wit
 const optimizeRulerPlacement = (htmlContent) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
-    
+
     const sections = doc.querySelectorAll('section');
     if (sections.length > 0) {
         const lastSection = sections[sections.length - 1];
         const rulers = lastSection.querySelectorAll('hr');
         rulers.forEach(hr => hr.remove());
-        
+
         // Also remove any trailing hr elements
         const allHrs = doc.querySelectorAll('hr');
         if (allHrs.length > 0) {
@@ -380,7 +401,7 @@ const optimizeRulerPlacement = (htmlContent) => {
             }
         }
     }
-    
+
     return doc.body.innerHTML;
 };
 
@@ -468,8 +489,8 @@ const extractContentByModel = (model, data) => {
 
 function cleanHtmlContent(raw) {
     const stripped = raw
-        .replace(/^```html\s*/i, '')   
-        .replace(/\s*```$/i, '');      
+        .replace(/^```html\s*/i, '')
+        .replace(/\s*```$/i, '');
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(stripped, 'text/html');
