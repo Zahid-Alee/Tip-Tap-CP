@@ -66,6 +66,7 @@ import { generateAiContent } from "@/services/openAiService";
 import { TableExtensions } from "@/components/tiptap-extension/table-extension";
 import { ResizableImage } from "../../tiptap-extension/Image/ImageExtension";
 import { ImageBubbleMenu } from "../../tiptap-extension/Image/ImageBubbleMenu";
+import ExtendedListExtension from "../../tiptap-extension/list-extension";
 
 const lowlight = createLowlight(all);
 
@@ -81,20 +82,6 @@ function debounce<T extends (...args: any[]) => any>(
     };
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
-  };
-}
-
-function throttle<T extends (...args: any[]) => any>(
-  func: T,
-  limit: number
-): (...args: Parameters<T>) => void {
-  let inThrottle: boolean;
-  return function executedFunction(...args: Parameters<T>) {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => (inThrottle = false), limit);
-    }
   };
 }
 
@@ -284,6 +271,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
         FontFamily,
         TextStyle,
         Color,
+        ExtendedListExtension,
         StarterKit.configure({
           codeBlock: false,
         }),

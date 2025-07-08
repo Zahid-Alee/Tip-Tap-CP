@@ -96,7 +96,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
-        <ListDropdownMenu types={["bulletList", "orderedList", "taskList"]} />
+        <ListDropdownMenu types={["bulletList", "orderedList", "taskList","alphabetList","upperAlphabetList","lowerRomanList","upperRomanList","arrowList","starList","dashList","squareList","circleList","checkList"]} />
         <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />

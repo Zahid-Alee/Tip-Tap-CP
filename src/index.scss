@@ -458,3 +458,198 @@ video {
 [hidden]:where(:not([hidden="until-found"])) {
   display: none;
 }
+
+
+
+/* Extended List Styles for TipTap Editor */
+
+/* Base list styles */
+.tiptap-editor ul,
+.tiptap-editor ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-editor li {
+  margin: 0.25rem 0;
+  position: relative;
+}
+
+/* Alphabet lists */
+.tiptap-editor ol[data-list-type="alphabetList"] {
+  list-style-type: lower-alpha;
+}
+
+.tiptap-editor ol[data-list-type="upperAlphabetList"] {
+  list-style-type: upper-alpha;
+}
+
+/* Roman numeral lists */
+.tiptap-editor ol[data-list-type="lowerRomanList"] {
+  list-style-type: lower-roman;
+}
+
+.tiptap-editor ol[data-list-type="upperRomanList"] {
+  list-style-type: upper-roman;
+}
+
+/* Custom marker lists */
+.tiptap-editor ul[data-list-marker]::before,
+.tiptap-editor ul[data-list-marker] li::before {
+  content: attr(data-list-marker);
+  position: absolute;
+  left: -1.5rem;
+  font-weight: bold;
+  color: currentColor;
+}
+
+.tiptap-editor ul[data-list-marker] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-list-marker] li {
+  position: relative;
+}
+
+/* Arrow list */
+.tiptap-editor ul[data-list-type="arrowList"] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-list-type="arrowList"] li::before {
+  content: "→";
+  position: absolute;
+  left: -1.5rem;
+  color: #6366f1;
+  font-weight: bold;
+}
+
+/* Star list */
+.tiptap-editor ul[data-list-type="starList"] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-list-type="starList"] li::before {
+  content: "★";
+  position: absolute;
+  left: -1.5rem;
+  color: #f59e0b;
+  font-weight: bold;
+}
+
+/* Dash list */
+.tiptap-editor ul[data-list-type="dashList"] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-list-type="dashList"] li::before {
+  content: "—";
+  position: absolute;
+  left: -1.5rem;
+  color: #6b7280;
+  font-weight: bold;
+}
+
+/* Check list */
+.tiptap-editor ul[data-list-type="checkList"] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-list-type="checkList"] li::before {
+  content: "✓";
+  position: absolute;
+  left: -1.5rem;
+  color: #10b981;
+  font-weight: bold;
+}
+
+/* Square list */
+.tiptap-editor ul[data-list-type="squareList"] {
+  list-style-type: square;
+}
+
+.tiptap-editor ul[data-list-type="squareList"] li::marker {
+  color: #8b5cf6;
+}
+
+/* Circle list */
+.tiptap-editor ul[data-list-type="circleList"] {
+  list-style-type: circle;
+}
+
+.tiptap-editor ul[data-list-type="circleList"] li::marker {
+  color: #06b6d4;
+}
+
+/* Hover effects for custom markers */
+.tiptap-editor ul[data-list-type="arrowList"] li:hover::before,
+.tiptap-editor ul[data-list-type="starList"] li:hover::before,
+.tiptap-editor ul[data-list-type="dashList"] li:hover::before,
+.tiptap-editor ul[data-list-type="checkList"] li:hover::before {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+/* Nested list indentation */
+.tiptap-editor ul ul,
+.tiptap-editor ol ol,
+.tiptap-editor ul ol,
+.tiptap-editor ol ul {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+/* Task list styles (if not already defined) */
+.tiptap-editor ul[data-type="taskList"] {
+  list-style-type: none;
+}
+
+.tiptap-editor ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor ul[data-type="taskList"] li input[type="checkbox"] {
+  margin-top: 0.125rem;
+  margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .tiptap-editor ul,
+  .tiptap-editor ol {
+    padding-left: 1.25rem;
+  }
+  
+  .tiptap-editor ul[data-list-type] li::before {
+    left: -1.25rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .tiptap-editor ul[data-list-type="arrowList"] li::before {
+    color: #818cf8;
+  }
+  
+  .tiptap-editor ul[data-list-type="starList"] li::before {
+    color: #fbbf24;
+  }
+  
+  .tiptap-editor ul[data-list-type="dashList"] li::before {
+    color: #9ca3af;
+  }
+  
+  .tiptap-editor ul[data-list-type="checkList"] li::before {
+    color: #34d399;
+  }
+  
+  .tiptap-editor ul[data-list-type="squareList"] li::marker {
+    color: #a78bfa;
+  }
+  
+  .tiptap-editor ul[data-list-type="circleList"] li::marker {
+    color: #22d3ee;
+  }
+}
