@@ -2,10 +2,10 @@ let generationHistory = [];
 
 const API_CONFIG = {
     openai: {
-        apiKey: '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',
+        apiKey: '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',
         endpoint: 'https://api.openai.com/v1/chat/completions',
         defaultModel: 'gpt-4o-mini',
-        temperature: 0.3, // Reduced for more consistent educational content
+        temperature: 0.3, 
         headers: (key) => ({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${key}`
@@ -29,7 +29,6 @@ const API_CONFIG = {
     }
 };
 
-// Token calculation based on section count and length
 const calculateMaxTokens = (sectionCount, sectionLength) => {
     const baseTokens = {
         short: 300,
@@ -72,33 +71,6 @@ const saveToLocalStorage = () => {
 };
 
 /**
- * Save generation history entry
- */
-// const saveGenerationHistory = (userPrompt, aiResponse, formData) => {
-//     const historyEntry = {
-//         id: Date.now().toString(),
-//         timestamp: new Date().toISOString(),
-//         userPrompt: userPrompt,
-//     };
-
-//     generationHistory.unshift(historyEntry);
-
-//     if (generationHistory.length > 100) {
-//         generationHistory = generationHistory.slice(0, 100);
-//     }
-
-//     saveToLocalStorage();
-//     return historyEntry;
-// };
-
-// /**
-//  * Estimate token count (rough approximation: 1 token ≈ 4 characters)
-//  */
-// const estimateTokenCount = (text) => {
-//     return Math.ceil(text.length / 4);
-// };
-
-/**
  * Get all generation history
  */
 export const getGenerationHistory = () => {
@@ -134,55 +106,6 @@ export const deleteHistoryEntry = (id) => {
     return false;
 };
 
-/**
- * Create user-friendly prompt summary from form data
- */
-// const createUserPromptSummary = (formData) => {
-//     const {
-//         topic,
-//         sectionCount,
-//         sectionTypes,
-//         sectionLength,
-//         tone,
-//         targetAudience,
-//         language,
-//         additionalInstructions
-//     } = formData;
-
-//     let summary = `Generate educational content about "${topic}"`;
-
-//     if (targetAudience) {
-//         summary += ` for ${targetAudience}`;
-//     }
-
-//     if (sectionCount) {
-//         summary += ` with ${sectionCount} sections`;
-//     }
-
-//     if (sectionTypes && sectionTypes.length > 0) {
-//         summary += ` (${sectionTypes.join(', ')})`;
-//     }
-
-//     if (sectionLength) {
-//         summary += ` in ${sectionLength} format`;
-//     }
-
-//     if (tone) {
-//         summary += ` using ${tone} tone`;
-//     }
-
-//     if (language && language !== 'english') {
-//         summary += ` in ${language}`;
-//     }
-
-//     if (additionalInstructions) {
-//         summary += `. Additional instructions: ${additionalInstructions}`;
-//     }
-
-//     return summary;
-// };
-
-// Initialize by loading existing history
 loadGenerationHistory();
 
 export const generateAiContent = async (formData) => {
@@ -220,15 +143,9 @@ export const generateAiContent = async (formData) => {
         const formattedContent = formatCodeBlocks(cleanHtmlContent(content));
         const finalContent = optimizeRulerPlacement(formattedContent);
 
-        // Save to history
-        // const historyEntry = saveGenerationHistory(userPrompt, finalContent, formData);
-
         return {
             content: finalContent,
             replaceExisting,
-            // historyId: historyEntry.id,
-            // timestamp: historyEntry.timestamp,
-            // tokenCount: historyEntry.tokenCount,
             maxTokens: maxTokens
         };
     } catch (error) {
