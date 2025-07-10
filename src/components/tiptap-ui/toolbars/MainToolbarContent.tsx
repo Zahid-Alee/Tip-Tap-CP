@@ -72,6 +72,8 @@ interface MainToolbarContentProps {
   setTranslationHistory: Function;
 }
 
+
+
 const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
   onHighlighterClick,
   onLinkClick,
@@ -96,7 +98,23 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
 
       <ToolbarGroup>
         <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
-        <ListDropdownMenu types={["bulletList", "orderedList", "taskList","alphabetList","upperAlphabetList","lowerRomanList","upperRomanList","arrowList","starList","dashList","squareList","circleList","checkList"]} />
+        <ListDropdownMenu
+          types={[
+            "bulletList",
+            "orderedList",
+            "taskList",
+            "alphabetList",
+            "upperAlphabetList",
+            "lowerRomanList",
+            "upperRomanList",
+            "arrowList",
+            "starList",
+            "dashList",
+            "squareList",
+            "circleList",
+            "checkList",
+          ]}
+        />
         <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />
@@ -154,15 +172,15 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
       <Spacer />
       {isMobile && <ToolbarSeparator />}
 
-     <div className="p-3 flex items-center">
-       <AIFeaturesButton editor={editor} />
+      <div className="p-3 flex items-center">
+        <AIFeaturesButton editor={editor} />
 
-      <TranslationModule
-        translationHistory={translationHistory}
-        setTranslationHistory={setTranslationHistory}
-        editor={editor}
-      />
-     </div>
+        <TranslationModule
+          translationHistory={translationHistory}
+          setTranslationHistory={setTranslationHistory}
+          editor={editor}
+        />
+      </div>
     </>
   );
 };

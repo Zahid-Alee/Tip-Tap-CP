@@ -24,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/tiptap-ui-primitive/popover";
-import { Button } from "@/components/tiptap-ui-primitive/button";
+import Button from "../../tiptap-ui-primitive/button/button";
 
 const TONES = {
   professional: "Professional",
@@ -306,7 +306,7 @@ export const AIFeaturesButton: React.FC<AIFeaturesButtonProps> = ({
                 ? "bg-purple-100 text-purple-600"
                 : "hover:bg-gray-100 text-gray-600"
             }`}
-            title="Translate Document"
+            tooltip="AI Features"
             disabled={isLoading}
           >
             {isLoading ? (

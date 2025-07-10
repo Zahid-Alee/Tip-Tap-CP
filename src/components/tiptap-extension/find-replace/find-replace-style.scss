@@ -1,0 +1,12 @@
+.find-replace-match {
+  background-color: rgba(255, 255, 0, 0.3);
+  border-radius: 2px;
+  padding: 1px 2px;
+}
+
+.find-replace-current {
+  background-color: rgba(255, 165, 0, 0.6);
+  border-radius: 2px;
+  padding: 1px 2px;
+  box-shadow: 0 0 0 1px rgba(255, 165, 0, 0.8);
+}

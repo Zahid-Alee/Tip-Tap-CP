@@ -23,9 +23,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/tiptap-ui-primitive/popover";
-import { Button } from "@/components/tiptap-ui-primitive/button";
 import { LANGUAGES, TRANSLATION_SERVICES } from "../../../lib/tiptap-utils";
 import axios from "axios";
+import Button from "../../tiptap-ui-primitive/button/button";
 
 export const TranslationModule = ({
   editor,
@@ -342,7 +342,7 @@ export const TranslationModule = ({
                 ? "bg-purple-100 text-purple-600"
                 : "hover:bg-gray-100 text-gray-600"
             }`}
-            title="Translate Document"
+            tooltip="Translate Document"
             disabled={isLoading && !isPopoverOpen}
           >
             {isLoading ? (

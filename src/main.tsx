@@ -8,34 +8,6 @@ const getCsrfToken = () => {
   return metaTag ? metaTag.getAttribute("content") : null;
 };
 
-const fakeTranslationHistory = [
-  {
-    title: "English to Spanish",
-    text: "<p>Este es el contenido traducido al español.</p>",
-    language: "es",
-    timestamp: "2025-06-11T10:15:00Z",
-    audio: "public/images/file_example_MP3_700KB.mp3",
-  },
-  {
-    title: "English to French",
-    text: "<p>Ceci est le contenu traduit en français.</p>",
-    language: "fr",
-    timestamp: "2025-06-11T10:16:00Z",
-  },
-  {
-    title: "English to German",
-    text: "<p>Dies ist der ins Deutsche übersetzte Inhalt.</p>",
-    language: "de",
-    timestamp: "2025-06-11T10:17:00Z",
-  },
-  {
-    title: "English to Japanese",
-    text: "<p>これは日本語に翻訳されたコンテンツです。</p>",
-    language: "ja",
-    timestamp: "2025-06-11T10:18:00Z",
-  },
-];
-
 const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({

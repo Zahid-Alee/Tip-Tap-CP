@@ -64,10 +64,10 @@ export const TRANSLATION_SERVICES = [
 ];
 
 
-export const COLLAB_DOC_PREFIX =
-  import.meta.env.NEXT_PUBLIC_COLLAB_DOC_PREFIX || ""
-export const TIPTAP_COLLAB_APP_ID =
-  import.meta.env.NEXT_PUBLIC_TIPTAP_COLLAB_APP_ID || ""
+// export const COLLAB_DOC_PREFIX =
+//   import.meta.env.NEXT_PUBLIC_COLLAB_DOC_PREFIX || ""
+// export const TIPTAP_COLLAB_APP_ID =
+//   import.meta.env.NEXT_PUBLIC_TIPTAP_COLLAB_APP_ID || ""
 export const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 export type OverflowPosition = "none" | "top" | "bottom" | "both"
 

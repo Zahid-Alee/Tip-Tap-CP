@@ -6,13 +6,13 @@ import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { EditorContext } from "@tiptap/react";
 
-import { Button } from "@/components/tiptap-ui-primitive/button";
 import { EmojiIcon } from "@/components/tiptap-icons/emoji-icon";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/tiptap-ui-primitive/popover";
+import Button from "../../tiptap-ui-primitive/button/button";
 
 export const EmojiPopover = () => {
   const { editor } = React.useContext(EditorContext);
@@ -26,7 +26,7 @@ export const EmojiPopover = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button title="Insert emoji" aria-label="Insert emoji">
+        <Button tooltip="Insert emoji" aria-label="Insert emoji">
           <EmojiIcon className="tiptap-button-icon" />
         </Button>
       </PopoverTrigger>

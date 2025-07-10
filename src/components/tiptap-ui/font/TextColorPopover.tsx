@@ -101,7 +101,7 @@ const TextColorIcon = ({ color }: { color: string | null }) => {
   return (
     <div className="relative flex items-center justify-center">
      
-     <Brush class='tiptap-button-icon' />
+     <Brush className='tiptap-button-icon' />
       {color && color !== "none" && (
         <div 
           className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 rounded-sm" 

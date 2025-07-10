@@ -8,6 +8,7 @@ import {
   PopoverTrigger,
 } from "@/components/tiptap-ui-primitive/popover";
 import { Editor } from "@tiptap/react";
+import Button from "../../tiptap-ui-primitive/button/button";
 
 interface FontPopoverProps {
   editor: Editor | null;
@@ -86,11 +87,6 @@ const FontPopover: React.FC<FontPopoverProps> = ({ editor }) => {
     }
   };
 
-  // Find display name for current font (used for the button label)
-  const getFontDisplayName = (fontValue: string): string => {
-    const font = FONTS.find((f) => f.value === fontValue);
-    return font ? font.name : "Default";
-  };
 
   if (!editor) {
     return null;
@@ -99,17 +95,16 @@ const FontPopover: React.FC<FontPopoverProps> = ({ editor }) => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
+        <Button
           className="toolbar-button flex items-center gap-1"
-          title="Font Family"
+          tooltip="Font Family"
           style={{ fontFamily: selectedFont || "inherit" }}
         >
-          <Type className="icon w-4 h-4" />
+          <Type className="tiptap-button-icon w-4 h-4" />
           <span className="hidden md:inline text-xs overflow-hidden text-ellipsis max-w-[80px] whitespace-nowrap">
-            {/* {getFontDisplayName(selectedFont)} */}
-            <ChevronDown className="icon w-4 h-4" />
+            <ChevronDown size={12} />
           </span>
-        </button>
+        </Button>
       </PopoverTrigger>
       <PopoverContent
         side="bottom"
