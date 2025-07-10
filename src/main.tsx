@@ -40,35 +40,12 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: 'null',
+    saveUrl: null,
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
     readOnly: false,
-    initialContent: `
-                <h2>Welcome to Your Editor</h2>
-
-                    <p>This editor is designed to help you write with clarity, structure, and a bit of creativity. Here’s what you can do:</p>
-
-                    <ul>
-                      <li><strong>Bold</strong> and <em>italic</em> your text to emphasize important points</li>
-                      <li>Use <code>inline code</code> or full code blocks for technical content</li>
-                    </ul>
-                    <img src="https://cdn.pixabay.com/photo/2025/04/24/06/25/automobile-9554635_1280.jpg" alt="Placeholder Image" />
-
-                    <h3>Example Code Block</h3>
-                    <pre><code>// Simple JavaScript function
-                    function greet(name) {
-                      return Hello,;
-                    }
-
-                    console.log(greet("World"));
-                    </code></pre>
-                    <ul>
-                      <li>Include 😊 emojis to express yourself</li>
-                      <li>Let the editor help generate content ideas or finish sentences ✨</li>
-                    </ul>
-                  <p>Enjoy writing!</p>`,
+    initialContent: `loading editor...`,
     title: "My Text Lecture",
     translations: [],
   });
