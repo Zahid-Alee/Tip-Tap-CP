@@ -1,11 +1,10 @@
 let generationHistory = [];
 
-// Enhanced API Configuration with optimized settings
 const API_CONFIG = {
     openai: {
         apiKey: 'sk-proj-ncXNHgKzJ4rzeODwe8WHT3BlbkFJV8m58WRZidY4BSD1WMkX',
         endpoint: 'https://api.openai.com/v1/chat/completions',
-        defaultModel: 'gpt-4o', // Using more capable model
+        defaultModel: 'gpt-4o', 
         temperature: 0.7, 
         headers: (key) => ({
             'Content-Type': 'application/json',
@@ -30,19 +29,17 @@ const API_CONFIG = {
     }
 };
 
-// Enhanced token calculation for better content length
 const calculateMaxTokens = (sectionCount, sectionLength) => {
     const tokensPerSection = {
-        short: 400,   // Increased for more detailed content
-        medium: 700,  // Increased for richer explanations
-        long: 1000    // Increased for comprehensive coverage
+        short: 400,
+        medium: 700,  
+        long: 1000  
     };
 
     const tokens = tokensPerSection[sectionLength] || 700;
     const headerFooterTokens = 300;
     const totalTokens = (sectionCount * tokens) + headerFooterTokens;
     
-    // Ensure we don't exceed model limits
     return Math.min(totalTokens, 4000);
 };
 
@@ -151,13 +148,14 @@ ${includeHeader ? '- START with engaging introduction that hooks the learner' : 
 ${includeFooter ? '- END with comprehensive summary and clear takeaways' : '- END with final main content section'}
 - Add <hr class="section-divider" /> after each section EXCEPT the last one
 
-CRITICAL FORMATTING RULES:
+CRITICAL FORMATTING RULES MUST BE INCLUDED:
 1. Use <strong> tags for ALL important concepts, key terms, and emphasis
 2. Use <em> tags for ALL definitions and first mentions of terms
 3. Apply bold and italic formatting liberally throughout content
 4. Use proper HTML structure: <section>, <h2>, <p>, <ul>, <ol>
 5. Include blockquotes for important insights: <blockquote>Pro tip or key insight</blockquote>
 6. Format code with: <pre><code class="language-[lang]">code here</code></pre>
+7. Use <mark data-color="color"></mark> to highlight important concept in the content.
 
 ENGAGEMENT ELEMENTS:
 - Start each section with a compelling hook

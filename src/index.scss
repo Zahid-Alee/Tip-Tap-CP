@@ -617,11 +617,12 @@ video {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+
   .tiptap-editor ul,
   .tiptap-editor ol {
     padding-left: 1.25rem;
   }
-  
+
   .tiptap-editor ul[data-list-type] li::before {
     left: -1.25rem;
   }
@@ -632,33 +633,46 @@ video {
   .tiptap-editor ul[data-list-type="arrowList"] li::before {
     color: #818cf8;
   }
-  
+
   .tiptap-editor ul[data-list-type="starList"] li::before {
     color: #fbbf24;
   }
-  
+
   .tiptap-editor ul[data-list-type="dashList"] li::before {
     color: #9ca3af;
   }
-  
+
   .tiptap-editor ul[data-list-type="checkList"] li::before {
     color: #34d399;
   }
-  
+
   .tiptap-editor ul[data-list-type="squareList"] li::marker {
     color: #a78bfa;
   }
-  
+
   .tiptap-editor ul[data-list-type="circleList"] li::marker {
     color: #22d3ee;
   }
 }
 
-$colors: red, orange, yellow, green, blue, indigo, violet;
+
+$colors: 
+  #6ebc9a,  
+  #79d5ff, 
+  #d0a98d, 
+  rgb(240, 126, 240),
+  rgb(3, 200, 200),
+  #abdb11,
+  #4087ce,
+  #f95371,
+  #8556e4,
+  orange;
 
 blockquote {
   padding-left: 1rem;
   margin: 1rem 0;
+  font-style: italic;
+  color: #333;
 
   @for $i from 1 through length($colors) {
     &:nth-of-type(#{$i}) {
@@ -666,7 +680,7 @@ blockquote {
     }
   }
 
-  @for $i from 8 through 20 {
+  @for $i from 11 through 20 {
     $color-index: ($i - 1) % length($colors) + 1;
     &:nth-of-type(#{$i}) {
       border-left: .25em solid nth($colors, $color-index);

@@ -1171,13 +1171,14 @@ ${s?"- START with engaging introduction that hooks the learner":"- START directl
 ${l?"- END with comprehensive summary and clear takeaways":"- END with final main content section"}
 - Add <hr class="section-divider" /> after each section EXCEPT the last one
 
-CRITICAL FORMATTING RULES:
+CRITICAL FORMATTING RULES MUST BE INCLUDED:
 1. Use <strong> tags for ALL important concepts, key terms, and emphasis
 2. Use <em> tags for ALL definitions and first mentions of terms
 3. Apply bold and italic formatting liberally throughout content
 4. Use proper HTML structure: <section>, <h2>, <p>, <ul>, <ol>
 5. Include blockquotes for important insights: <blockquote>Pro tip or key insight</blockquote>
 6. Format code with: <pre><code class="language-[lang]">code here</code></pre>
+7. Use <mark data-color="color"></mark> to highlight important concept in the content.
 
 ENGAGEMENT ELEMENTS:
 - Start each section with a compelling hook
