@@ -670,7 +670,7 @@ blockquote {
   @for $i from 8 through 20 {
     $color-index: ($i - 1) % length($colors) + 1;
     &:nth-of-type(#{$i}) {
-      border-left: 6px solid nth($colors, $color-index);
+      border-left: 3px solid nth($colors, $color-index);
     }
   }
 }
