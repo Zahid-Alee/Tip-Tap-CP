@@ -653,3 +653,24 @@ video {
     color: #22d3ee;
   }
 }
+
+$colors: red, orange, yellow, green, blue, indigo, violet;
+
+blockquote {
+  padding-left: 1rem;
+  margin: 1rem 0;
+
+  @for $i from 1 through length($colors) {
+    &:nth-of-type(#{$i}) {
+      border-left: 6px solid nth($colors, $i);
+    }
+  }
+
+  // If you want more than 7 blockquotes, repeat the loop
+  @for $i from 8 through 20 {
+    $color-index: ($i - 1) % length($colors) + 1;
+    &:nth-of-type(#{$i}) {
+      border-left: 6px solid nth($colors, $color-index);
+    }
+  }
+}
