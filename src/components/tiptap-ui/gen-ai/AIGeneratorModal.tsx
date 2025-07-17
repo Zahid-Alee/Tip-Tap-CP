@@ -12,8 +12,8 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
       "paragraph",
       "bulletList",
       "codeBlock",
-      "taskList",
-      "blockquote",
+      // "taskList",
+      // "blockquote",
       "heading",
     ],
     sectionLength: "medium",
@@ -173,9 +173,9 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     { value: "heading", label: "Heading" },
     { value: "bulletList", label: "Bullet List" },
     { value: "orderedList", label: "Numbered List" },
-    { value: "taskList", label: "Task List" },
+    // { value: "taskList", label: "Task List" },
     { value: "codeBlock", label: "Code Block" },
-    { value: "blockquote", label: "Blockquote" },
+    // { value: "blockquote", label: "Blockquote" },
   ];
 
   const modelOptions = [

@@ -3,7 +3,7 @@ let generationHistory = [];
 //key has been updated
 const API_CONFIG = {
     openai: {
-        apiKey: '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',
+        apiKey:'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',
         endpoint: 'https://api.openai.com/v1/chat/completions',
         defaultModel: 'gpt-4o',
         temperature: 0.7,
