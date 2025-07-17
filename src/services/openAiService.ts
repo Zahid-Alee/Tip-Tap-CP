@@ -2,10 +2,10 @@ let generationHistory = [];
 
 const API_CONFIG = {
     openai: {
-        apiKey: 'sk-proj-ncXNHgKzJ4rzeODwe8WHT3BlbkFJV8m58WRZidY4BSD1WMkX',
+        apiKey: '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',
         endpoint: 'https://api.openai.com/v1/chat/completions',
-        defaultModel: 'gpt-4o', 
-        temperature: 0.7, 
+        defaultModel: 'gpt-4o',
+        temperature: 0.7,
         headers: (key) => ({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${key}`
@@ -32,14 +32,14 @@ const API_CONFIG = {
 const calculateMaxTokens = (sectionCount, sectionLength) => {
     const tokensPerSection = {
         short: 400,
-        medium: 700,  
-        long: 1000  
+        medium: 700,
+        long: 1000
     };
 
     const tokens = tokensPerSection[sectionLength] || 700;
     const headerFooterTokens = 300;
     const totalTokens = (sectionCount * tokens) + headerFooterTokens;
-    
+
     return Math.min(totalTokens, 4000);
 };
 
@@ -121,7 +121,7 @@ const createOptimizedPrompt = (formData, language = 'english') => {
     };
 
     const selectedSections = sectionTypes || ['explanation', 'examples', 'discussion'];
-    
+
     return `Create a professional lecture on: "${topic}"
 
 TARGET AUDIENCE: ${targetAudience}
@@ -176,7 +176,7 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
     const commonParams = {
         temperature: temperature,
         max_tokens: maxTokens,
-        top_p: 0.95,  
+        top_p: 0.95,
         frequency_penalty: 0.2,
         presence_penalty: 0.1
     };
@@ -271,7 +271,7 @@ const formatCodeBlocks = (htmlContent) => {
         const language = langClass ? langClass.replace('language-', '') : 'code';
 
         code = code.replace(/^\s*\n|\n\s*$/g, '');
-        
+
         if (language && language !== 'code') {
             code = formatCodeIndentation(code, language);
             if (!codeBlock.classList.contains(`language-${language}`)) {
@@ -288,7 +288,7 @@ const formatCodeBlocks = (htmlContent) => {
 const formatCodeIndentation = (code, language) => {
     const lines = code.split('\n');
     const nonEmptyLines = lines.filter(line => line.trim());
-    
+
     if (nonEmptyLines.length === 0) return code;
 
     const minIndent = Math.min(...nonEmptyLines.map(line => {
@@ -309,14 +309,14 @@ const formatCodeIndentation = (code, language) => {
 const optimizeRulerPlacement = (htmlContent) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
-    
+
     const sections = doc.querySelectorAll('section');
     if (sections.length > 0) {
         const lastSection = sections[sections.length - 1];
-        
+
         const hrsInLastSection = lastSection.querySelectorAll('hr');
         hrsInLastSection.forEach(hr => hr.remove());
-        
+
         let nextSibling = lastSection.nextElementSibling;
         while (nextSibling) {
             if (nextSibling.tagName === 'HR') {
@@ -338,10 +338,10 @@ export const generateAiContent = async (formData) => {
 
     try {
         console.log('Generating content with enhanced prompts...');
-        
+
         const aiPrompt = createOptimizedPrompt(contentParams, language);
         console.log('Enhanced AI Prompt:', aiPrompt);
-        
+
         const modelConfig = API_CONFIG[model];
         if (!modelConfig) {
             throw new Error(`Unsupported AI model: ${model}`);
@@ -368,7 +368,7 @@ export const generateAiContent = async (formData) => {
 
         const data = await response.json();
         const content = extractContentByModel(model, data);
-        
+
         console.log('Processing and formatting generated content...');
         const cleanedContent = cleanHtmlContent(content);
         const formattedContent = formatCodeBlocks(cleanedContent);
