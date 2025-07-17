@@ -1,5 +1,6 @@
 let generationHistory = [];
 
+//key has been updated
 const API_CONFIG = {
     openai: {
         apiKey: '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',
