@@ -1,9 +1,8 @@
 let generationHistory = [];
 
-//key has been updated
 const API_CONFIG = {
     openai: {
-        apiKey:'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',
+        apiKey: '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',
         endpoint: 'https://api.openai.com/v1/chat/completions',
         defaultModel: 'gpt-4o',
         temperature: 0.7,
@@ -30,19 +29,10 @@ const API_CONFIG = {
     }
 };
 
-const calculateMaxTokens = (sectionCount, sectionLength) => {
-    const tokensPerSection = {
-        short: 400,
-        medium: 700,
-        long: 1000
-    };
+// ----------------------------------
+// SECTION-BY-SECTION GENERATION CORE
+// ----------------------------------
 
-    const tokens = tokensPerSection[sectionLength] || 700;
-    const headerFooterTokens = 300;
-    const totalTokens = (sectionCount * tokens) + headerFooterTokens;
-
-    return Math.min(totalTokens, 4000);
-};
 
 const createSystemPrompt = () => {
     return `You are an expert educational content creator and instructional designer with 15+ years of experience creating professional courses for platforms like Udemy, Coursera, and LinkedIn Learning.
@@ -78,98 +68,66 @@ ENGAGEMENT PRINCIPLES:
 Generate content that students would be excited to learn from and instructors would be proud to teach.`;
 };
 
-
-const createOptimizedPrompt = (formData, language = 'english') => {
-    const {
-        topic,
-        sectionCount,
-        sectionTypes,
-        sectionLength,
-        tone,
-        includeHeader,
-        includeFooter,
-        includeEmojis,
-        targetAudience,
-        additionalInstructions,
-    } = formData;
-
-    const sectionGuidance = {
-        explanation: 'Provide clear, systematic explanations with practical examples',
-        examples: 'Present concrete, real-world examples with step-by-step breakdowns',
-        discussion: 'Explore implications, best practices, and critical considerations',
-        history: 'Cover key milestones and evolution with contextual significance',
-        casestudy: 'Analyze real scenarios with detailed outcomes and lessons learned',
-        comparison: 'Create clear comparisons with pros, cons, and use cases',
-        exercise: 'Design practical activities with clear objectives and outcomes',
-        demonstration: 'Provide step-by-step procedures with explanations',
-        application: 'Show real-world implementation with practical guidance',
-        analysis: 'Break down complex concepts with systematic examination',
-        conclusion: 'Synthesize key insights with actionable takeaways'
-    };
-
-    const lengthMap = {
-        short: '2-3 focused paragraphs with clear key points',
-        medium: '4-5 well-developed paragraphs with examples and explanations',
-        long: '6-8 comprehensive paragraphs with detailed coverage and multiple examples'
-    };
-
-    const audienceMap = {
-        beginners: 'Use foundational language, define all terms, provide plenty of context',
-        intermediate: 'Build on basic knowledge, introduce complexity gradually',
-        advanced: 'Engage with sophisticated concepts, explore nuances and edge cases',
-        professionals: 'Focus on practical applications, industry standards, and best practices',
-        students: 'Structure for academic learning with clear objectives and assessments'
-    };
-
-    const selectedSections = sectionTypes || ['explanation', 'examples', 'discussion'];
-
-    return `Create a professional lecture on: "${topic}"
-
-TARGET AUDIENCE: ${targetAudience}
-${audienceMap[targetAudience] || 'Adapt content appropriately for the audience'}
-
-${language !== 'english' ? `LANGUAGE: Generate ALL content in ${language}` : ''}
-
-STRUCTURE REQUIREMENTS:
-- Create exactly ${sectionCount} sections
-- Use these section types: ${selectedSections.join(', ')}
-- Each section should contain: ${lengthMap[sectionLength]}
-
-SECTION TYPES TO CREATE:
-${selectedSections.map(type => `• ${type.toUpperCase()}: ${sectionGuidance[type]}`).join('\n')}
-
-TONE & STYLE:
-- Use ${tone} tone throughout
-- Write with authority and expertise
-- Include practical insights and real-world relevance
-- ${includeEmojis ? 'Use relevant emojis strategically to enhance engagement' : 'No emojis'}
-
-CONTENT STRUCTURE:
-${includeHeader ? '- START with engaging introduction that hooks the learner' : '- START directly with main content sections'}
-${includeFooter ? '- END with comprehensive summary and clear takeaways' : '- END with final main content section'}
-- Add <hr class="section-divider" /> after each section EXCEPT the last one
-
-CRITICAL FORMATTING RULES MUST BE INCLUDED:
-1. Use <strong> tags for ALL important concepts, key terms, and emphasis
-2. Use <em> tags for ALL definitions and first mentions of terms
-3. Apply bold and italic formatting liberally throughout content
-4. Use proper HTML structure: <section>, <h2>, <p>, <ul>, <ol>
-5. Include blockquotes for important insights: <blockquote>Pro tip or key insight</blockquote>
-6. Format code with: <pre><code class="language-[lang]">code here</code></pre>
-7. Use <mark data-color="color"></mark> to highlight important concept in the content.
-
-ENGAGEMENT ELEMENTS:
-- Start each section with a compelling hook
-- Include practical examples throughout
-- Add "Pro Tips" or "Key Insights" as blockquotes
-- End sections with clear takeaways
-- Use questions to engage reader thinking
-
-${additionalInstructions ? `ADDITIONAL REQUIREMENTS:\n${additionalInstructions}` : ''}
-
-Remember: This content will be used in professional courses. Make it engaging, well-formatted, and educational excellence.`;
+const SECTION_GUIDANCE = {
+    explanation: 'Provide clear, systematic explanations with practical examples.',
+    examples: 'Present real-world examples with detailed breakdowns.',
+    discussion: 'Explore implications, best practices, and critical considerations.',
+    history: 'Cover key milestones and evolution with contextual significance.',
+    casestudy: 'Analyze real scenarios with outcomes and lessons learned.',
+    comparison: 'Create clear comparisons with pros, cons, and use cases.',
+    exercise: 'Design practical activities with clear objectives and outcomes.',
+    demonstration: 'Provide step-by-step procedures with explanations.',
+    application: 'Show real-world implementation with practical guidance.',
+    analysis: 'Break down complex concepts with systematic examination.',
+    conclusion: 'Synthesize key insights with actionable takeaways.'
 };
 
+const LENGTH_MAP = {
+    short: '2-3 focused paragraphs with clear key points',
+    medium: '4-5 well-developed paragraphs with examples and explanations',
+    long: '6-8 comprehensive paragraphs with detailed coverage and multiple examples'
+};
+
+function createSectionPrompt({
+    topic,
+    sectionType,
+    sectionNumber,
+    sectionTotal,
+    title,
+    titlesSoFar,
+    targetAudience,
+    language,
+    sectionLength,
+    tone,
+}) {
+    return `
+You are an expert educational content creator. Generate a SINGLE HTML <section> for a professional lecture on: "${topic}".
+
+Section to Generate: ${sectionNumber} of ${sectionTotal}
+Section Type: ${sectionType}
+Section Title: ${title}
+Previous Section Titles: ${titlesSoFar.length ? titlesSoFar.join(', ') : 'None'}
+Target Audience: ${targetAudience}
+Language: ${language}
+Length: ${LENGTH_MAP[sectionLength] || LENGTH_MAP.medium}
+Tone: ${tone}
+
+Formatting & Structure Rules (MANDATORY):
+- Output ONLY pure HTML, nothing else.
+- Wrap the section in <section> tags, starting with an <h2> containing the section title.
+- Use <blockquote> in every section for key points, pro tips, or important insights.
+- Bold key terms and concepts using <strong>. Use <em> for definitions or first mentions.
+- Highlight important sentences or concepts with <mark>.
+- Include at least one well-formatted code block (never empty).
+- Add practical examples, hooks, and clear takeaways as per type.
+- NO duplicate content with previous sections. Refer to "Previous Section Titles".
+- Do NOT add any header or footer text outside of section content.
+
+${sectionNumber < sectionTotal ? 'AFTER </section> output: <hr class="section-divider" />' : ''}
+
+Section Specific Guidance: ${SECTION_GUIDANCE[sectionType] || ''}
+`.trim();
+}
 
 const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
     const systemPrompt = createSystemPrompt();
@@ -192,7 +150,6 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
                 ],
                 ...commonParams
             };
-
         case 'gemini':
             return {
                 contents: [
@@ -209,7 +166,6 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
                     topK: 40
                 }
             };
-
         case 'deepseek':
             return {
                 model: API_CONFIG.deepseek.defaultModel,
@@ -219,9 +175,21 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
                 ],
                 ...commonParams
             };
-
         default:
             throw new Error(`Unsupported model format: ${model}`);
+    }
+};
+
+const extractContentByModel = (model, data) => {
+    switch (model) {
+        case 'openai':
+            return data.choices?.[0]?.message?.content || '';
+        case 'gemini':
+            return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        case 'deepseek':
+            return data.choices?.[0]?.message?.content || '';
+        default:
+            throw new Error(`Unsupported model for content extraction: ${model}`);
     }
 };
 
@@ -306,7 +274,6 @@ const formatCodeIndentation = (code, language) => {
     return code;
 };
 
-
 const optimizeRulerPlacement = (htmlContent) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -314,7 +281,6 @@ const optimizeRulerPlacement = (htmlContent) => {
     const sections = doc.querySelectorAll('section');
     if (sections.length > 0) {
         const lastSection = sections[sections.length - 1];
-
         const hrsInLastSection = lastSection.querySelectorAll('hr');
         hrsInLastSection.forEach(hr => hr.remove());
 
@@ -329,80 +295,79 @@ const optimizeRulerPlacement = (htmlContent) => {
             }
         }
     }
-
     return doc.body.innerHTML;
 };
 
+// ------------- SECTION-BY-SECTION GENERATOR -------------
 
 export const generateAiContent = async (formData) => {
-    const { model = 'openai', language = 'english', replaceExisting = false, ...contentParams } = formData;
+    const { model = 'openai', language = 'english', sectionCount, sectionTypes, sectionTitles, ...contentParams } = formData;
+    const modelConfig = API_CONFIG[model];
+    if (!modelConfig) throw new Error(`Unsupported AI model: ${model}`);
 
-    try {
-        console.log('Generating content with enhanced prompts...');
+    let htmlSections = [];
+    let titlesSoFar = [];
+    let failures = [];
 
-        const aiPrompt = createOptimizedPrompt(contentParams, language);
-        console.log('Enhanced AI Prompt:', aiPrompt);
+    for (let i = 0; i < sectionCount; i++) {
+        const sectionType = sectionTypes[i];
+        const title = sectionTitles && sectionTitles[i];
+        const sectionPrompt = createSectionPrompt({
+            ...contentParams,
+            sectionType,
+            sectionNumber: i + 1,
+            sectionTotal: sectionCount,
+            title,
+            titlesSoFar,
+            targetAudience: contentParams.targetAudience,
+            language,
+            sectionLength: contentParams.sectionLength,
+            tone: contentParams.tone
+        });
 
-        const modelConfig = API_CONFIG[model];
-        if (!modelConfig) {
-            throw new Error(`Unsupported AI model: ${model}`);
-        }
-
-        const maxTokens = calculateMaxTokens(contentParams.sectionCount, contentParams.sectionLength);
-        const requestData = formatRequestByModel(model, aiPrompt, maxTokens, modelConfig.temperature);
-
+        const maxTokens = 1200;
+        const requestData = formatRequestByModel(model, sectionPrompt, maxTokens, modelConfig.temperature);
         const endpoint = typeof modelConfig.endpoint === 'function'
             ? modelConfig.endpoint(modelConfig.apiKey)
             : modelConfig.endpoint;
 
-        console.log('Making API request with optimized parameters...');
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: modelConfig.headers(modelConfig.apiKey),
-            body: JSON.stringify(requestData),
-        });
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: modelConfig.headers(modelConfig.apiKey),
+                body: JSON.stringify(requestData),
+            });
+            if (!response.ok) {
+                failures.push(i);
+                continue;
+            }
+            const data = await response.json();
+            const content = extractContentByModel(model, data);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`API request failed: ${response.status} - ${errorText}`);
+            const cleanedContent = cleanHtmlContent(content);
+            const formattedContent = formatCodeBlocks(cleanedContent);
+            htmlSections.push(formattedContent + (i < sectionCount - 1 ? '' : ''));
+            titlesSoFar.push(title);
+
+        } catch (e) {
+            failures.push(i);
+            continue;
         }
-
-        const data = await response.json();
-        const content = extractContentByModel(model, data);
-
-        console.log('Processing and formatting generated content...');
-        const cleanedContent = cleanHtmlContent(content);
-        const formattedContent = formatCodeBlocks(cleanedContent);
-        const finalContent = optimizeRulerPlacement(formattedContent);
-
-        console.log('Content generation completed successfully');
-        return {
-            content: finalContent,
-            replaceExisting,
-            maxTokens: maxTokens
-        };
-
-    } catch (error) {
-        console.error(`Error generating content with ${model}:`, error);
-        throw error;
     }
+
+    // Remove trailing <hr> if present (extra safety)
+    let joined = htmlSections.join('\n');
+    joined = optimizeRulerPlacement(joined);
+
+    return {
+        content: joined,
+        failures,
+        sectionTitles
+    };
 };
 
-// Extract content function
-const extractContentByModel = (model, data) => {
-    switch (model) {
-        case 'openai':
-            return data.choices?.[0]?.message?.content || '';
-        case 'gemini':
-            return data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        case 'deepseek':
-            return data.choices?.[0]?.message?.content || '';
-        default:
-            throw new Error(`Unsupported model for content extraction: ${model}`);
-    }
-};
 
-// Storage functions (keeping your existing implementation)
+// ========== HISTORY & STORAGE (unchanged) ==========
 const loadGenerationHistory = () => {
     try {
         const saved = localStorage.getItem('lectureGenerationHistory');
