@@ -54,6 +54,7 @@ CONTENT STANDARDS:
 FORMATTING REQUIREMENTS - CRITICAL:
 - ALWAYS use <strong> tags for important concepts, key terms, and emphasis
 - ALWAYS use <em> tags for definitions, first mentions of terminology, and subtle emphasis
+- ALWAYS use <code> tags for inline code
 - Apply formatting liberally - educational content should have visual hierarchy
 - Use proper HTML semantic structure with correct nesting
 - Include as many specialized blurbs as possible to keep it exciting, interactive, and highly engaging. Always format them as blockquotes
@@ -301,6 +302,7 @@ const optimizeRulerPlacement = (htmlContent) => {
 // ------------- SECTION-BY-SECTION GENERATOR -------------
 
 export const generateAiContent = async (formData) => {
+    console.log('form data',formData);
     const { model = 'openai', language = 'english', sectionCount, sectionTypes, sectionTitles, ...contentParams } = formData;
     const modelConfig = API_CONFIG[model];
     if (!modelConfig) throw new Error(`Unsupported AI model: ${model}`);
