@@ -25,11 +25,19 @@
   }
 }
 
+
+.output-block-header {
+
+  // background: #636364;
+  color: white;
+  border: 0;
+
+}
+
 .output-block-content {
   margin: 0;
-  // padding: 0.75rem;
-  background: #1f2937;
-  color: #f9fafb;
+  // background: ;
+    color: #f9fafb;
   font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
   font-size: 0.8125rem;
   line-height: 1.4;

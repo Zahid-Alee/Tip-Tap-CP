@@ -22,7 +22,7 @@ const OutputBlockButton: React.FC<OutputBlockButtonProps> = ({ editor }) => {
       type="button"
       onClick={handleClick}
       className={isActive ? "is-active" : ""}
-      tooltip="Output Block (Ctrl+Alt+O)"
+      tooltip="Output Block"
     >
       <Terminal className="tiptap-button-icon" size={16} />
     </Button>
