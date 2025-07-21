@@ -5,12 +5,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/tiptap-ui-primitive/tooltip";
-import {
-  Sparkles,
-  Globe,
-  Check,
-  ChevronDown,
-} from "lucide-react";
+import { Sparkles, Globe, Check, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,10 +47,11 @@ export function EditorHeader({
   translationHistory,
   currentTranslationIndex,
   onTranslationChange,
-  setIsUpdatingFromTranslation
+  setIsUpdatingFromTranslation,
 }) {
   const [isSaving, setIsSaving] = React.useState(false);
-  const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] = React.useState(false);
+  const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
+    React.useState(false);
 
   const handleOpenAIModal = () => {
     setIsAIModalOpen(true);
@@ -79,10 +75,10 @@ export function EditorHeader({
       const response = await fetch(saveUrl, {
         method: "POST",
         headers: requestHeaders,
-        body: JSON.stringify({ 
-          content, 
+        body: JSON.stringify({
+          content,
           translation: translationHistory,
-          currentTranslationIndex: currentTranslationIndex 
+          currentTranslationIndex: currentTranslationIndex,
         }),
       });
 
@@ -114,7 +110,7 @@ export function EditorHeader({
       editor.commands.setContent(translationHistory[index].text, false);
       onTranslationChange(index);
       setIsTranslationDropdownOpen(false);
-      
+
       // Reset the flag after content is set
       setTimeout(() => setIsUpdatingFromTranslation(false), 100);
     }
@@ -139,15 +135,14 @@ export function EditorHeader({
                         onOpenChange={setIsTranslationDropdownOpen}
                       >
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            className="flex items-center px-3 py-2 font-medium rounded-md transition-colors bg-blue-50 hover:bg-blue-100 text-blue-600"
-                          >
+                          <Button className="flex items-center px-3 py-2 font-medium rounded-md transition-colors bg-blue-50 hover:bg-blue-100 text-blue-600">
                             <Globe className="h-4 w-4 mr-2" />
                             <span>
-                              {currentTranslationIndex >= 0 
-                                ? translationHistory[currentTranslationIndex].title.split("to")[1]
-                                : "Language"
-                              }
+                              {currentTranslationIndex >= 0
+                                ? translationHistory[
+                                    currentTranslationIndex
+                                  ].title.split("to")[1]
+                                : "Language"}
                             </span>
                             <ChevronDown className="h-3 w-3 ml-1" />
                           </Button>

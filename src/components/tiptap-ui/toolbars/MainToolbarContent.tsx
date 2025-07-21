@@ -1,5 +1,7 @@
 import * as React from "react";
 import { Editor } from "@tiptap/react";
+import { Minus } from "lucide-react"; // Add this import
+import Button from "@/components/tiptap-ui-primitive/button/button"; // Add this import
 import { Spacer } from "@/components/tiptap-ui-primitive/spacer";
 import {
   ToolbarGroup,
@@ -72,7 +74,23 @@ interface MainToolbarContentProps {
   setTranslationHistory: Function;
 }
 
+// Add this custom component
+const HorizontalRuleButton: React.FC<{ editor: Editor }> = ({ editor }) => {
+  const handleClick = () => {
+    editor.chain().focus().setHorizontalRule().run();
+  };
 
+  return (
+    <Button
+      onClick={handleClick}
+      disabled={!editor.can().setHorizontalRule()}
+      tooltip="Insert horizontal line"
+      size="sm"
+    >
+      <Minus className="tiptap-button-icon" size={16} />
+    </Button>
+  );
+};
 
 const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
   onHighlighterClick,
@@ -84,6 +102,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
   setTranslationHistory,
 }) => {
   if (!showToolBar) return null;
+  if (!editor) return null;
 
   return (
     <>
@@ -118,6 +137,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />
+        <HorizontalRuleButton editor={editor} />
       </ToolbarGroup>
 
       <ToolbarSeparator />
