@@ -1,9 +1,8 @@
-let generationHistory = [];
+//openAiService.ts
 
+let generationHistory = [];
 const API_CONFIG = {
     openai: {
-        apiKey: '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',
-        endpoint: 'https://api.openai.com/v1/chat/completions',
         defaultModel: 'gpt-4o',
         temperature: 0.7,
         headers: (key) => ({
@@ -18,7 +17,7 @@ const API_CONFIG = {
         headers: () => ({ 'Content-Type': 'application/json' })
     },
     deepseek: {
-        apiKey: 'sk-6b276ef8cd6d497a8e5555235da9198a',
+        // apiKey: 'sk-6b276ef8cd6d497a8e5555235da9198a',
         endpoint: 'https://api.deepseek.com/v1/chat/completions',
         defaultModel: 'deepseek-chat',
         temperature: 0.7,
@@ -30,58 +29,8 @@ const API_CONFIG = {
 };
 
 // ----------------------------------
-// SECTION-BY-SECTION GENERATION CORE
+// SECTION GUIDANCE AND CONFIGURATIONS
 // ----------------------------------
-
-
-const createSystemPrompt = () => {
-    return `You are an expert educational content creator and instructional designer with 15+ years of experience creating professional courses for platforms like Udemy, Coursera, and LinkedIn Learning.
-
-CORE EXPERTISE:
-- Pedagogical best practices and adult learning principles
-- Engaging educational content that maintains learner attention
-- Professional course structure and presentation
-- Clear, accessible explanations of complex topics
-- Strategic use of examples, analogies, and real-world applications
-
-CONTENT STANDARDS:
-- Create content that feels professionally authored, not AI-generated
-- Maintain consistent educational tone throughout
-- Use active voice and conversational yet professional language
-- Include strategic repetition of key concepts for retention
-- Build content progressively from simple to complex
-
-FORMATTING REQUIREMENTS - CRITICAL:
-- ALWAYS use <strong> tags for important concepts, key terms, and emphasis
-- ALWAYS use <em> tags for definitions, first mentions of terminology, and subtle emphasis
-- ALWAYS use <code> tags for inline code
-- Apply formatting liberally - educational content should have visual hierarchy
-- Use proper HTML semantic structure with correct nesting
-- Include as many specialized blurbs as possible to keep it exciting, interactive, and highly engaging. Always format them as blockquotes
-
-ENGAGEMENT PRINCIPLES:
-- Start each section with a compelling hook or question
-- Use practical examples relevant to the target audience
-- Include "pro tips" and insider insights as blockquotes
-- End sections with clear takeaways or action items
-- Maintain enthusiasm and expertise throughout
-
-Generate content that students would be excited to learn from and instructors would be proud to teach.`;
-};
-
-const SECTION_GUIDANCE = {
-    explanation: 'Provide clear, systematic explanations with practical examples.',
-    examples: 'Present real-world examples with detailed breakdowns.',
-    discussion: 'Explore implications, best practices, and critical considerations.',
-    history: 'Cover key milestones and evolution with contextual significance.',
-    casestudy: 'Analyze real scenarios with outcomes and lessons learned.',
-    comparison: 'Create clear comparisons with pros, cons, and use cases.',
-    exercise: 'Design practical activities with clear objectives and outcomes.',
-    demonstration: 'Provide step-by-step procedures with explanations.',
-    application: 'Show real-world implementation with practical guidance.',
-    analysis: 'Break down complex concepts with systematic examination.',
-    conclusion: 'Synthesize key insights with actionable takeaways.'
-};
 
 const LENGTH_MAP = {
     short: '2-3 focused paragraphs with clear key points',
@@ -89,55 +38,201 @@ const LENGTH_MAP = {
     long: '6-8 comprehensive paragraphs with detailed coverage and multiple examples'
 };
 
-function createSectionPrompt({
-    topic,
-    sectionType,
-    sectionNumber,
-    sectionTotal,
-    title,
-    titlesSoFar,
-    targetAudience,
-    language,
-    sectionLength,
-    tone,
-}) {
-    return `
-You are an expert educational content creator. Generate a SINGLE HTML <section> for a professional lecture on: "${topic}".
+// ----------------------------------
+// ENHANCED SINGLE-PROCESS GENERATION
+// ----------------------------------
 
-Section to Generate: ${sectionNumber} of ${sectionTotal}
-Section Type: ${sectionType}
-Section Title: ${title}
-Previous Section Titles: ${titlesSoFar.length ? titlesSoFar.join(', ') : 'None'}
-Target Audience: ${targetAudience}
-Language: ${language}
-Length: ${LENGTH_MAP[sectionLength] || LENGTH_MAP.medium}
-Tone: ${tone}
+const createComprehensiveLecturePrompt = (formData) => {
+    const {
+        topic,
+        sectionCount,
+        sectionTypes,
+        targetAudience,
+        language,
+        tone,
+        sectionLength,
+        includeHeader = false,
+        includeFooter = false,
+        includeEmojis = false,
+        additionalInstructions = ''
+    } = formData;
 
-Formatting & Structure Rules (MANDATORY):
-- Output ONLY pure HTML, nothing else.
-- Wrap the section in <section> tags, starting with an <h2> containing the section title.
-- Use <blockquote> in every section for key points, pro tips, or important insights.
-- Bold key terms and concepts using <strong>. Use <em> for definitions or first mentions.
-- Highlight important sentences or concepts with <mark>.
-- Include at least one well-formatted code block (never empty).
-- Add practical examples, hooks, and clear takeaways as per type.
-- NO duplicate content with previous sections. Refer to "Previous Section Titles".
-- Do NOT add any header or footer text outside of section content.
+    const getOptimalLength = (count, baseLength) => {
+        if (count <= 3) return baseLength;
+        if (count <= 6) return baseLength === 'long' ? 'medium' : baseLength;
+        return 'short';
+    };
 
-${sectionNumber < sectionTotal ? 'AFTER </section> output: <hr class="section-divider" />' : ''}
+    console.log('sectionLength', sectionLength);
 
-Section Specific Guidance: ${SECTION_GUIDANCE[sectionType] || ''}
-`.trim();
-}
+    const lengthDescription = LENGTH_MAP[sectionLength];
+    const emojiInstruction = includeEmojis ? 'Include relevant emojis throughout the content to make it engaging and visually appealing' : 'Do NOT include any emojis in the content';
 
-const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
-    const systemPrompt = createSystemPrompt();
+    // Calculate total sections including header and footer
+    const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
+    const mainSections = sectionCount;
+
+    return `You are an expert educational content creator generating a comprehensive lecture on "${topic}".
+
+CRITICAL REQUIREMENTS:
+- Generate EXACTLY ${totalSections} distinct sections total${includeHeader ? ' (including header)' : ''}${includeFooter ? ' (including footer)' : ''}
+- Generate EXACTLY ${mainSections} main content sections
+- Each section must be COMPLETE and SUBSTANTIAL
+- Use STRICT HTML formatting for TipTap editor compatibility
+- NO truncation or incomplete sections allowed
+- Each section must be unique with no overlapping content
+- Each main content section must include <hr class="section-divider" />, except the last one
+- ${emojiInstruction}
+
+TARGET SPECIFICATIONS:
+- Audience: ${targetAudience}
+- Language: ${language}
+- Tone: ${tone}
+- Individual Section Length: ${lengthDescription}
+
+${additionalInstructions ? `ADDITIONAL INSTRUCTIONS:
+${additionalInstructions}
+
+` : ''}STRUCTURE REQUIREMENTS:
+
+${includeHeader ? `1. HEADER SECTION (Required):
+<header>
+<h1>${includeEmojis ? '📚 ' : ''}${topic}</h1>
+<p>Engaging introductory description (3-4 lines) that provides context and sets expectations for the lecture. Should motivate learners and explain what they will gain.</p>
+</header>
+
+` : ''}${includeHeader ? '2-' + (mainSections + 1) : '1-' + mainSections}. MAIN CONTENT SECTIONS:
+${sectionTypes.map((type, index) => `
+${includeHeader ? index + 2 : index + 1}. ${type.toUpperCase()} SECTION
+- Type: ${type}
+- Must include <hr class="section-divider" /> at the end${index === sectionTypes.length - 1 ? ' (except this last main section)' : ''}`).join('\n')}
+
+${includeFooter ? `${totalSections}. FOOTER SECTION (Required):
+<footer>
+<h2>${includeEmojis ? '🎯 ' : ''}Summary & Conclusion</h2>
+<p>Comprehensive summary of key takeaways and learning outcomes from this lecture on ${topic}. Include practical next steps for continued learning.</p>
+</footer>` : ''}
+
+MANDATORY HTML STRUCTURE FOR EACH MAIN SECTION:
+Each main content section MUST follow this exact format:
+
+<section>
+<h2>${includeEmojis ? '[Relevant Emoji] ' : ''}[Compelling Title]</h2>
+[Rich, well-formatted content with proper HTML tags]
+[Additional paragraphs with proper formatting]
+${includeEmojis ? '[Strategic emoji placement throughout content]' : ''}
+</section>
+
+HTML FORMATTING REQUIREMENTS:
+- Use <strong> for key concepts and important terms
+- Use <em> for definitions and emphasis
+- Use <code> for inline code examples
+- Use <pre><code class="language-[lang]">code</code></pre> for code blocks
+- Use <mark> for highlighting important concepts
+- Include meaningful <blockquote> with tips/insights per section
+- Use proper semantic HTML structure
+${includeEmojis ? '- Include relevant emojis in headings, key points, and throughout content for engagement' : '- Do NOT include any emojis'}
+
+CONTENT QUALITY STANDARDS:
+- Start each section with an engaging hook
+- Include practical examples relevant to ${targetAudience}
+- Maintain progressive difficulty from section 1 to ${mainSections}
+- Ensure each section builds upon previous knowledge
+- NO generic or filler content
+
+SECTION PROGRESSION STRATEGY:
+1. Begin with foundational concepts
+2. Build complexity gradually
+3. Include practical applications
+4. Provide real-world examples
+5. Conclude with advanced insights
+
+Generate the complete lecture with${includeHeader ? ' header,' : ''} all ${mainSections} main content sections${includeFooter ? ', and footer' : ''} now. Each section must be substantial and complete - no summaries or abbreviated content allowed.`;
+};
+
+const MODEL_CONFIGS = {
+    openai: {
+        maxTokens: 16384,
+        optimalPromptLength: 2000,
+        safetyBuffer: 1000
+    },
+    gemini: {
+        maxTokens: 32768,
+        optimalPromptLength: 2500,
+        safetyBuffer: 2000
+    },
+    deepseek: {
+        maxTokens: 32768,
+        optimalPromptLength: 2500,
+        safetyBuffer: 2000
+    }
+};
+
+const calculateOptimalTokens = (model, sectionCount, includeHeader = false, includeFooter = false) => {
+    const config = MODEL_CONFIGS[model] || MODEL_CONFIGS.openai;
+    const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
+
+    const tokensPerSection = Math.floor(
+        (config.maxTokens - config.optimalPromptLength - config.safetyBuffer) / totalSections
+    );
+
+    const minTokensPerSection = 300;
+    const maxTokensPerSection = 1200;
+
+    return {
+        totalTokens: Math.min(config.maxTokens - config.safetyBuffer, totalSections * 800),
+        tokensPerSection: Math.max(minTokensPerSection, Math.min(maxTokensPerSection, tokensPerSection))
+    };
+};
+
+const createSystemPrompt = (sectionCount, model, includeHeader = false, includeFooter = false, includeEmojis = false) => {
+    const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
+    const { tokensPerSection } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
+
+    return `You are an expert educational content creator with 15+ years of experience creating professional courses.
+
+CORE EXPERTISE:
+- Pedagogical best practices and adult learning principles
+- Engaging educational content that maintains learner attention
+- Professional course structure and presentation
+- Clear, accessible explanations of complex topics
+
+CRITICAL SUCCESS FACTORS:
+- Generate COMPLETE content for all ${totalSections} sections total${includeHeader ? ' (including header)' : ''}${includeFooter ? ' (including footer)' : ''}
+- Each section should be approximately ${tokensPerSection} tokens
+- NO truncation or incomplete sections allowed
+- Maintain consistent quality across all sections
+- Use active voice and professional educational tone
+${includeEmojis ? '- Include engaging and relevant emojis throughout the content' : '- Do NOT include any emojis in the content'}
+
+CONTENT STANDARDS:
+- Create content that feels professionally authored
+- Include strategic repetition of key concepts for retention
+- Build content progressively from simple to complex
+- Use practical examples relevant to the target audience
+${includeHeader ? '- Header must provide clear context and learning expectations' : ''}
+${includeFooter ? '- Footer must summarize key takeaways and provide next steps' : ''}
+
+FORMATTING EXCELLENCE:
+- ALWAYS use <strong> tags for important concepts
+- ALWAYS use <em> tags for definitions and terminology
+- Apply formatting liberally for visual hierarchy
+- Include engaging blockquotes with practical tips
+${includeEmojis ? '- Use emojis strategically to enhance engagement and readability' : ''}
+
+Your goal is to create a complete, professional lecture that students would be excited to learn from.`;
+};
+
+const formatRequestByModel = (model, prompt, maxTokens, temperature, sectionCount, includeHeader = false, includeFooter = false, includeEmojis = false) => {
+    const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
+    const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
+    const actualMaxTokens = Math.min(maxTokens, totalTokens);
 
     const commonParams = {
         temperature: temperature,
-        max_tokens: maxTokens,
+        max_tokens: actualMaxTokens,
         top_p: 0.95,
-        frequency_penalty: 0.2,
+        frequency_penalty: 0.1,
         presence_penalty: 0.1
     };
 
@@ -162,7 +257,7 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature) => {
                 ],
                 generationConfig: {
                     temperature: temperature,
-                    maxOutputTokens: maxTokens,
+                    maxOutputTokens: actualMaxTokens,
                     topP: 0.95,
                     topK: 40
                 }
@@ -194,6 +289,10 @@ const extractContentByModel = (model, data) => {
     }
 };
 
+// ----------------------------------
+// CONTENT PROCESSING UTILITIES
+// ----------------------------------
+
 const cleanHtmlContent = (raw) => {
     const stripped = raw
         .replace(/^```html\s*/i, '')
@@ -204,6 +303,7 @@ const cleanHtmlContent = (raw) => {
     const doc = parser.parseFromString(stripped, 'text/html');
     const body = doc.body;
 
+    // Remove empty elements
     const elementsToClean = ['p', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
     elementsToClean.forEach(tag => {
         body.querySelectorAll(tag).forEach(el => {
@@ -213,18 +313,9 @@ const cleanHtmlContent = (raw) => {
         });
     });
 
+    // Remove empty lists
     body.querySelectorAll('ul, ol').forEach(list => {
         if (list.children.length === 0) list.remove();
-    });
-
-    body.querySelectorAll('strong, em').forEach(el => {
-        const parent = el.parentElement;
-        if (parent && parent.tagName === 'P') {
-        } else if (parent && parent.tagName === 'BODY') {
-            const p = document.createElement('p');
-            parent.insertBefore(p, el);
-            p.appendChild(el);
-        }
     });
 
     return body.innerHTML.trim();
@@ -240,6 +331,7 @@ const formatCodeBlocks = (htmlContent) => {
         const langClass = Array.from(codeBlock.classList).find(c => c.startsWith('language-'));
         const language = langClass ? langClass.replace('language-', '') : 'code';
 
+        // Clean up code formatting
         code = code.replace(/^\s*\n|\n\s*$/g, '');
 
         if (language && language !== 'code') {
@@ -275,101 +367,238 @@ const formatCodeIndentation = (code, language) => {
     return code;
 };
 
-const optimizeRulerPlacement = (htmlContent) => {
+const validateSectionCompleteness = (htmlContent, expectedSections, includeHeader = false, includeFooter = false) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
-
     const sections = doc.querySelectorAll('section');
-    if (sections.length > 0) {
-        const lastSection = sections[sections.length - 1];
-        const hrsInLastSection = lastSection.querySelectorAll('hr');
-        hrsInLastSection.forEach(hr => hr.remove());
+    const header = doc.querySelector('header');
+    const footer = doc.querySelector('footer');
 
-        let nextSibling = lastSection.nextElementSibling;
-        while (nextSibling) {
-            if (nextSibling.tagName === 'HR') {
-                const toRemove = nextSibling;
-                nextSibling = nextSibling.nextElementSibling;
-                toRemove.remove();
-            } else {
-                break;
+    const totalExpected = expectedSections + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
+    let totalFound = sections.length;
+
+    if (includeHeader && header) totalFound++;
+    if (includeFooter && footer) totalFound++;
+
+    const analysis = {
+        expectedSections: totalExpected,
+        foundSections: totalFound,
+        mainSections: sections.length,
+        hasHeader: includeHeader ? !!header : null,
+        hasFooter: includeFooter ? !!footer : null,
+        isComplete: totalFound === totalExpected,
+        averageLength: 0,
+        hasAllRequiredElements: true
+    };
+
+    if (sections.length > 0) {
+        const totalLength = Array.from(sections).reduce((sum, section) => {
+            return sum + section.textContent.length;
+        }, 0);
+        analysis.averageLength = Math.round(totalLength / sections.length);
+
+        // Check if each section has required elements
+        sections.forEach((section, index) => {
+            const hasH2 = section.querySelector('h2') !== null;
+            const hasContent = section.textContent.trim().length > 100;
+
+            if (!hasH2 || !hasContent) {
+                analysis.hasAllRequiredElements = false;
+                console.warn(`Section ${index + 1} is incomplete or malformed`);
             }
-        }
+        });
     }
-    return doc.body.innerHTML;
+
+    // Validate header and footer if required
+    if (includeHeader && !header) {
+        analysis.hasAllRequiredElements = false;
+        console.warn('Required header is missing');
+    }
+
+    if (includeFooter && !footer) {
+        analysis.hasAllRequiredElements = false;
+        console.warn('Required footer is missing');
+    }
+
+    return analysis;
 };
 
-// ------------- SECTION-BY-SECTION GENERATOR -------------
+// ----------------------------------
+// MAIN GENERATION FUNCTION
+// ----------------------------------
 
 export const generateAiContent = async (formData) => {
-    console.log('form data',formData);
-    const { model = 'openai', language = 'english', sectionCount, sectionTypes, sectionTitles, ...contentParams } = formData;
+    console.log('Enhanced single-process generation starting:', formData);
+
+    const {
+        model = 'openai',
+        sectionCount,
+        sectionTypes,
+        includeHeader = false,
+        includeFooter = false,
+        includeEmojis = false,
+        additionalInstructions = '',
+        ...contentParams
+    } = formData;
+
+    if (sectionCount > 10) {
+        throw new Error('Maximum 10 sections allowed');
+    }
+
     const modelConfig = API_CONFIG[model];
     if (!modelConfig) throw new Error(`Unsupported AI model: ${model}`);
 
-    let htmlSections = [];
-    let titlesSoFar = [];
-    let failures = [];
+    const endpoint = typeof modelConfig.endpoint === 'function'
+        ? modelConfig.endpoint(modelConfig.apiKey)
+        : modelConfig.endpoint;
 
-    for (let i = 0; i < sectionCount; i++) {
-        const sectionType = sectionTypes[i];
-        const title = sectionTitles && sectionTitles[i];
-        const sectionPrompt = createSectionPrompt({
-            ...contentParams,
-            sectionType,
-            sectionNumber: i + 1,
-            sectionTotal: sectionCount,
-            title,
-            titlesSoFar,
-            targetAudience: contentParams.targetAudience,
-            language,
-            sectionLength: contentParams.sectionLength,
-            tone: contentParams.tone
+    try {
+        console.log('formData', formData);
+        const lecturePrompt = createComprehensiveLecturePrompt(formData);
+        const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
+
+        console.log(`Using ${totalTokens} tokens for ${sectionCount} sections${includeHeader ? ' + header' : ''}${includeFooter ? ' + footer' : ''}`);
+
+        const request = formatRequestByModel(
+            model,
+            lecturePrompt,
+            totalTokens,
+            modelConfig.temperature,
+            sectionCount,
+            includeHeader,
+            includeFooter,
+            includeEmojis
+        );
+
+        console.log('lecture prompt', lecturePrompt);
+
+
+        let response = {};
+        let rawContent = {};
+
+
+
+        if (model === 'openai') {
+
+            const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
+
+            response = await fetch('/api/generate/text-lecture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    systemPrompt,
+                    userPrompt:lecturePrompt,
+                    totalTokens,
+                    temperature: modelConfig?.temperature
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API request failed: ${response.statusText}. ${errorData.error?.message || ''}`);
+            }
+
+            const data = await response.json();
+            rawContent = data.content;
+
+        }
+
+        else {
+
+            response =
+                await fetch(endpoint, {
+                    method: 'POST',
+                    headers: modelConfig.headers(modelConfig.apiKey),
+                    body: JSON.stringify(request),
+                });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`API request failed: ${response.statusText}. ${errorData.error?.message || ''}`);
+            }
+
+            const data = await response.json();
+            rawContent = extractContentByModel(model, data);
+
+        }
+
+
+        if (!rawContent || rawContent.trim().length < 100) {
+            throw new Error('Generated content is too short or empty');
+        }
+
+        // Process and validate content
+        const cleanedContent = cleanHtmlContent(rawContent);
+        const formattedContent = formatCodeBlocks(cleanedContent);
+
+        // Validate completeness
+        const validation = validateSectionCompleteness(formattedContent, sectionCount, includeHeader, includeFooter);
+
+        if (!validation.isComplete) {
+            console.warn(`⚠️ Generated ${validation.foundSections}/${validation.expectedSections} total sections`);
+        }
+
+        // Extract section titles
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(formattedContent, 'text/html');
+        const sectionTitles = Array.from(doc.querySelectorAll('section h2')).map(h2 =>
+            h2.textContent.replace(/^Section \d+:\s*/, '').replace(/^[^\s]*\s/, '') // Remove emoji if present
+        );
+
+        const result = {
+            content: formattedContent,
+            validation,
+            sectionTitles,
+            metadata: {
+                model,
+                sectionCount,
+                sectionTypes,
+                includeHeader,
+                includeFooter,
+                includeEmojis,
+                additionalInstructions,
+                totalTokensUsed: totalTokens,
+                averageSectionLength: validation.averageLength,
+                generationTime: Date.now()
+            }
+        };
+
+        console.log('🎉 Single-process generation completed:', {
+            totalSectionsGenerated: validation.foundSections,
+            mainSections: validation.mainSections,
+            hasHeader: validation.hasHeader,
+            hasFooter: validation.hasFooter,
+            contentLength: formattedContent.length,
+            averageLength: validation.averageLength,
+            isComplete: validation.isComplete
         });
 
-        const maxTokens = 1200;
-        const requestData = formatRequestByModel(model, sectionPrompt, maxTokens, modelConfig.temperature);
-        const endpoint = typeof modelConfig.endpoint === 'function'
-            ? modelConfig.endpoint(modelConfig.apiKey)
-            : modelConfig.endpoint;
+        // Save to history
+        const historyEntry = {
+            id: Date.now().toString(),
+            timestamp: new Date().toISOString(),
+            topic: formData.topic,
+            ...result
+        };
 
-        try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: modelConfig.headers(modelConfig.apiKey),
-                body: JSON.stringify(requestData),
-            });
-            if (!response.ok) {
-                failures.push(i);
-                continue;
-            }
-            const data = await response.json();
-            const content = extractContentByModel(model, data);
+        generationHistory.unshift(historyEntry);
+        saveToLocalStorage();
 
-            const cleanedContent = cleanHtmlContent(content);
-            const formattedContent = formatCodeBlocks(cleanedContent);
-            htmlSections.push(formattedContent + (i < sectionCount - 1 ? '' : ''));
-            titlesSoFar.push(title);
+        return result;
 
-        } catch (e) {
-            failures.push(i);
-            continue;
-        }
+    } catch (error) {
+        console.error('🚨 Single-process generation failed:', error);
+        throw new Error(`Lecture generation failed: ${error.message}`);
     }
-
-    // Remove trailing <hr> if present (extra safety)
-    let joined = htmlSections.join('\n');
-    joined = optimizeRulerPlacement(joined);
-
-    return {
-        content: joined,
-        failures,
-        sectionTitles
-    };
 };
 
+// ----------------------------------
+// HISTORY MANAGEMENT (unchanged)
+// ----------------------------------
 
-// ========== HISTORY & STORAGE (unchanged) ==========
 const loadGenerationHistory = () => {
     try {
         const saved = localStorage.getItem('lectureGenerationHistory');

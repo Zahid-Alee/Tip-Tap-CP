@@ -44,9 +44,6 @@ type ActionType =
   | "fix"
   | "change-tone";
 
-const OPENAI_API_KEY =
-  "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";
-const OPENAI_API_URL = "https://api.openai.com/v1/chat/completions";
 
 const getSystemPrompt = (
   type: ActionType,
@@ -82,11 +79,7 @@ async function callOpenAI(
   systemPrompt: string,
   action: ActionType
 ): Promise<string> {
-  if (!OPENAI_API_KEY) {
-    throw new Error(
-      "OpenAI API Key not configured. Please set it in your environment variables."
-    );
-  }
+  
 
   const model = "gpt-4o-mini";
   let maxTokens = 1500;
@@ -108,22 +101,21 @@ async function callOpenAI(
       break;
   }
 
-  const response = await fetch(OPENAI_API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: model,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: content },
-      ],
-      max_tokens: maxTokens,
-      temperature: temperature,
-    }),
-  });
+
+    const response = await fetch('/api/generate/text-lecture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                    systemPrompt,
+                    userPrompt:content,
+                    totalTokens:maxTokens,
+                    temperature
+                }),
+            });
+
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => response.text());
@@ -135,7 +127,7 @@ async function callOpenAI(
   }
 
   const data = await response.json();
-  const resultText = data.choices?.[0]?.message?.content;
+  const resultText = data.content;
 
   if (!resultText) {
     console.error("Invalid response format from API:", data);
