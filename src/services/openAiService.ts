@@ -34,8 +34,8 @@ const API_CONFIG = {
 
 const LENGTH_MAP = {
     short: '2-3 focused paragraphs with clear key points',
-    medium: '4-5 well-developed paragraphs with examples and explanations',
-    long: '6-8 comprehensive paragraphs with detailed coverage and multiple examples'
+    medium: '3-4 well-developed paragraphs with examples and explanations',
+    long: '3-4 comprehensive paragraphs with detailed coverage and multiple examples'
 };
 
 // ----------------------------------
