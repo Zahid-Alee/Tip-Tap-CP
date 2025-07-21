@@ -27,6 +27,7 @@ import TextColorPopover from "../font/TextColorPopover";
 import { TableButton } from "@/components/tiptap-ui/table/table-ui";
 import { AIFeaturesButton } from "../ai-features/ai-features-ui";
 import { TranslationModule } from "../translation/ai-translate";
+import HorizontalRuleButton from "../horizental-rule-button";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -73,24 +74,6 @@ interface MainToolbarContentProps {
   translationHistory: object;
   setTranslationHistory: Function;
 }
-
-// Add this custom component
-const HorizontalRuleButton: React.FC<{ editor: Editor }> = ({ editor }) => {
-  const handleClick = () => {
-    editor.chain().focus().setHorizontalRule().run();
-  };
-
-  return (
-    <Button
-      onClick={handleClick}
-      disabled={!editor.can().setHorizontalRule()}
-      tooltip="Insert horizontal line"
-      size="sm"
-    >
-      <Minus className="tiptap-button-icon" size={16} />
-    </Button>
-  );
-};
 
 const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
   onHighlighterClick,
