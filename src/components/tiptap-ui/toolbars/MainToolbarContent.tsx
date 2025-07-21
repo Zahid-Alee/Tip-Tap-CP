@@ -28,6 +28,7 @@ import { TableButton } from "@/components/tiptap-ui/table/table-ui";
 import { AIFeaturesButton } from "../ai-features/ai-features-ui";
 import { TranslationModule } from "../translation/ai-translate";
 import HorizontalRuleButton from "../horizental-rule-button";
+import OutputBlockButton from "../output-block/OutputBlockButton";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -117,6 +118,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
             "checkList",
           ]}
         />
+        <OutputBlockButton editor={editor} />
         <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />

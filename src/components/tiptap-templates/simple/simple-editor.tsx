@@ -39,6 +39,7 @@ import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/image-node/image-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "@/components/tiptap-ui/output-block/styles.scss";
 
 // --- Hooks ---
 import { useMobile } from "@/hooks/use-mobile";
@@ -73,6 +74,7 @@ import {
   useFindReplaceShortcuts,
 } from "../../tiptap-extension/find-replace/FindReplacePanel";
 import Button from "../../tiptap-ui-primitive/button/button";
+import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
 
 const lowlight = createLowlight(all);
 
@@ -186,6 +188,7 @@ const useEditorExtensions = () => {
         return ReactNodeViewRenderer(CodeBlockComponent);
       },
     }).configure({ lowlight }),
+    OutputBlock,
     TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
     Underline,
     TaskList,
