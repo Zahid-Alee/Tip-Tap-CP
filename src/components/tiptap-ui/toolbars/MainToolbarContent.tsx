@@ -30,6 +30,7 @@ import { TranslationModule } from "../translation/ai-translate";
 import HorizontalRuleButton from "../horizental-rule-button";
 import OutputBlockButton from "../output-block/OutputBlockButton";
 import BoldDropdownMenu from "../bold-dropdown-menu";
+import TextSettingsDropdownMenu from "../text-settings-dropdown";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -141,6 +142,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
       <ToolbarGroup>
         <FontPopover editor={editor} />
         <TextColorPopover editor={editor} colors={EXTENDED_TEXT_COLORS} />
+        <TextSettingsDropdownMenu editor={editor} />
         {!isMobile ? (
           <HighlightPopover
             colors={EXTENDED_HIGHLIGHT_COLORS}

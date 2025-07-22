@@ -97,9 +97,11 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
       setWordSpacing:
         (wordSpacing: string) =>
         ({ commands }: CommandProps) => {
-          const value = wordSpacing.includes("em")
-            ? wordSpacing
-            : `${wordSpacing}em`;
+          // Support both em and px units, default to px if no unit is specified
+          let value = wordSpacing;
+          if (!wordSpacing.includes("em") && !wordSpacing.includes("px")) {
+            value = `${wordSpacing}px`;
+          }
 
           return this.options.types.every((type) =>
             commands.updateAttributes(type, { wordSpacing: value })
@@ -154,9 +156,11 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
       setLetterSpacing:
         (letterSpacing: string) =>
         ({ commands }: CommandProps) => {
-          const value = letterSpacing.includes("em")
-            ? letterSpacing
-            : `${letterSpacing}em`;
+          // Support both em and px units, default to px if no unit is specified
+          let value = letterSpacing;
+          if (!letterSpacing.includes("em") && !letterSpacing.includes("px")) {
+            value = `${letterSpacing}px`;
+          }
 
           return this.options.types.every((type) =>
             commands.updateAttributes(type, { letterSpacing: value })
