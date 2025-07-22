@@ -77,6 +77,10 @@ export const FindReplacePanel: React.FC<FindReplacePanelProps> = ({
       // Force update after a small delay to ensure DOM is updated
       setTimeout(() => {
         editor.commands.updateFindResults();
+        // Scroll to first match if there are results
+        if (value.trim()) {
+          setTimeout(() => scrollToCurrentMatch(), 100);
+        }
       }, 10);
     }
   };
@@ -88,15 +92,122 @@ export const FindReplacePanel: React.FC<FindReplacePanelProps> = ({
     }
   };
 
+  // Add scroll to current match function (keep only this one)
+  const scrollToCurrentMatch = () => {
+    if (!editor) return;
+
+    const storage = editor.storage.findReplace;
+    const { results, currentIndex } = storage;
+
+    if (results.length === 0 || currentIndex === -1) return;
+
+    const currentResult = results[currentIndex];
+    if (!currentResult) return;
+
+    try {
+      // Get the editor view
+      const view = editor.view;
+      const { from, to } = currentResult;
+
+      // Set the selection to the current match first
+      editor.commands.setTextSelection({ from, to });
+
+      // Approach 1: Use ProseMirror's built-in scrollIntoView
+      setTimeout(() => {
+        try {
+          view.dispatch(view.state.tr.scrollIntoView());
+        } catch (e) {
+          console.log("ProseMirror scrollIntoView failed, trying DOM approach");
+        }
+      }, 10);
+
+      // Approach 2: Find and scroll to the highlighted element
+      setTimeout(() => {
+        try {
+          // Find the current match element
+          const currentMatchElement = view.dom.querySelector(
+            ".find-replace-current"
+          );
+
+          if (currentMatchElement) {
+            currentMatchElement.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+              inline: "nearest",
+            });
+            return;
+          }
+
+          // Fallback: Use coordinates to scroll
+          const coords = view.coordsAtPos(from);
+          if (coords) {
+            // Find the scrollable container
+            let scrollContainer =
+              view.dom.closest(".ProseMirror") || view.dom.parentElement;
+
+            // Look for a scrollable parent
+            while (scrollContainer && scrollContainer !== document.body) {
+              const style = window.getComputedStyle(scrollContainer);
+              if (
+                style.overflow === "auto" ||
+                style.overflow === "scroll" ||
+                style.overflowY === "auto" ||
+                style.overflowY === "scroll"
+              ) {
+                break;
+              }
+              scrollContainer = scrollContainer.parentElement;
+            }
+
+            if (!scrollContainer) {
+              scrollContainer = document.documentElement;
+            }
+
+            // Calculate scroll position
+            const containerRect = scrollContainer.getBoundingClientRect();
+            const targetY =
+              coords.top -
+              containerRect.top +
+              scrollContainer.scrollTop -
+              containerRect.height / 2;
+
+            scrollContainer.scrollTo({
+              top: Math.max(0, targetY),
+              behavior: "smooth",
+            });
+          }
+        } catch (e) {
+          console.log("DOM scrolling failed:", e);
+        }
+      }, 50);
+    } catch (error) {
+      console.error("Error in scrollToCurrentMatch:", error);
+    }
+  };
+
   const handleFindNext = () => {
     if (editor) {
       editor.commands.findNext();
+      setTimeout(() => {
+        scrollToCurrentMatch();
+        // Maintain focus on search input
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
     }
   };
 
   const handleFindPrevious = () => {
     if (editor) {
       editor.commands.findPrevious();
+      setTimeout(() => {
+        scrollToCurrentMatch();
+        // Maintain focus on search input
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+        }
+      }, 50);
     }
   };
 
@@ -123,6 +234,8 @@ export const FindReplacePanel: React.FC<FindReplacePanelProps> = ({
     if (e.key === "Enter") {
       e.preventDefault();
       handleFindNext();
+      // Prevent the input from losing focus
+      e.stopPropagation();
     } else if (e.key === "Escape") {
       handleClose();
     }
