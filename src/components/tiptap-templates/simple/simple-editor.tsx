@@ -75,6 +75,7 @@ import {
 } from "../../tiptap-extension/find-replace/FindReplacePanel";
 import Button from "../../tiptap-ui-primitive/button/button";
 import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
+import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
 
 const lowlight = createLowlight(all);
 
@@ -176,6 +177,7 @@ const useEditorExtensions = () => {
     LineHeight,
     WordSpacing,
     LetterSpacing,
+    Bold,
     FontFamily,
     TextStyle,
     Color,

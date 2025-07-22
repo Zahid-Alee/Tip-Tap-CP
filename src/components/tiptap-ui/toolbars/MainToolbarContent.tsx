@@ -29,6 +29,7 @@ import { AIFeaturesButton } from "../ai-features/ai-features-ui";
 import { TranslationModule } from "../translation/ai-translate";
 import HorizontalRuleButton from "../horizental-rule-button";
 import OutputBlockButton from "../output-block/OutputBlockButton";
+import BoldDropdownMenu from "../bold-dropdown-menu";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -128,7 +129,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <MarkButton type="bold" />
+        <BoldDropdownMenu editor={editor} />
         <MarkButton type="italic" />
         <MarkButton type="strike" />
         <MarkButton type="underline" />

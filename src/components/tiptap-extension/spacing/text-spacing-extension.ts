@@ -1,4 +1,4 @@
-import { Extension, CommandProps } from '@tiptap/core';
+import { Extension, CommandProps } from "@tiptap/core";
 
 interface LineHeightOptions {
   types: string[];
@@ -6,12 +6,12 @@ interface LineHeightOptions {
 }
 
 export const LineHeight = Extension.create<LineHeightOptions>({
-  name: 'lineHeight',
+  name: "lineHeight",
 
   addOptions() {
     return {
-      types: ['paragraph', 'heading'],
-      defaultHeight: '1.5',
+      types: ["paragraph", "heading"],
+      defaultHeight: "1.5",
     };
   },
 
@@ -45,7 +45,7 @@ export const LineHeight = Extension.create<LineHeightOptions>({
         (lineHeight: string) =>
         ({ commands }: CommandProps) => {
           return this.options.types.every((type) =>
-            commands.updateAttributes(type, { lineHeight: String(lineHeight) }),
+            commands.updateAttributes(type, { lineHeight: String(lineHeight) })
           );
         },
     };
@@ -59,12 +59,12 @@ interface WordSpacingOptions {
 }
 
 export const WordSpacing = Extension.create<WordSpacingOptions>({
-  name: 'wordSpacing',
+  name: "wordSpacing",
 
   addOptions() {
     return {
-      types: ['paragraph', 'heading'],
-      defaultSpacing: '0em',
+      types: ["paragraph", "heading"],
+      defaultSpacing: "0em",
     };
   },
 
@@ -97,12 +97,12 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
       setWordSpacing:
         (wordSpacing: string) =>
         ({ commands }: CommandProps) => {
-          const value = wordSpacing.includes('em')
+          const value = wordSpacing.includes("em")
             ? wordSpacing
             : `${wordSpacing}em`;
 
           return this.options.types.every((type) =>
-            commands.updateAttributes(type, { wordSpacing: value }),
+            commands.updateAttributes(type, { wordSpacing: value })
           );
         },
     };
@@ -116,12 +116,12 @@ interface LetterSpacingOptions {
 }
 
 export const LetterSpacing = Extension.create<LetterSpacingOptions>({
-  name: 'letterSpacing',
+  name: "letterSpacing",
 
   addOptions() {
     return {
-      types: ['paragraph', 'heading'],
-      defaultSpacing: '0em',
+      types: ["paragraph", "heading"],
+      defaultSpacing: "0em",
     };
   },
 
@@ -154,14 +154,128 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
       setLetterSpacing:
         (letterSpacing: string) =>
         ({ commands }: CommandProps) => {
-          const value = letterSpacing.includes('em')
+          const value = letterSpacing.includes("em")
             ? letterSpacing
             : `${letterSpacing}em`;
 
           return this.options.types.every((type) =>
-            commands.updateAttributes(type, { letterSpacing: value }),
+            commands.updateAttributes(type, { letterSpacing: value })
           );
         },
+    };
+  },
+});
+
+// Bold Extension
+
+interface BoldOptions {
+  types: string[];
+  defaultWeight: string;
+  HTMLAttributes: Record<string, any>;
+}
+
+export const Bold = Extension.create<BoldOptions>({
+  name: "bold",
+
+  addOptions() {
+    return {
+      types: ["paragraph", "heading", "textStyle"],
+      defaultWeight: "700",
+      HTMLAttributes: {},
+    };
+  },
+
+  addGlobalAttributes() {
+    return [
+      {
+        types: this.options.types,
+        attributes: {
+          fontWeight: {
+            default: null,
+            parseHTML: (element: HTMLElement) => {
+              const weight = element.style.fontWeight;
+              // Handle both numeric and named font weights
+              if (weight) {
+                // Convert named weights to numeric
+                const namedWeights: Record<string, string> = {
+                  normal: "400",
+                  bold: "700",
+                  bolder: "800",
+                  lighter: "300",
+                };
+                return namedWeights[weight] || weight;
+              }
+              return null;
+            },
+            renderHTML: (attributes: Record<string, any>) => {
+              if (!attributes.fontWeight) {
+                return {};
+              }
+
+              return {
+                style: `font-weight: ${attributes.fontWeight}`,
+              };
+            },
+          },
+        },
+      },
+    ];
+  },
+
+  addCommands() {
+    return {
+      setFontWeight:
+        (fontWeight?: string) =>
+        ({ commands }: CommandProps) => {
+          const weight = fontWeight || this.options.defaultWeight;
+
+          return this.options.types.every((type) =>
+            commands.updateAttributes(type, { fontWeight: String(weight) })
+          );
+        },
+
+      toggleFontWeight:
+        (fontWeight?: string) =>
+        ({ commands, editor }: CommandProps) => {
+          const weight = fontWeight || this.options.defaultWeight;
+
+          // Check if any of the current selection has bold applied
+          const hasBold = this.options.types.some((type) => {
+            const attrs = editor.getAttributes(type);
+            return (
+              attrs.fontWeight &&
+              attrs.fontWeight !== "400" &&
+              attrs.fontWeight !== "normal"
+            );
+          });
+
+          if (hasBold) {
+            // Remove bold by setting to normal weight
+            return this.options.types.every((type) =>
+              commands.updateAttributes(type, { fontWeight: "400" })
+            );
+          } else {
+            // Apply bold with specified weight
+            return this.options.types.every((type) =>
+              commands.updateAttributes(type, { fontWeight: String(weight) })
+            );
+          }
+        },
+
+      unsetFontWeight:
+        () =>
+        ({ commands }: CommandProps) => {
+          return this.options.types.every((type) =>
+            commands.updateAttributes(type, { fontWeight: "400" })
+          );
+        },
+    };
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      "Mod-b": () => this.editor.commands.toggleFontWeight(),
+      "Mod-B": () => this.editor.commands.toggleFontWeight(),
     };
   },
 });
