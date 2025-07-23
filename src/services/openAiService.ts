@@ -1,4 +1,3 @@
-//openAiService.ts
 
 let generationHistory = [];
 const API_CONFIG = {
@@ -57,97 +56,81 @@ const createComprehensiveLecturePrompt = (formData) => {
         additionalInstructions = ''
     } = formData;
 
-    const getOptimalLength = (count, baseLength) => {
-        if (count <= 3) return baseLength;
-        if (count <= 6) return baseLength === 'long' ? 'medium' : baseLength;
-        return 'short';
-    };
-
-    console.log('sectionLength', sectionLength);
-
     const lengthDescription = LENGTH_MAP[sectionLength];
-    const emojiInstruction = includeEmojis ? 'Include relevant emojis throughout the content to make it engaging and visually appealing' : 'Do NOT include any emojis in the content';
+    const emojiInstruction = includeEmojis
+        ? 'Include relevant emojis throughout to boost engagement and visual appeal.'
+        : 'Do NOT include emojis.';
 
-    // Calculate total sections including header and footer
     const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
     const mainSections = sectionCount;
 
-    return `You are an expert educational content creator generating a comprehensive lecture on "${topic}".
+    return `You are an expert educator crafting an interactive, easy-to-read lecture on "${topic}".
 
 CRITICAL REQUIREMENTS:
-- Generate EXACTLY ${totalSections} distinct sections total${includeHeader ? ' (including header)' : ''}${includeFooter ? ' (including footer)' : ''}
-- Generate EXACTLY ${mainSections} main content sections
-- Each section must be COMPLETE and SUBSTANTIAL
-- Use STRICT HTML formatting for TipTap editor compatibility
-- NO truncation or incomplete sections allowed
-- Each section must be unique with no overlapping content
-- Each main content section must include <hr class="section-divider" />, except the last one
+- Generate EXACTLY ${totalSections} complete sections${includeHeader ? ' (including a header)' : ''}${includeFooter ? ' (including a footer)' : ''}.
+- Prioritize short paragraphs, bullet lists, numbered lists, nested lists, blockquotes, and interactive elements such as tables.
+- Avoid long paragraphs; use clear headings, subheadings, and concise formatting for easy comprehension.
+- Each main content section ends with <hr class="section-divider" />, except the last.
 - ${emojiInstruction}
 
 TARGET SPECIFICATIONS:
 - Audience: ${targetAudience}
 - Language: ${language}
 - Tone: ${tone}
-- Individual Section Length: ${lengthDescription}
+- Section Length: ${lengthDescription}
 
-${additionalInstructions ? `ADDITIONAL INSTRUCTIONS:
-${additionalInstructions}
+${additionalInstructions ? `ADDITIONAL INSTRUCTIONS:\n${additionalInstructions}\n\n` : ''}
 
-` : ''}STRUCTURE REQUIREMENTS:
+STRUCTURE REQUIREMENTS:
 
-${includeHeader ? `1. HEADER SECTION (Required):
+${includeHeader ? `1. HEADER SECTION:
 <header>
-<h1>${includeEmojis ? '📚 ' : ''}${topic}</h1>
-<p>Engaging introductory description (3-4 lines) that provides context and sets expectations for the lecture. Should motivate learners and explain what they will gain.</p>
-</header>
+  <h1>${includeEmojis ? '[Relevant Emoji] ' : ''}${topic}</h1>
+  <p>Briefly introduce the lecture in an engaging, motivational style (max 3 sentences).</p>
+</header>\n\n` : ''}
 
-` : ''}${includeHeader ? '2-' + (mainSections + 1) : '1-' + mainSections}. MAIN CONTENT SECTIONS:
-${sectionTypes.map((type, index) => `
-${includeHeader ? index + 2 : index + 1}. ${type.toUpperCase()} SECTION
-- Type: ${type}
-- Must include <hr class="section-divider" /> at the end${index === sectionTypes.length - 1 ? ' (except this last main section)' : ''}`).join('\n')}
+${sectionTypes.map((type, index) => `${includeHeader ? index + 2 : index + 1}. ${type.toUpperCase()} SECTION:
+- Clearly formatted using:
+  - Short paragraphs
+  - Bullet points or numbered lists
+  - Nested lists for detailed breakdowns
+  - Tables for comparisons or structured data
+  - Frequent use of <blockquote> to highlight key insights or tips
+  - Include <hr class="section-divider" />${index === sectionTypes.length - 1 ? ' (except last main section)' : ''}`).join('\n\n')}
 
-${includeFooter ? `${totalSections}. FOOTER SECTION (Required):
+${includeFooter ? `\n${totalSections}. FOOTER SECTION:
 <footer>
-<h2>${includeEmojis ? '🎯 ' : ''}Summary & Conclusion</h2>
-<p>Comprehensive summary of key takeaways and learning outcomes from this lecture on ${topic}. Include practical next steps for continued learning.</p>
+  <h2>${includeEmojis ? '[Relevant Emoji] ' : ''}Summary & Next Steps</h2>
+  <p>Summarize key points clearly. Provide actionable next steps for continued learning.</p>
 </footer>` : ''}
 
-MANDATORY HTML STRUCTURE FOR EACH MAIN SECTION:
-Each main content section MUST follow this exact format:
-
+MANDATORY HTML STRUCTURE FOR MAIN SECTIONS:
 <section>
-<h2>${includeEmojis ? '[Relevant Emoji] ' : ''}[Compelling Title]</h2>
-[Rich, well-formatted content with proper HTML tags]
-[Additional paragraphs with proper formatting]
-${includeEmojis ? '[Strategic emoji placement throughout content]' : ''}
+  <h2>${includeEmojis ? '[Relevant Emoji] ' : ''}[Engaging Section Title]</h2>
+  <p>[Concise introduction]</p>
+  <ul>
+    <li>[Bullet point or numbered list item]</li>
+    <li>[Further detailed explanation or nested list]</li>
+  </ul>
+  <blockquote>[Important tip or insight]</blockquote>
+  [Interactive table or formatted content if relevant]
 </section>
 
-HTML FORMATTING REQUIREMENTS:
-- Use <strong> for key concepts and important terms
-- Use <em> for definitions and emphasis
-- Use <code> for inline code examples
-- Use <pre><code class="language-[lang]">code</code></pre> for code blocks
-- Use <mark> for highlighting important concepts
-- Include meaningful <blockquote> with tips/insights per section
-- Use proper semantic HTML structure
-${includeEmojis ? '- Include relevant emojis in headings, key points, and throughout content for engagement' : '- Do NOT include any emojis'}
+HTML FORMATTING GUIDELINES:
+- <strong> for key terms
+- <em> for emphasis and definitions
+- <code> for inline code snippets
+- <pre><code class="language-[lang]">code</code></pre> for full code examples
+- <mark> to highlight critical points
+- Semantic HTML for clear structure
 
-CONTENT QUALITY STANDARDS:
-- Start each section with an engaging hook
-- Include practical examples relevant to ${targetAudience}
-- Maintain progressive difficulty from section 1 to ${mainSections}
-- Ensure each section builds upon previous knowledge
-- NO generic or filler content
+CONTENT QUALITY:
+- Engaging hooks at each section’s start
+- Practical examples relevant to ${targetAudience}
+- Gradually increase content complexity
+- Maintain logical progression and clear learning outcomes
 
-SECTION PROGRESSION STRATEGY:
-1. Begin with foundational concepts
-2. Build complexity gradually
-3. Include practical applications
-4. Provide real-world examples
-5. Conclude with advanced insights
-
-Generate the complete lecture with${includeHeader ? ' header,' : ''} all ${mainSections} main content sections${includeFooter ? ', and footer' : ''} now. Each section must be substantial and complete - no summaries or abbreviated content allowed.`;
+Generate the full lecture, ensuring each section is complete and engaging.`;
 };
 
 const MODEL_CONFIGS = {
@@ -490,7 +473,7 @@ export const generateAiContent = async (formData) => {
                 },
                 body: JSON.stringify({
                     systemPrompt,
-                    userPrompt:lecturePrompt,
+                    userPrompt: lecturePrompt,
                     totalTokens,
                     temperature: modelConfig?.temperature
                 }),
