@@ -13,7 +13,7 @@ export const OutputBlock = Node.create({
 
   defining: true,
 
-  code: true, // Add this - it tells TipTap this is a code-like block
+  code: true,
 
   addAttributes() {
     return {
@@ -29,6 +29,25 @@ export const OutputBlock = Node.create({
           };
         },
       },
+      // Add these attributes to ensure they're preserved
+      "data-type": {
+        default: "output-block",
+        renderHTML: () => {
+          return {
+            "data-type": "output-block",
+          };
+        },
+        parseHTML: (element) => element.getAttribute("data-type"),
+      },
+      class: {
+        default: "output-block",
+        renderHTML: () => {
+          return {
+            class: "output-block",
+          };
+        },
+        parseHTML: (element) => element.getAttribute("class"),
+      },
     };
   },
 
@@ -38,16 +57,24 @@ export const OutputBlock = Node.create({
         tag: 'pre[data-type="output-block"]',
         preserveWhitespace: "full",
       },
+      // Also accept regular pre tags with output-block class as fallback
+      {
+        tag: "pre.output-block",
+        preserveWhitespace: "full",
+      },
     ];
   },
 
-  renderHTML({ HTMLAttributes }) {
+  renderHTML({ HTMLAttributes, node }) {
     return [
       "pre",
-      mergeAttributes(HTMLAttributes, {
-        "data-type": "output-block",
-        class: "output-block",
-      }),
+      mergeAttributes(
+        {
+          "data-type": "output-block",
+          class: "output-block",
+        },
+        HTMLAttributes
+      ),
       ["code", {}, 0],
     ];
   },
@@ -70,7 +97,6 @@ export const OutputBlock = Node.create({
   addKeyboardShortcuts() {
     return {
       "Mod-Alt-o": () => this.editor.commands.toggleOutputBlock(),
-      // Remove the Enter and Shift-Enter handlers - let TipTap handle them naturally
     };
   },
 
