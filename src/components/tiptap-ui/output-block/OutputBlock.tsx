@@ -1,4 +1,4 @@
-import { Node } from "@tiptap/core";
+import { Node, mergeAttributes } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import OutputBlockComponent from "./OutputBlockComponent";
 
@@ -11,15 +11,9 @@ export const OutputBlock = Node.create({
 
   marks: "",
 
-  code: true,
-
   defining: true,
 
-  addOptions() {
-    return {
-      HTMLAttributes: {},
-    };
-  },
+  code: true, // Add this - it tells TipTap this is a code-like block
 
   addAttributes() {
     return {
@@ -42,38 +36,20 @@ export const OutputBlock = Node.create({
     return [
       {
         tag: 'pre[data-type="output-block"]',
-        getAttrs: (element) => {
-          return {
-            language: element.getAttribute("data-language") || "text",
-          };
-        },
-      },
-      {
-        tag: "pre.output-block",
-        getAttrs: (element) => {
-          return {
-            language: element.getAttribute("data-language") || "text",
-          };
-        },
+        preserveWhitespace: "full",
       },
     ];
   },
 
-  renderHTML({ HTMLAttributes, node }) {
+  renderHTML({ HTMLAttributes }) {
     return [
       "pre",
-      {
-        ...HTMLAttributes,
+      mergeAttributes(HTMLAttributes, {
         "data-type": "output-block",
-        "data-language": node.attrs.language || "text",
         class: "output-block",
-      },
+      }),
       ["code", {}, 0],
     ];
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(OutputBlockComponent);
   },
 
   addCommands() {
@@ -83,12 +59,22 @@ export const OutputBlock = Node.create({
         ({ commands }) => {
           return commands.setNode(this.name, attributes);
         },
+      toggleOutputBlock:
+        (attributes) =>
+        ({ commands }) => {
+          return commands.toggleNode(this.name, "paragraph", attributes);
+        },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-Alt-o": () => this.editor.commands.setOutputBlock(),
+      "Mod-Alt-o": () => this.editor.commands.toggleOutputBlock(),
+      // Remove the Enter and Shift-Enter handlers - let TipTap handle them naturally
     };
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(OutputBlockComponent);
   },
 });
