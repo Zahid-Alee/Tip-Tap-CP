@@ -1,4 +1,4 @@
-import { Node, mergeAttributes } from "@tiptap/core";
+import { Node } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import OutputBlockComponent from "./OutputBlockComponent";
 
@@ -11,9 +11,15 @@ export const OutputBlock = Node.create({
 
   marks: "",
 
+  code: true,
+
   defining: true,
 
-  code: true,
+  addOptions() {
+    return {
+      HTMLAttributes: {},
+    };
+  },
 
   addAttributes() {
     return {
@@ -29,25 +35,6 @@ export const OutputBlock = Node.create({
           };
         },
       },
-      // Add these attributes to ensure they're preserved
-      "data-type": {
-        default: "output-block",
-        renderHTML: () => {
-          return {
-            "data-type": "output-block",
-          };
-        },
-        parseHTML: (element) => element.getAttribute("data-type"),
-      },
-      class: {
-        default: "output-block",
-        renderHTML: () => {
-          return {
-            class: "output-block",
-          };
-        },
-        parseHTML: (element) => element.getAttribute("class"),
-      },
     };
   },
 
@@ -55,12 +42,19 @@ export const OutputBlock = Node.create({
     return [
       {
         tag: 'pre[data-type="output-block"]',
-        preserveWhitespace: "full",
+        getAttrs: (element) => {
+          return {
+            language: element.getAttribute("data-language") || "text",
+          };
+        },
       },
-      // Also accept regular pre tags with output-block class as fallback
       {
         tag: "pre.output-block",
-        preserveWhitespace: "full",
+        getAttrs: (element) => {
+          return {
+            language: element.getAttribute("data-language") || "text",
+          };
+        },
       },
     ];
   },
@@ -68,15 +62,18 @@ export const OutputBlock = Node.create({
   renderHTML({ HTMLAttributes, node }) {
     return [
       "pre",
-      mergeAttributes(
-        {
-          "data-type": "output-block",
-          class: "output-block",
-        },
-        HTMLAttributes
-      ),
+      {
+        ...HTMLAttributes,
+        "data-type": "output-block",
+        "data-language": node.attrs.language || "text",
+        class: "output-block",
+      },
       ["code", {}, 0],
     ];
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(OutputBlockComponent);
   },
 
   addCommands() {
@@ -86,21 +83,12 @@ export const OutputBlock = Node.create({
         ({ commands }) => {
           return commands.setNode(this.name, attributes);
         },
-      toggleOutputBlock:
-        (attributes) =>
-        ({ commands }) => {
-          return commands.toggleNode(this.name, "paragraph", attributes);
-        },
     };
   },
 
   addKeyboardShortcuts() {
     return {
-      "Mod-Alt-o": () => this.editor.commands.toggleOutputBlock(),
+      "Mod-Alt-o": () => this.editor.commands.setOutputBlock(),
     };
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(OutputBlockComponent);
   },
 });

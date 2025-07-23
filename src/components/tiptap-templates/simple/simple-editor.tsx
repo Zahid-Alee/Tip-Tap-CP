@@ -185,12 +185,12 @@ const useEditorExtensions = () => {
     StarterKit.configure({
       codeBlock: false,
     }),
+    OutputBlock,
     CodeBlockLowlight.extend({
       addNodeView() {
         return ReactNodeViewRenderer(CodeBlockComponent);
       },
     }).configure({ lowlight }),
-    OutputBlock,
     TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
     Underline,
     TaskList,
