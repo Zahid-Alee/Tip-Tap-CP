@@ -22,15 +22,23 @@ export const LineHeight = Extension.create<LineHeightOptions>({
         attributes: {
           lineHeight: {
             default: this.options.defaultHeight,
-            parseHTML: (element: HTMLElement) =>
-              element.style.lineHeight || this.options.defaultHeight,
+            parseHTML: (element: HTMLElement) => {
+              const lineHeight = element.style.lineHeight;
+              // If no line height is set or it's the default, return the default
+              if (!lineHeight || lineHeight === "normal") {
+                return this.options.defaultHeight;
+              }
+              return lineHeight;
+            },
             renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.lineHeight) {
+              const lineHeight = attributes.lineHeight;
+              // Don't render if it's the default value
+              if (!lineHeight || lineHeight === this.options.defaultHeight) {
                 return {};
               }
 
               return {
-                style: `line-height: ${attributes.lineHeight}`,
+                style: `line-height: ${lineHeight}`,
               };
             },
           },
@@ -75,15 +83,23 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
         attributes: {
           wordSpacing: {
             default: this.options.defaultSpacing,
-            parseHTML: (element: HTMLElement) =>
-              element.style.wordSpacing || this.options.defaultSpacing,
+            parseHTML: (element: HTMLElement) => {
+              const wordSpacing = element.style.wordSpacing;
+              // If no word spacing is set or it's normal, return default
+              if (!wordSpacing || wordSpacing === "normal") {
+                return this.options.defaultSpacing;
+              }
+              return wordSpacing;
+            },
             renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.wordSpacing) {
+              const wordSpacing = attributes.wordSpacing;
+              // Don't render if it's the default value
+              if (!wordSpacing || wordSpacing === this.options.defaultSpacing) {
                 return {};
               }
 
               return {
-                style: `word-spacing: ${attributes.wordSpacing}`,
+                style: `word-spacing: ${wordSpacing}`,
               };
             },
           },
@@ -134,15 +150,26 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
         attributes: {
           letterSpacing: {
             default: this.options.defaultSpacing,
-            parseHTML: (element: HTMLElement) =>
-              element.style.letterSpacing || this.options.defaultSpacing,
+            parseHTML: (element: HTMLElement) => {
+              const letterSpacing = element.style.letterSpacing;
+              // If no letter spacing is set or it's normal, return default
+              if (!letterSpacing || letterSpacing === "normal") {
+                return this.options.defaultSpacing;
+              }
+              return letterSpacing;
+            },
             renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.letterSpacing) {
+              const letterSpacing = attributes.letterSpacing;
+              // Don't render if it's the default value
+              if (
+                !letterSpacing ||
+                letterSpacing === this.options.defaultSpacing
+              ) {
                 return {};
               }
 
               return {
-                style: `letter-spacing: ${attributes.letterSpacing}`,
+                style: `letter-spacing: ${letterSpacing}`,
               };
             },
           },

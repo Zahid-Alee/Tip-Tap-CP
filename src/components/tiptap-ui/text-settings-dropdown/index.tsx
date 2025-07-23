@@ -330,9 +330,52 @@ export function TextSettingsDropdownMenu({
                 type="button"
                 data-style="ghost"
                 onClick={() => {
+                  // Reset local state
                   handleLineHeightChange("1.5");
                   handleLetterSpacingChange("0");
                   handleWordSpacingChange("0");
+
+                  // Actually reset the attributes in the editor
+                  if (editor) {
+                    const { from, to } = editor.state.selection;
+                    const hasSelection = from !== to;
+
+                    if (hasSelection) {
+                      // Reset selection only
+                      (editor.chain() as any)
+                        .setLineHeight("1.5")
+                        .setLetterSpacing("0em")
+                        .setWordSpacing("0em")
+                        .run();
+                    } else {
+                      // Reset entire document
+                      const { doc } = editor.state;
+                      editor
+                        .chain()
+                        .focus()
+                        .command(({ tr, dispatch }) => {
+                          if (!dispatch) return false;
+
+                          // Reset all nodes in the document
+                          doc.descendants((node, pos) => {
+                            if (
+                              node.type.name === "paragraph" ||
+                              node.type.name === "heading"
+                            ) {
+                              tr.setNodeMarkup(pos, undefined, {
+                                ...node.attrs,
+                                lineHeight: "1.5",
+                                letterSpacing: "0em",
+                                wordSpacing: "0em",
+                              });
+                            }
+                          });
+
+                          return true;
+                        })
+                        .run();
+                    }
+                  }
                 }}
                 className="w-full text-sm"
               >
