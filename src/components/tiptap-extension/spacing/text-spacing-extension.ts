@@ -23,9 +23,7 @@ export const LineHeight = Extension.create<LineHeightOptions>({
           lineHeight: {
             default: this.options.defaultHeight,
             parseHTML: (element: HTMLElement) => {
-              const lineHeight =
-                element.style.lineHeight ||
-                element.getAttribute("data-line-height");
+              const lineHeight = element.style.lineHeight;
               // If no line height is set or it's the default, return the default
               if (!lineHeight || lineHeight === "normal") {
                 return this.options.defaultHeight;
@@ -41,7 +39,6 @@ export const LineHeight = Extension.create<LineHeightOptions>({
 
               return {
                 style: `line-height: ${lineHeight}`,
-                "data-line-height": lineHeight,
               };
             },
           },
@@ -87,9 +84,7 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
           wordSpacing: {
             default: this.options.defaultSpacing,
             parseHTML: (element: HTMLElement) => {
-              const wordSpacing =
-                element.style.wordSpacing ||
-                element.getAttribute("data-word-spacing");
+              const wordSpacing = element.style.wordSpacing;
               // If no word spacing is set or it's normal, return default
               if (!wordSpacing || wordSpacing === "normal") {
                 return this.options.defaultSpacing;
@@ -105,7 +100,6 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
 
               return {
                 style: `word-spacing: ${wordSpacing}`,
-                "data-word-spacing": wordSpacing,
               };
             },
           },
@@ -119,10 +113,10 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
       setWordSpacing:
         (wordSpacing: string) =>
         ({ commands }: CommandProps) => {
-          // Support both em and px units, default to em if no unit is specified
+          // Support both em and px units, default to px if no unit is specified
           let value = wordSpacing;
           if (!wordSpacing.includes("em") && !wordSpacing.includes("px")) {
-            value = `${wordSpacing}em`;
+            value = `${wordSpacing}px`;
           }
 
           return this.options.types.every((type) =>
@@ -157,9 +151,7 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
           letterSpacing: {
             default: this.options.defaultSpacing,
             parseHTML: (element: HTMLElement) => {
-              const letterSpacing =
-                element.style.letterSpacing ||
-                element.getAttribute("data-letter-spacing");
+              const letterSpacing = element.style.letterSpacing;
               // If no letter spacing is set or it's normal, return default
               if (!letterSpacing || letterSpacing === "normal") {
                 return this.options.defaultSpacing;
@@ -178,7 +170,6 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
 
               return {
                 style: `letter-spacing: ${letterSpacing}`,
-                "data-letter-spacing": letterSpacing,
               };
             },
           },
@@ -192,10 +183,10 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
       setLetterSpacing:
         (letterSpacing: string) =>
         ({ commands }: CommandProps) => {
-          // Support both em and px units, default to em if no unit is specified
+          // Support both em and px units, default to px if no unit is specified
           let value = letterSpacing;
           if (!letterSpacing.includes("em") && !letterSpacing.includes("px")) {
-            value = `${letterSpacing}em`;
+            value = `${letterSpacing}px`;
           }
 
           return this.options.types.every((type) =>
@@ -207,6 +198,7 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
 });
 
 // Bold Extension
+
 interface BoldOptions {
   types: string[];
   defaultWeight: string;
@@ -232,9 +224,7 @@ export const Bold = Extension.create<BoldOptions>({
           fontWeight: {
             default: null,
             parseHTML: (element: HTMLElement) => {
-              const weight =
-                element.style.fontWeight ||
-                element.getAttribute("data-font-weight");
+              const weight = element.style.fontWeight;
               // Handle both numeric and named font weights
               if (weight) {
                 // Convert named weights to numeric
@@ -255,7 +245,6 @@ export const Bold = Extension.create<BoldOptions>({
 
               return {
                 style: `font-weight: ${attributes.fontWeight}`,
-                "data-font-weight": attributes.fontWeight,
               };
             },
           },
