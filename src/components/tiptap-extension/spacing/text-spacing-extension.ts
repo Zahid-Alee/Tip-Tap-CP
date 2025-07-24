@@ -265,6 +265,35 @@ export const Bold = Extension.create<BoldOptions>({
           );
         },
 
+      toggleBold:
+        () =>
+        ({ commands, editor }: CommandProps) => {
+          // Check if any of the current selection has bold applied
+          const hasBold = this.options.types.some((type) => {
+            const attrs = editor.getAttributes(type);
+            return (
+              attrs.fontWeight &&
+              attrs.fontWeight !== "400" &&
+              attrs.fontWeight !== "normal" &&
+              attrs.fontWeight !== null
+            );
+          });
+
+          if (hasBold) {
+            // Remove bold by setting to normal weight
+            return this.options.types.every((type) =>
+              commands.updateAttributes(type, { fontWeight: null })
+            );
+          } else {
+            // Apply bold with default weight
+            return this.options.types.every((type) =>
+              commands.updateAttributes(type, {
+                fontWeight: this.options.defaultWeight,
+              })
+            );
+          }
+        },
+
       toggleFontWeight:
         (fontWeight?: string) =>
         ({ commands, editor }: CommandProps) => {
@@ -276,14 +305,15 @@ export const Bold = Extension.create<BoldOptions>({
             return (
               attrs.fontWeight &&
               attrs.fontWeight !== "400" &&
-              attrs.fontWeight !== "normal"
+              attrs.fontWeight !== "normal" &&
+              attrs.fontWeight !== null
             );
           });
 
           if (hasBold) {
-            // Remove bold by setting to normal weight
+            // Remove bold by setting to null
             return this.options.types.every((type) =>
-              commands.updateAttributes(type, { fontWeight: "400" })
+              commands.updateAttributes(type, { fontWeight: null })
             );
           } else {
             // Apply bold with specified weight
@@ -297,7 +327,7 @@ export const Bold = Extension.create<BoldOptions>({
         () =>
         ({ commands }: CommandProps) => {
           return this.options.types.every((type) =>
-            commands.updateAttributes(type, { fontWeight: "400" })
+            commands.updateAttributes(type, { fontWeight: null })
           );
         },
     };
@@ -305,8 +335,8 @@ export const Bold = Extension.create<BoldOptions>({
 
   addKeyboardShortcuts() {
     return {
-      "Mod-b": () => this.editor.commands.toggleFontWeight(),
-      "Mod-B": () => this.editor.commands.toggleFontWeight(),
+      "Mod-b": () => this.editor.commands.toggleBold(),
+      "Mod-B": () => this.editor.commands.toggleBold(),
     };
   },
 });

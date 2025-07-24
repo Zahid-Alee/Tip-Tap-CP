@@ -120,8 +120,6 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
             "checkList",
           ]}
         />
-        <OutputBlockButton editor={editor} />
-        <NodeButton type="codeBlock" />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />
         <HorizontalRuleButton editor={editor} />
@@ -134,7 +132,14 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         <MarkButton type="italic" />
         <MarkButton type="strike" />
         <MarkButton type="underline" />
+      </ToolbarGroup>
+
+      <ToolbarSeparator />
+
+      <ToolbarGroup>
         <MarkButton type="code" />
+        <NodeButton type="codeBlock" />
+        <OutputBlockButton editor={editor} />
       </ToolbarGroup>
 
       <ToolbarSeparator />

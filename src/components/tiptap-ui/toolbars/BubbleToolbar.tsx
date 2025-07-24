@@ -5,6 +5,7 @@ import { NodeButton } from "@/components/tiptap-ui/node-button";
 import { HighlightPopover } from "@/components/tiptap-ui/highlight-popover";
 import TextColorPopover from "../font/TextColorPopover";
 import "./toolbar.scss";
+import BoldButton from "../bold-button";
 
 interface BubbleToolbarProps {
   editor: Editor | null;
@@ -35,15 +36,14 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
 
         if (editor.isActive("resizableImage")) return false;
 
-        if(editor.isActive("link")) return false;
-        if(editor.isActive("code-block")) return false;
+        if (editor.isActive("link")) return false;
+        if (editor.isActive("code-block")) return false;
 
         return true;
-
       }}
     >
       <div className="flex items-center gap-1">
-        <MarkButton type="bold" size="sm" />
+        <BoldButton editor={editor} size="sm" />
         <MarkButton type="italic" size="sm" />
         <MarkButton type="underline" size="sm" />
         <MarkButton type="strike" size="sm" />

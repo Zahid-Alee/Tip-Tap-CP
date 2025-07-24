@@ -184,6 +184,7 @@ const useEditorExtensions = () => {
     ExtendedListExtension,
     StarterKit.configure({
       codeBlock: false,
+      bold: false, // Disable built-in bold mark
     }),
     OutputBlock,
     CodeBlockLowlight.extend({
