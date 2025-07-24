@@ -103,6 +103,8 @@ const App = () => {
     }
   };
 
+  console.log('config received',config);
+
   if (!config.saveUrl) return <EditorLoader />;
 
   return (
