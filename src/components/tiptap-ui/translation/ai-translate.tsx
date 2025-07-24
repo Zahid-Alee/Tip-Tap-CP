@@ -195,7 +195,7 @@ export const TranslationModule = ({
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
       }
-
+      console.log('data', response.data);
       const data = response.data;
       updateTranslationWithAudio(translationIndex, data?.data);
     } catch (err) {
