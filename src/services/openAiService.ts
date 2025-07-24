@@ -314,7 +314,6 @@ const formatCodeBlocks = (htmlContent) => {
         const langClass = Array.from(codeBlock.classList).find(c => c.startsWith('language-'));
         const language = langClass ? langClass.replace('language-', '') : 'code';
 
-        // Clean up code formatting
         code = code.replace(/^\s*\n|\n\s*$/g, '');
 
         if (language && language !== 'code') {
