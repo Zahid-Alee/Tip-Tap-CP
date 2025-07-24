@@ -148,6 +148,8 @@ export const TranslationModule = ({
       audio: audioUrl,
     };
 
+    console.log('newTranslation',newTranslation)
+
     // Check if translation for this language already exists
     const existingIndex = getExistingTranslationIndex(langCode);
 
@@ -302,6 +304,10 @@ export const TranslationModule = ({
         translatedContent = data.data?.translations[0]?.text;
         detectedSourceLang =
           data.data?.translations[0]?.detected_source_language;
+
+          console.log('translated content',translatedContent);
+          console.log('data souce lang',detectedSourceLang);
+
       } else {
         throw new Error("Invalid response format from translation service");
       }
@@ -593,7 +599,7 @@ export const TranslationModule = ({
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium text-gray-700">
-                              {translation.title.split("to")[1]}
+                              {translation?.title?.split("to")[1]}
                             </span>
                             <span className="text-xs text-gray-500">
                               {translation.service}
