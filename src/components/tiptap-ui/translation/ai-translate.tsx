@@ -195,7 +195,7 @@ export const TranslationModule = ({
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
       }
-      console.log('data', response.data);
+      console.log("data", response.data);
       const data = response.data;
       updateTranslationWithAudio(translationIndex, data?.data);
     } catch (err) {
@@ -255,8 +255,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "http://lms.localhost:8000/api/translate/deepl"
-          : "http://lms.localhost:8000/api/translate/chatgpt";
+          ? "/api/translate/deepl"
+          : "/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
@@ -291,14 +291,17 @@ export const TranslationModule = ({
       let translatedContent;
       let detectedSourceLang = "EN";
 
+      console.log("data from translate api", data);
+
       if (
         data.success &&
         data.data &&
-        data.data.translations &&
-        data.data.translations.length > 0
+        data?.data?.translations &&
+        data?.data?.translations?.length > 0
       ) {
-        translatedContent = data.data.translations[0].text;
-        detectedSourceLang = data.data.translations[0].detected_source_language;
+        translatedContent = data.data?.translations[0]?.text;
+        detectedSourceLang =
+          data.data?.translations[0]?.detected_source_language;
       } else {
         throw new Error("Invalid response format from translation service");
       }
