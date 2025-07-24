@@ -150,12 +150,12 @@ export const TranslationModule = ({
 
     // Check if translation for this language already exists
     const existingIndex = getExistingTranslationIndex(langCode);
-    
+
     if (existingIndex >= 0) {
       // Replace existing translation, preserving audio if it exists
-      setTranslationHistory((prev) => 
-        prev.map((item, index) => 
-          index === existingIndex 
+      setTranslationHistory((prev) =>
+        prev.map((item, index) =>
+          index === existingIndex
             ? { ...newTranslation, audio: item.audio || audioUrl }
             : item
         )
@@ -186,10 +186,11 @@ export const TranslationModule = ({
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await axios.post(
-        "/api/gen/text-to-speech",
-        { text: textContent, voice: "alloy",path:'/app/course/1000/narrations' }
-      );
+      const response = await axios.post("/api/gen/text-to-speech", {
+        text: textContent,
+        voice: "alloy",
+        path: "/app/course/1000/narrations",
+      });
 
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
@@ -254,8 +255,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "/api/translate/deepl"
-          : "/api/translate/chatgpt";
+          ? "http://lms.localhost:8000/api/translate/deepl"
+          : "http://lms.localhost:8000/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
@@ -305,7 +306,7 @@ export const TranslationModule = ({
       if (translationHistory?.length < 1) {
         saveToHistory(editor.getHTML(), "English", "English", "English");
       }
-      
+
       saveToHistory(
         translatedContent,
         targetLanguage,
@@ -589,7 +590,7 @@ export const TranslationModule = ({
                         >
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium text-gray-700">
-                              {translation.title.split('to')[1]}
+                              {translation.title.split("to")[1]}
                             </span>
                             <span className="text-xs text-gray-500">
                               {translation.service}
@@ -618,9 +619,8 @@ export const TranslationModule = ({
                                 }
                                 disabled={isGeneratingAudio}
                                 className="!p-2 !bg-blue-100 !hover:bg-blue-200 !text-blue-700 !rounded-md"
-                              > 
-
-                               Generate Narration
+                              >
+                                Generate Narration
                               </Button>
                             )}
 
