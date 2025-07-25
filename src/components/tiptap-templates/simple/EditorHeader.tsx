@@ -177,12 +177,7 @@ export function EditorHeader({
             <PencilLine size={16} />
           </button>
         )}
-    <div
-      className={`flex justify-between items-center p-3 ${
-        !readOnlyValue && "border-b"
-      } bg-inherit`}
-    >
-     
+      </div>
 
       <div className="flex items-center gap-3">
         <div className="flex gap-2">
