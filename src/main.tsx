@@ -23,8 +23,6 @@ const App = () => {
     editorId: "",
   });
 
-  console.log("here is the config ", config);
-
   const [isInitialized, setIsInitialized] = useState(false);
   const editorRef = useRef(null);
   const configReceivedRef = useRef(false);
