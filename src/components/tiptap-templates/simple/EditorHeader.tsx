@@ -5,7 +5,14 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/tiptap-ui-primitive/tooltip";
-import { Sparkles, Globe, Check, ChevronDown } from "lucide-react";
+import {
+  Sparkles,
+  Globe,
+  Check,
+  ChevronDown,
+  PencilLine,
+  X,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +60,8 @@ export function EditorHeader({
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
     React.useState(false);
 
+  const [titleValue, setTitleValue] = React.useState(title);
+  const [isEditTitle, setIsEditTitle] = React.useState(false);
   const handleOpenAIModal = () => {
     setIsAIModalOpen(true);
   };
@@ -118,8 +127,43 @@ export function EditorHeader({
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
-      <div className="editor-title">
-        {!readOnlyValue && <h2 className="text-lg font-medium m-0">{title}</h2>}
+      <div className="editor-title flex items-center gap-4">
+        <div>
+          {/* {!readOnlyValue && ( */}
+          {/* )} */}
+          {isEditTitle ? (
+            <div className="bg-gray-50 flex items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
+              <input
+                type="text"
+                id="first_name"
+                value={titleValue}
+                onChange={(e) => setTitleValue(e.target.value)}
+                className="block py-2 w-full bg-transparent outline-none focus:outline-none"
+                placeholder="Enter title here"
+                required
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => setIsEditTitle(false)}
+                className="flex-shrink-0 p-1 rounded hover:bg-gray-200 transition-colors"
+              >
+                <X size={16} className="text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+          ) : (
+            <h2 className="text-lg font-medium m-0">{title}</h2>
+          )}
+        </div>
+        {!isEditTitle && (
+          <button
+            type="button"
+            onClick={() => setIsEditTitle(true)}
+            className="flex-shrink-0 p-1 rounded hover:bg-gray-200 transition-colors"
+          >
+            <PencilLine size={16} />
+          </button>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
