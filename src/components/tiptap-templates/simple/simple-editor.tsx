@@ -385,23 +385,67 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   editor,
   isReadOnly,
 }) => {
-  const contentWrapper = React.useRef<HTMLDivElement>(null);
+  const contentWrapperRef = React.useRef<HTMLDivElement>(null);
+  const lastHeightRef = React.useRef<number>(0);
 
   React.useEffect(() => {
     const sendHeightToParent = () => {
-      const contentWrapperElement = contentWrapper.current;
-      const height = contentWrapperElement
-        ? contentWrapperElement.scrollHeight
-        : 200;
+      const el = contentWrapperRef.current;
+      if (!el) return;
 
-      console.log("Sending height to parent:", height);
-      window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+      const height = el.scrollHeight;
+
+      if (height !== lastHeightRef.current) {
+        lastHeightRef.current = height;
+        window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+        console.log("[AutoResizer] Sent new height:", height);
+      }
     };
-    sendHeightToParent();
-  }, []);
+
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+    const debouncedSend = () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => sendHeightToParent(), 100);
+    };
+
+    const wrapper = contentWrapperRef.current;
+    if (!wrapper) return;
+
+    const resizeObserver = new ResizeObserver(debouncedSend);
+    resizeObserver.observe(wrapper);
+
+    const mutationObserver = new MutationObserver(debouncedSend);
+    mutationObserver.observe(wrapper, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      characterData: true,
+    });
+
+    sendHeightToParent(); // Initial send
+
+    // 💡 Stop observing after 3 seconds if read-only
+    let stopTimeout: ReturnType<typeof setTimeout> | null = null;
+    if (isReadOnly) {
+      stopTimeout = setTimeout(() => {
+        resizeObserver.disconnect();
+        mutationObserver.disconnect();
+        console.log(
+          "[AutoResizer] Disconnected observers after 3s (read-only)"
+        );
+      }, 3000);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+      if (timeout) clearTimeout(timeout);
+      if (stopTimeout) clearTimeout(stopTimeout);
+    };
+  }, [isReadOnly]);
 
   return (
-    <div ref={contentWrapper} className="content-wrapper">
+    <div ref={contentWrapperRef} className="content-wrapper">
       <EditorContent
         editor={editor}
         role="presentation"
