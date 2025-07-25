@@ -12,7 +12,7 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: "null",
+    saveUrl: null,
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
@@ -22,6 +22,8 @@ const App = () => {
     translations: [],
     editorId: "",
   });
+
+  console.log("here is the config ", config);
 
   const [isInitialized, setIsInitialized] = useState(false);
   const editorRef = useRef(null);
