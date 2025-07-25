@@ -396,7 +396,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       const height = el.scrollHeight;
 
       if (height !== lastHeightRef.current) {
-        lastHeightRef.current = height;
+        lastHeightRef.current = height + 200;
         window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
         console.log("[AutoResizer] Sent new height:", height);
       }
