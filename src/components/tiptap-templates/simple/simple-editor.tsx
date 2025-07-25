@@ -393,7 +393,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       const el = contentWrapperRef.current;
       if (!el) return;
 
-      const height = el.scrollHeight + 80;
+      const height = el.scrollHeight + 60;
 
       if (height !== lastHeightRef.current) {
         lastHeightRef.current = height;
