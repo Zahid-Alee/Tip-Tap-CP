@@ -142,9 +142,9 @@ export function EditorHeader({
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
       <div className="editor-title flex items-center gap-4">
-        <div>
+        <div className="w-full">
           {isEditTitle && !readOnlyValue ? (
-            <div className="bg-gray-50 flex items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
+            <div className="bg-gray-50 flex w-full max-w-xl items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
               <input
                 type="text"
                 id="first_name"
