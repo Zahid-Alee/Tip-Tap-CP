@@ -31,21 +31,24 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const sendHeightToParent = () => {
-      const height = document.body.scrollHeight;
-      window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
-    };
+    if (mounted) {
+      const sendHeightToParent = () => {
+        const height = document.body.scrollHeight;
+        console.log("Sending height to parent:", height);
+        window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+      };
 
-    sendHeightToParent();
-
-    const observer = new ResizeObserver(() => {
       sendHeightToParent();
-    });
+    }
 
-    observer.observe(document.body);
+    // const observer = new ResizeObserver(() => {
+    //   sendHeightToParent();
+    // });
 
-    return () => observer.disconnect();
-  }, []);
+    // observer.observe(document.body);
+
+    // return () => observer.disconnect();
+  }, [setMounted]);
 
   useEffect(() => {
     const handleMessage = (event) => {
