@@ -12,12 +12,181 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: null,
+    saveUrl: "null",
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
     readOnly: false,
-    initialContent: `loading editor...`,
+    initialContent: `loading editor... Welcome to Your Editor
+
+This editor is designed to help you write with clarity, structure, and a bit of creativity. Here’s what you can do:
+
+
+
+
+
+Bold and italic your text to emphasize important point
+
+
+
+Use inline code or full code blocks for technical content
+
+Example Code Block
+
+        
+            function greet(name) {
+            return Hello,;
+            }
+            console.log(greet("World"));
+        
+        
+
+
+
+
+
+Include 😊 emojis to express yourself
+
+
+
+Let the editor help generate content ideas or finish sentences ✨
+
+Enjoy writing!
+
+Welcome to Your Editor
+
+This editor is designed to help you write with clarity, structure, and a bit of creativity. Here’s what you can do:
+
+
+
+
+
+Bold and italic your text to emphasize important point
+
+
+
+Use inline code or full code blocks for technical content
+
+Example Code Block
+
+        
+            function greet(name) {
+            return Hello,;
+            }
+            console.log(greet("World"));
+        
+        
+
+
+
+
+
+Include 😊 emojis to express yourself
+
+
+
+Let the editor help generate content ideas or finish sentences ✨
+
+Enjoy writing!
+
+Welcome to Your Editor
+
+This editor is designed to help you write with clarity, structure, and a bit of creativity. Here’s what you can do:
+
+
+
+
+
+Bold and italic your text to emphasize important point
+
+
+
+Use inline code or full code blocks for technical content
+
+Example Code Block
+
+        
+            function greet(name) {
+            return Hello,;
+            }
+            console.log(greet("World"));
+        
+        
+
+
+
+
+
+Include 😊 emojis to express yourself
+
+
+
+Let the editor help generate content ideas or finish sentences ✨
+
+Enjoy writing!
+
+Welcome to Your Editor
+
+This editor is designed to help you write with clarity, structure, and a bit of creativity. Here’s what you can do:
+
+
+
+
+
+Bold and italic your text to emphasize important point
+
+
+
+Use inline code or full code blocks for technical content
+
+Example Code Block
+
+        
+            function greet(name) {
+            return Hello,;
+            }
+            console.log(greet("World"));
+        
+        
+const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+  });
+
+  observer.observe(document.body);
+
+  return () => observer.disconnect();
+  const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+  });
+
+  observer.observe(document.body);
+
+  return () => observer.disconnect();
+  const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+  });
+
+  observer.observe(document.body);
+
+  return () => observer.disconnect();
+  const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+  });
+
+  observer.observe(document.body);
+
+  return () => observer.disconnect();
+
+
+
+
+Include 😊 emojis to express yourself
+
+
+
+Let the editor help generate content ideas or finish sentences ✨
+
+Enjoy writing!`,
     title: "My Text Lecture",
     translations: [],
   });
@@ -32,14 +201,23 @@ const App = () => {
 
   useEffect(() => {
     const sendHeightToParent = () => {
-      const height = document.body.scrollHeight;
+      const contentWrapper = document.querySelector(".content-wrapper");
+      console.log("Content wrapper:", contentWrapper);
+      const height = contentWrapper ? contentWrapper.scrollHeight : 200;
+
       console.log("Sending height to parent:", height);
-      window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+      // const height = document.body.scrollHeight;
+      // console.log("Sending height to parent:", height);
+      // window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
     };
 
-    setTimeout(() => {
-      sendHeightToParent();
-    }, 1000);
+    // const observer = new ResizeObserver(() => {
+    // sendHeightToParent();
+    // });
+
+    // observer.observe(document.body);
+
+    // return () => observer.disconnect();
   }, []);
 
   useEffect(() => {

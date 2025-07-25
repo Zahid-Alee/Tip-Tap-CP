@@ -385,8 +385,30 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   editor,
   isReadOnly,
 }) => {
+  const contentWrapper = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const sendHeightToParent = () => {
+      const contentWrapperElement = contentWrapper.current;
+      const height = contentWrapperElement
+        ? contentWrapperElement.scrollHeight
+        : 200;
+
+      console.log("Sending height to parent:", height);
+      window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+    };
+
+    const observer = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    observer.observe(document.body);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="content-wrapper">
+    <div ref={contentWrapper} className="content-wrapper">
       <EditorContent
         editor={editor}
         role="presentation"
