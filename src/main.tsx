@@ -12,7 +12,7 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: "null",
+    saveUrl: null,
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
@@ -28,27 +28,6 @@ const App = () => {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const sendHeightToParent = () => {
-      const contentWrapper = document.querySelector(".content-wrapper");
-      console.log("Content wrapper:", contentWrapper);
-      const height = contentWrapper ? contentWrapper.scrollHeight : 200;
-
-      console.log("Sending height to parent:", height);
-      // const height = document.body.scrollHeight;
-      // console.log("Sending height to parent:", height);
-      // window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
-    };
-
-    // const observer = new ResizeObserver(() => {
-    // sendHeightToParent();
-    // });
-
-    // observer.observe(document.body);
-
-    // return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
