@@ -20,6 +20,7 @@ const App = () => {
     initialContent: `loading editor...`,
     title: "My Text Lecture",
     translations: [],
+    editorId: "",
   });
 
   const [isInitialized, setIsInitialized] = useState(false);
@@ -118,6 +119,7 @@ const App = () => {
       onLoadError={handleLoadError}
       initialContent={config.initialContent}
       readOnlyValue={config.readOnly}
+      editorId={config.editorId}
       onReady={handleEditorReady}
       title={config.title}
       translations={config.translations}

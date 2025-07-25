@@ -147,6 +147,7 @@ interface EditorMenusProps {
 interface EditorContentWrapperProps {
   editor: any;
   isReadOnly: boolean;
+  editorId?: string;
 }
 
 interface AIModalProps {
@@ -384,6 +385,7 @@ const EditorMenus: React.FC<EditorMenusProps> = ({ editor, readOnlyValue }) => {
 const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   editor,
   isReadOnly,
+  editorId,
 }) => {
   const contentWrapperRef = React.useRef<HTMLDivElement>(null);
   const lastHeightRef = React.useRef<number>(0);
@@ -398,7 +400,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       if (height !== lastHeightRef.current) {
         lastHeightRef.current = height;
         window.parent.postMessage(
-          { type: "IFRAME_HEIGHT", height: height + 60 },
+          { type: "IFRAME_HEIGHT", height: height + 60, editorId },
           "*"
         );
         console.log("[AutoResizer] Sent new height:", height);
@@ -482,6 +484,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
       readOnlyValue = false,
       onReady,
       translations,
+      editorId,
     },
     ref
   ) {
@@ -815,7 +818,11 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           <EditorMenus editor={editor} readOnlyValue={readOnlyValue} />
 
-          <EditorContentWrapper editor={editor} isReadOnly={state.isReadOnly} />
+          <EditorContentWrapper
+            editorId={editorId}
+            editor={editor}
+            isReadOnly={state.isReadOnly}
+          />
         </div>
 
         <AIModal
