@@ -150,6 +150,11 @@ export function EditorHeader({
                 id="first_name"
                 value={titleValue}
                 onChange={(e) => setTitleValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    setIsEditTitle(false);
+                  }
+                }}
                 className="block py-2 w-full bg-transparent outline-none focus:outline-none"
                 placeholder="Enter title here"
                 required
@@ -164,7 +169,7 @@ export function EditorHeader({
               </button>
             </div>
           ) : (
-            <h2 className="text-lg font-medium m-0">{title}</h2>
+            <h2 className="text-lg font-medium m-0">{titleValue}</h2>
           )}
         </div>
 
