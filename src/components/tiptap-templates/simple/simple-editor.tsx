@@ -398,13 +398,13 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
     };
 
-    const observer = new ResizeObserver(() => {
-      sendHeightToParent();
-    });
+    // const observer = new ResizeObserver(() => {
+    sendHeightToParent();
+    // });
 
-    observer.observe(document.body);
+    // observer.observe(document.body);
 
-    return () => observer.disconnect();
+    // return () => observer.disconnect();
   }, []);
 
   return (
