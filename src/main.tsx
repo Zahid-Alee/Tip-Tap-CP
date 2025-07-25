@@ -31,6 +31,23 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    const sendHeightToParent = () => {
+      const height = document.body.scrollHeight;
+      window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
+    };
+
+    sendHeightToParent();
+
+    const observer = new ResizeObserver(() => {
+      sendHeightToParent();
+    });
+
+    observer.observe(document.body);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
     const handleMessage = (event) => {
       if (event.data && event.data.type === "EDITOR_CONFIG") {
         setConfig((prevConfig) => ({
@@ -103,7 +120,7 @@ const App = () => {
     }
   };
 
-  console.log('config received',config);
+  console.log("config received", config);
 
   if (!config.saveUrl) return <EditorLoader />;
 
