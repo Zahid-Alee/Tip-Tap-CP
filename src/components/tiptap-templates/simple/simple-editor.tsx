@@ -397,13 +397,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       console.log("Sending height to parent:", height);
       window.parent.postMessage({ type: "IFRAME_HEIGHT", height }, "*");
     };
-    const observer = new ResizeObserver(() => {
-      sendHeightToParent();
-    });
-
-    observer.observe(document.body);
-
-    return () => observer.disconnect();
+    sendHeightToParent();
   }, []);
 
   return (
