@@ -31,6 +31,7 @@ import HorizontalRuleButton from "../horizental-rule-button";
 import OutputBlockButton from "../output-block/OutputBlockButton";
 import BoldDropdownMenu from "../bold-dropdown-menu";
 import TextSettingsDropdownMenu from "../text-settings-dropdown";
+import { ColumnButton } from "../../tiptap-extension/column/column-ui";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -122,6 +123,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         />
         <NodeButton type="blockquote" />
         <TableButton editor={editor} />
+        {/* <ColumnButton editor={editor}/> */}
         <HorizontalRuleButton editor={editor} />
       </ToolbarGroup>
 

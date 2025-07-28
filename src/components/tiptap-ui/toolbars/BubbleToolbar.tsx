@@ -56,7 +56,6 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
       </div>
 
       <div className="flex items-center gap-1">
-        {/* <LinkPopover /> */}
         <NodeButton type="codeBlock" size="sm" />
       </div>
     </BubbleMenu>

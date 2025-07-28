@@ -1,0 +1,318 @@
+// src/components/tiptap-ui/column/styles.scss
+
+// Main column layout wrapper
+.column-layout-wrapper {
+  position: relative;
+  margin: 16px 0;
+  
+  // Ensure proper spacing and visibility
+  &:first-child {
+    margin-top: 8px;
+  }
+  
+  &:last-child {
+    margin-bottom: 8px;
+  }
+}
+
+// Column container styles
+.tiptap-columns-container {
+  position: relative;
+  width: 100%;
+  min-height: 100px;
+  background: rgba(248, 250, 252, 0.5);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  
+  // Hover state for better UX
+  &:hover {
+    background: rgba(248, 250, 252, 0.8);
+  }
+  
+  // Active/focused state
+  &.is-focused {
+    background: rgba(59, 130, 246, 0.02);
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+}
+
+// Individual column styles
+.tiptap-column {
+  position: relative;
+  min-height: 100px;
+  background: white;
+  border: 1px solid rgba(229, 231, 235, 0.8);
+  border-radius: 4px;
+  padding: 12px;
+  transition: all 0.2s ease;
+  
+  // Hover effect
+  &:hover {
+    border-color: rgba(156, 163, 175, 0.6);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+  
+  // Focus within effect
+  &:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
+  
+  // Empty column placeholder
+  &:empty::before {
+    content: 'Start typing...';
+    color: #9ca3af;
+    font-style: italic;
+    pointer-events: none;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+  }
+  
+  // First paragraph in column should have no top margin
+  > .ProseMirror-node:first-child {
+    margin-top: 0;
+  }
+  
+  // Last paragraph in column should have no bottom margin
+  > .ProseMirror-node:last-child {
+    margin-bottom: 0;
+  }
+}
+
+// Resize handles
+.column-resize-handle {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  width: 8px;
+  background: rgba(59, 130, 246, 0.3);
+  cursor: col-resize;
+  z-index: 10;
+  border-radius: 2px;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  
+  // Add visual indicator
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 20px;
+    background: white;
+    border-radius: 1px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  &:hover {
+    opacity: 1;
+    background: rgba(59, 130, 246, 0.5);
+    width: 10px;
+    margin-left: -1px;
+  }
+  
+  &.is-resizing {
+    opacity: 1;
+    background: rgba(59, 130, 246, 0.8);
+    width: 10px;
+    margin-left: -1px;
+  }
+}
+
+// Column indicators
+.column-indicators {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  display: flex;
+  z-index: 5;
+  
+  > div {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 2px;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #3b82f6;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: rgba(59, 130, 246, 0.5);
+    }
+  }
+}
+
+// Template preview styles
+.template-preview {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  
+  > div {
+    height: 16px;
+    background: #60a5fa;
+    border-radius: 1px;
+    min-width: 8px;
+    transition: background-color 0.2s ease;
+  }
+}
+
+// Dropdown menu enhancements for column controls
+.column-dropdown-menu {
+  .template-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(59, 130, 246, 0.05);
+      color: #3b82f6;
+      
+      .template-preview > div {
+        background: #3b82f6;
+      }
+    }
+    
+    .template-info {
+      flex: 1;
+      margin: 0 12px;
+      
+      .template-name {
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      
+      .template-description {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.2;
+        margin-top: 2px;
+      }
+    }
+  }
+}
+
+// Quick insert grid
+.quick-insert-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 8px;
+  
+  .quick-insert-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: white;
+    
+    &:hover {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: #3b82f6;
+      
+      .template-preview > div {
+        background: #3b82f6;
+      }
+    }
+    
+    .column-count {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 6px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .tiptap-columns-container {
+    // Stack columns on mobile for better readability
+    &[data-columns="3"],
+    &[data-columns="4"],
+    &[data-columns="5"],
+    &[data-columns="6"] {
+      display: block !important;
+      
+      .tiptap-column {
+        margin-bottom: 16px;
+        
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+  
+  .column-resize-handle {
+    display: none; // Hide resize handles on mobile
+  }
+  
+  .column-indicators {
+    display: none; // Hide indicators on mobile
+  }
+}
+
+// Dark mode support (if using)
+@media (prefers-color-scheme: dark) {
+  .tiptap-columns-container {
+    background: rgba(17, 24, 39, 0.5);
+    
+    &:hover {
+      background: rgba(17, 24, 39, 0.8);
+    }
+    
+    &.is-focused {
+      background: rgba(59, 130, 246, 0.05);
+    }
+  }
+  
+  .tiptap-column {
+    background: #1f2937;
+    border-color: rgba(75, 85, 99, 0.8);
+    
+    &:hover {
+      border-color: rgba(156, 163, 175, 0.8);
+    }
+    
+    &:focus-within {
+      border-color: #60a5fa;
+    }
+    
+    &:empty::before {
+      color: #6b7280;
+    }
+  }
+}
+
+// Print styles
+@media print {
+  .column-resize-handle,
+  .column-indicators {
+    display: none !important;
+  }
+  
+  .tiptap-columns-container {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+}

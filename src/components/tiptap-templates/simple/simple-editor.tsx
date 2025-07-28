@@ -76,6 +76,8 @@ import {
 import Button from "../../tiptap-ui-primitive/button/button";
 import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
 import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
+import { ColumnExtensions } from "../../tiptap-extension/column/column-extension";
+import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
 
 const lowlight = createLowlight(all);
 
@@ -173,7 +175,7 @@ function debounce<T extends (...args: any[]) => any>(
 }
 
 // ===== EDITOR CONFIGURATION =====
-const useEditorExtensions = () => {
+const useEditorExtensions = ({ readOnlyValue }) => {
   return [
     LineHeight,
     WordSpacing,
@@ -185,14 +187,23 @@ const useEditorExtensions = () => {
     ExtendedListExtension,
     StarterKit.configure({
       codeBlock: false,
-      bold: false, // Disable built-in bold mark
+      bold: false,
     }),
     OutputBlock,
+
     CodeBlockLowlight.extend({
+      addOptions() {
+        return {
+          ...this.parent?.(),
+          lowlight: null,
+          readOnlyValue: false,
+        };
+      },
       addNodeView() {
         return ReactNodeViewRenderer(CodeBlockComponent);
       },
-    }).configure({ lowlight }),
+    }).configure({ lowlight, readOnlyValue }),
+
     TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
     Underline,
     TaskList,
@@ -214,6 +225,7 @@ const useEditorExtensions = () => {
     TrailingNode,
     Link.configure({ openOnClick: false }),
     ...TableExtensions,
+    ...ColumnExtensions,
     FindReplace,
   ];
 };
@@ -372,14 +384,20 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
 };
 
 const EditorMenus: React.FC<EditorMenusProps> = ({ editor, readOnlyValue }) => {
-  return (
-    <>
-      {editor && <BubbleToolbar editor={editor} />}
-      {editor && <ImageBubbleMenu editor={editor} />}
-      {editor && <TableBubbleMenu readonly={readOnlyValue} editor={editor} />}
-      {editor && <TableFloatingMenu readonly={readOnlyValue} editor={editor} />}
-    </>
-  );
+  if (!readOnlyValue)
+    return (
+      <>
+        {editor && <BubbleToolbar editor={editor} />}
+        {editor && <ImageBubbleMenu editor={editor} />}
+        {editor && <TableBubbleMenu readonly={readOnlyValue} editor={editor} />}
+        {editor && (
+          <ColumnBubbleMenu readonly={readOnlyValue} editor={editor} />
+        )}
+        {editor && (
+          <TableFloatingMenu readonly={readOnlyValue} editor={editor} />
+        )}
+      </>
+    );
 };
 
 const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
@@ -493,7 +511,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     const [state, setState] = useEditorState(readOnlyValue, translations);
     const { getInitialEditorContent, updateTranslationDebounced } =
       useTranslationManagement(translations, initialContent);
-    const extensions = useEditorExtensions();
+    const extensions = useEditorExtensions({ readOnlyValue });
     const editorRef = React.useRef<any>(null);
 
     // ===== EDITOR HANDLERS =====
