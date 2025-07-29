@@ -71,6 +71,7 @@ CRITICAL REQUIREMENTS:
 - Avoid long paragraphs; use clear headings, subheadings, and concise formatting for easy comprehension.
 - Each main content section ends with <hr class="section-divider" />, except the last.
 - ${emojiInstruction}
+- Do not use backticks anywhere in the content, for inline code use <code> element.
 
 TARGET SPECIFICATIONS:
 - Audience: ${targetAudience}
@@ -94,7 +95,7 @@ ${sectionTypes.map((type, index) => `${includeHeader ? index + 2 : index + 1}. $
   - Bullet points or numbered lists
   - Nested lists for detailed breakdowns
   - Tables for comparisons or structured data
-  - Frequent use of <blockquote> to highlight key insights or tips
+  - Frequent use of <blockquote> to highlight key insights or tips, blockqoute should never be wrapped in quotation marks.
   - Include <hr class="section-divider" />${index === sectionTypes.length - 1 ? ' (except last main section)' : ''}`).join('\n\n')}
 
 ${includeFooter ? `\n${totalSections}. FOOTER SECTION:

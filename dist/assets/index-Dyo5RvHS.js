@@ -1157,6 +1157,7 @@ CRITICAL REQUIREMENTS:
 - Avoid long paragraphs; use clear headings, subheadings, and concise formatting for easy comprehension.
 - Each main content section ends with <hr class="section-divider" />, except the last.
 - ${p}
+- Do not use backticks anywhere in the content, for inline code use <code> element.
 
 TARGET SPECIFICATIONS:
 - Audience: ${r}
@@ -1185,7 +1186,7 @@ ${i.map((g,h)=>`${l?h+2:h+1}. ${g.toUpperCase()} SECTION:
   - Bullet points or numbered lists
   - Nested lists for detailed breakdowns
   - Tables for comparisons or structured data
-  - Frequent use of <blockquote> to highlight key insights or tips
+  - Frequent use of <blockquote> to highlight key insights or tips, blockqoute should never be wrapped in quotation marks.
   - Include <hr class="section-divider" />${h===i.length-1?" (except last main section)":""}`).join(`
 
 `)}
