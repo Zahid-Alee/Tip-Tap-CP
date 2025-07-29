@@ -530,7 +530,7 @@ export const generateAiContent = async (formData) => {
 
             const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
 
-            response = await fetch('http://lms.locahost:8001/api/generate/text-lecture', {
+            response = await fetch('/api/generate/text-lecture', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

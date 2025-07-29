@@ -189,7 +189,7 @@ export const TranslationModule = ({
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await axios.post("http://lms.localhost:8001/api/gen/text-to-speech", {
+      const response = await axios.post("/api/gen/text-to-speech", {
         text: textContent,
         voice: "alloy",
         path: "/app/course/1000/narrations",
@@ -258,8 +258,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "http://lms.localhost:8001/api/translate/deepl"
-          : "http://lms.localhost:8001/api/translate/chatgpt";
+          ? "/api/translate/deepl"
+          : "/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
