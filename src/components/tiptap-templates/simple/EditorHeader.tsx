@@ -232,7 +232,7 @@ export function EditorHeader({
                                   <span className="font-medium text-sm">
                                     {translation.title.split("to")[1]}
                                   </span>
-                                  {translation.lastModified && (
+                                  {translation.lastModified && !readOnlyValue&& (
                                     <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
                                       Modified
                                     </span>
