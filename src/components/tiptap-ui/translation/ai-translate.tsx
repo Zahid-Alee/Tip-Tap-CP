@@ -202,7 +202,7 @@ export const TranslationModule = ({
       }
 
       const response = await axios.post(
-        "http://lms.localhost:8001/api/gen/text-to-speech",
+        "/api/gen/text-to-speech",
         {
           text: textContent,
           voice: "alloy",
@@ -273,8 +273,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "http://lms.localhost:8001/api/translate/deepl"
-          : "http://lms.localhost:8001/api/translate/chatgpt";
+          ? "/api/translate/deepl"
+          : "/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
