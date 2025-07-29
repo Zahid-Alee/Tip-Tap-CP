@@ -148,34 +148,46 @@ export const TranslationModule = ({
       audio: audioUrl,
     };
 
-    console.log('newTranslation',newTranslation)
+    console.log("newTranslation", newTranslation);
 
     // Check if translation for this language already exists
     const existingIndex = getExistingTranslationIndex(langCode);
 
+    console.log("existingIndex", existingIndex);
+
     if (existingIndex >= 0) {
-      console.log('exiiting',existingIndex)
+      console.log("exiiting", existingIndex);
       // Replace existing translation, preserving audio if it exists
-      setTranslationHistory((prev) =>
-        prev.map((item, index) =>
-          index === existingIndex
-            ? { ...newTranslation, audio: item.audio || audioUrl }
-            : item
-        )
+      // setTranslationHistory((prev) =>
+      //   prev.map((item, index) =>
+      //     index === existingIndex
+      //       ? { ...newTranslation, audio: item.audio || audioUrl }
+      //       : item
+      //   )
+      // );
+      const updatedHistory = translationHistory.map((item, index) =>
+        index === existingIndex
+          ? { ...newTranslation, audio: item.audio || audioUrl }
+          : item
       );
+      setTranslationHistory(updatedHistory);
       setCurrentTranslationIndex(existingIndex);
     } else {
       // Add new translation
-      setTranslationHistory((prev) => [...prev, newTranslation]);
+      // setTranslationHistory((prev) => [...prev, newTranslation]);
+      const newHistory = [...translationHistory, newTranslation];
+      setTranslationHistory(newHistory);
+      setCurrentTranslationIndex(newHistory.length - 1);
       setCurrentTranslationIndex(translationHistory.length);
     }
   };
 
   const updateTranslationWithAudio = (index, audioUrl) => {
     console.log("Updating translation with audio:", index, audioUrl);
-    setTranslationHistory((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, audio: audioUrl } : item))
+    const updatedHistory = translationHistory.map((item, i) =>
+      i === index ? { ...item, audio: audioUrl } : item
     );
+    setTranslationHistory(updatedHistory);
   };
 
   const generateAudio = async (text, translationIndex) => {
@@ -189,11 +201,14 @@ export const TranslationModule = ({
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await axios.post("/api/gen/text-to-speech", {
-        text: textContent,
-        voice: "alloy",
-        path: "/app/course/1000/narrations",
-      });
+      const response = await axios.post(
+        "http://lms.localhost:8001/api/gen/text-to-speech",
+        {
+          text: textContent,
+          voice: "alloy",
+          path: "/app/course/1000/narrations",
+        }
+      );
 
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
@@ -258,8 +273,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "/api/translate/deepl"
-          : "/api/translate/chatgpt";
+          ? "http://lms.localhost:8001/api/translate/deepl"
+          : "http://lms.localhost:8001/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
@@ -306,9 +321,8 @@ export const TranslationModule = ({
         detectedSourceLang =
           data.data?.translations[0]?.detected_source_language;
 
-          console.log('translated content',translatedContent);
-          console.log('data souce lang',detectedSourceLang);
-
+        console.log("translated content", translatedContent);
+        console.log("data souce lang", detectedSourceLang);
       } else {
         throw new Error("Invalid response format from translation service");
       }

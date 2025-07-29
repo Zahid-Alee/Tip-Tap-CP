@@ -141,7 +141,7 @@ export function EditorHeader({
     }
   };
 
-  console.log('readonly value',readOnlyValue)
+  console.log('translatin hisotry',translationHistory)
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
