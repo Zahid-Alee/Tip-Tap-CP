@@ -132,16 +132,15 @@ CONTENT QUALITY:
 Generate the full lecture, ensuring each section is complete and engaging.`;
 };
 
-// UPDATED: More conservative and reliable token calculations
 const MODEL_CONFIGS = {
     openai: {
-        maxTokens: 4096,        // Reduced from 16384 for reliability
-        optimalPromptLength: 1500,  // Reduced prompt overhead
-        safetyBuffer: 500,      // Increased safety buffer
-        maxSafeTokens: 3500     // Hard limit to prevent cutoffs
+        maxTokens: 7000,       
+        optimalPromptLength: 1500, 
+        safetyBuffer: 1000,     
+        maxSafeTokens: 6100
     },
     gemini: {
-        maxTokens: 8192,        // More conservative than 32768
+        maxTokens: 8192,        
         optimalPromptLength: 2000,
         safetyBuffer: 1000,
         maxSafeTokens: 7000
