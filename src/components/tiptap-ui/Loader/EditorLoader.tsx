@@ -21,7 +21,7 @@ const EditorLoader = () => {
       </div>
       
       {/* Content area shimmer */}
-      <div className="p-4 min-h-64 bg-white">
+      <div className="p-10 min-h-64 bg-white">
         <div className="h-8 w-3/4 bg-gray-200 rounded mb-4 animate-pulse"></div>
         <div className="h-4 w-full bg-gray-200 rounded mb-2 animate-pulse"></div>
         <div className="h-4 w-5/6 bg-gray-200 rounded mb-2 animate-pulse"></div>

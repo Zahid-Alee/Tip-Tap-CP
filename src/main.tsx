@@ -16,7 +16,7 @@ const App = () => {
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
-    readOnly: true,
+    readOnly: false,
     initialContent: `<header>
   <h1>Cyber security introduction</h1>
   <p>Welcome to the world of cyber security! In this lecture, we'll explore the fundamental concepts that underpin the protection of digital assets. Get ready to learn how to defend against ever-evolving cyber threats and safeguard sensitive information.</p>

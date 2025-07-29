@@ -468,7 +468,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   }, [isReadOnly]);
 
   return (
-    <div ref={contentWrapperRef} className="content-wrapper">
+    <div ref={contentWrapperRef} className={`content-wrapper ${isReadOnly ?'py-5':'p-5'}`}>
       <EditorContent
         editor={editor}
         role="presentation"
