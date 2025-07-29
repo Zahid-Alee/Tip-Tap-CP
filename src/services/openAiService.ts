@@ -72,6 +72,7 @@ CRITICAL REQUIREMENTS:
 - Each main content section ends with <hr class="section-divider" />, except the last.
 - ${emojiInstruction}
 - Do not use backticks anywhere in the content, for inline code use <code> element.
+- Avoid adding extra spaces or empty elements in start or end of the conent.
 
 TARGET SPECIFICATIONS:
 - Audience: ${targetAudience}
