@@ -38,9 +38,9 @@ export const ImageButton: React.FC<ImageButtonProps> = ({ editor }) => {
   const [showUrlInput, setShowUrlInput] = React.useState<boolean>(false);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("selectin file");
+    // console.log("selectin file");
     const file = event.target.files?.[0];
-    console.log("file", file);
+    // console.log("file", file);
     if (!file) return;
 
     const reader = new FileReader();

@@ -9,10 +9,8 @@ const CodeBlockComponent = ({
   },
   updateAttributes,
   extension,
-  readOnlyValue=true
+  readOnlyValue = true,
 }) => {
-
-
   // console.log('readonlyvalue',readOnlyValue)
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);
@@ -36,7 +34,7 @@ const CodeBlockComponent = ({
 
   return (
     <NodeViewWrapper className="code-block">
-      <div className="code-block-header">
+      <div className={`code-block-header ${readOnlyValue ? "!border-0" : ""}`}>
         {!readOnlyValue ? (
           <select
             className="code-block-language"

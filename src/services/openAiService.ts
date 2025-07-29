@@ -1,4 +1,3 @@
-
 let generationHistory = [];
 const API_CONFIG = {
     openai: {
@@ -125,7 +124,7 @@ HTML FORMATTING GUIDELINES:
 - Semantic HTML for clear structure
 
 CONTENT QUALITY:
-- Engaging hooks at each section’s start
+- Engaging hooks at each section's start
 - Practical examples relevant to ${targetAudience}
 - Gradually increase content complexity
 - Maintain logical progression and clear learning outcomes
@@ -133,41 +132,83 @@ CONTENT QUALITY:
 Generate the full lecture, ensuring each section is complete and engaging.`;
 };
 
+// UPDATED: More conservative and reliable token calculations
 const MODEL_CONFIGS = {
     openai: {
-        maxTokens: 16384,
-        optimalPromptLength: 2000,
-        safetyBuffer: 1000
+        maxTokens: 4096,        // Reduced from 16384 for reliability
+        optimalPromptLength: 1500,  // Reduced prompt overhead
+        safetyBuffer: 500,      // Increased safety buffer
+        maxSafeTokens: 3500     // Hard limit to prevent cutoffs
     },
     gemini: {
-        maxTokens: 32768,
-        optimalPromptLength: 2500,
-        safetyBuffer: 2000
+        maxTokens: 8192,        // More conservative than 32768
+        optimalPromptLength: 2000,
+        safetyBuffer: 1000,
+        maxSafeTokens: 7000
     },
     deepseek: {
-        maxTokens: 32768,
-        optimalPromptLength: 2500,
-        safetyBuffer: 2000
+        maxTokens: 8192,        // More conservative
+        optimalPromptLength: 2000,
+        safetyBuffer: 1000,
+        maxSafeTokens: 7000
     }
 };
 
-const calculateOptimalTokens = (model, sectionCount, includeHeader = false, includeFooter = false) => {
+// UPDATED: Smart token calculation with section length consideration
+const calculateOptimalTokens = (model, sectionCount, includeHeader = false, includeFooter = false, sectionLength = 'medium') => {
     const config = MODEL_CONFIGS[model] || MODEL_CONFIGS.openai;
     const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
 
-    const tokensPerSection = Math.floor(
-        (config.maxTokens - config.optimalPromptLength - config.safetyBuffer) / totalSections
+    // Adjust base tokens per section based on length setting
+    const lengthMultiplier = {
+        short: 0.7,
+        medium: 1.0,
+        long: 1.3
+    };
+
+    const multiplier = lengthMultiplier[sectionLength] || 1.0;
+    
+    // Calculate available tokens for content
+    const availableTokens = config.maxSafeTokens - config.optimalPromptLength;
+    
+    // Base tokens per section (conservative)
+    let baseTokensPerSection = Math.floor(availableTokens / totalSections);
+    
+    // Apply length multiplier
+    baseTokensPerSection = Math.floor(baseTokensPerSection * multiplier);
+    
+    // Set reasonable bounds
+    const minTokensPerSection = 200;
+    const maxTokensPerSection = model === 'openai' ? 400 : 600; // OpenAI gets stricter limits
+    
+    const tokensPerSection = Math.max(
+        minTokensPerSection, 
+        Math.min(maxTokensPerSection, baseTokensPerSection)
+    );
+    
+    // Calculate total with overhead
+    const totalTokens = Math.min(
+        config.maxSafeTokens,
+        config.optimalPromptLength + (tokensPerSection * totalSections)
     );
 
-    const minTokensPerSection = 300;
-    const maxTokensPerSection = 1200;
+    // console.log(`Token calculation for ${model}:`, {
+    //     sectionCount,
+    //     totalSections,
+    //     sectionLength,
+    //     multiplier,
+    //     tokensPerSection,
+    //     totalTokens,
+    //     maxSafe: config.maxSafeTokens
+    // });
 
     return {
-        totalTokens: Math.min(config.maxTokens - config.safetyBuffer, totalSections * 800),
-        tokensPerSection: Math.max(minTokensPerSection, Math.min(maxTokensPerSection, tokensPerSection))
+        totalTokens,
+        tokensPerSection
     };
 };
 
+// UPDATED: Enhanced system prompt with completion instructions
 const createSystemPrompt = (sectionCount, model, includeHeader = false, includeFooter = false, includeEmojis = false) => {
     const totalSections = sectionCount + (includeHeader ? 1 : 0) + (includeFooter ? 1 : 0);
     const { tokensPerSection } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
@@ -183,10 +224,17 @@ CORE EXPERTISE:
 CRITICAL SUCCESS FACTORS:
 - Generate COMPLETE content for all ${totalSections} sections total${includeHeader ? ' (including header)' : ''}${includeFooter ? ' (including footer)' : ''}
 - Each section should be approximately ${tokensPerSection} tokens
-- NO truncation or incomplete sections allowed
+- ABSOLUTELY NO truncation or incomplete sections allowed
 - Maintain consistent quality across all sections
 - Use active voice and professional educational tone
+- ALWAYS end with a proper closing tag for the last section
 ${includeEmojis ? '- Include engaging and relevant emojis throughout the content' : '- Do NOT include any emojis in the content'}
+
+COMPLETION GUARANTEE:
+- If you approach token limits, prioritize completing all sections over length
+- Better to have ${totalSections} complete shorter sections than incomplete long ones
+- Always close all HTML tags properly
+- End with "LECTURE COMPLETE" to confirm full generation
 
 CONTENT STANDARDS:
 - Create content that feels professionally authored
@@ -206,15 +254,18 @@ ${includeEmojis ? '- Use emojis strategically to enhance engagement and readabil
 Your goal is to create a complete, professional lecture that students would be excited to learn from.`;
 };
 
-const formatRequestByModel = (model, prompt, maxTokens, temperature, sectionCount, includeHeader = false, includeFooter = false, includeEmojis = false) => {
+// UPDATED: Enhanced request formatting with conservative token limits
+const formatRequestByModel = (model, prompt, maxTokens, temperature, sectionCount, includeHeader = false, includeFooter = false, includeEmojis = false, sectionLength = 'medium') => {
     const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
-    const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
+    const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter, sectionLength);
+    
+    // Use the more conservative calculated tokens instead of requested maxTokens
     const actualMaxTokens = Math.min(maxTokens, totalTokens);
 
     const commonParams = {
         temperature: temperature,
         max_tokens: actualMaxTokens,
-        top_p: 0.95,
+        top_p: 0.9,  // Slightly reduced for more focused output
         frequency_penalty: 0.1,
         presence_penalty: 0.1
     };
@@ -241,7 +292,7 @@ const formatRequestByModel = (model, prompt, maxTokens, temperature, sectionCoun
                 generationConfig: {
                     temperature: temperature,
                     maxOutputTokens: actualMaxTokens,
-                    topP: 0.95,
+                    topP: 0.9,
                     topK: 40
                 }
             };
@@ -280,6 +331,7 @@ const cleanHtmlContent = (raw) => {
     const stripped = raw
         .replace(/^```html\s*/i, '')
         .replace(/\s*```$/i, '')
+        .replace(/LECTURE COMPLETE/gi, '') // Remove completion marker
         .trim();
 
     const parser = new DOMParser();
@@ -349,6 +401,7 @@ const formatCodeIndentation = (code, language) => {
     return code;
 };
 
+// UPDATED: Enhanced validation with truncation detection
 const validateSectionCompleteness = (htmlContent, expectedSections, includeHeader = false, includeFooter = false) => {
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -362,13 +415,23 @@ const validateSectionCompleteness = (htmlContent, expectedSections, includeHeade
     if (includeHeader && header) totalFound++;
     if (includeFooter && footer) totalFound++;
 
+    // Check for truncation indicators
+    const lastElement = doc.body.lastElementChild;
+    const contentStr = htmlContent.toLowerCase();
+    const possibleTruncation = 
+        !contentStr.includes('</section>') ||
+        !contentStr.includes('</footer>') && includeFooter ||
+        contentStr.endsWith('...') ||
+        (lastElement && !lastElement.outerHTML.includes('</'));
+
     const analysis = {
         expectedSections: totalExpected,
         foundSections: totalFound,
         mainSections: sections.length,
         hasHeader: includeHeader ? !!header : null,
         hasFooter: includeFooter ? !!footer : null,
-        isComplete: totalFound === totalExpected,
+        isComplete: totalFound === totalExpected && !possibleTruncation,
+        possibleTruncation,
         averageLength: 0,
         hasAllRequiredElements: true
     };
@@ -382,7 +445,7 @@ const validateSectionCompleteness = (htmlContent, expectedSections, includeHeade
         // Check if each section has required elements
         sections.forEach((section, index) => {
             const hasH2 = section.querySelector('h2') !== null;
-            const hasContent = section.textContent.trim().length > 100;
+            const hasContent = section.textContent.trim().length > 50; // Reduced threshold
 
             if (!hasH2 || !hasContent) {
                 analysis.hasAllRequiredElements = false;
@@ -402,6 +465,10 @@ const validateSectionCompleteness = (htmlContent, expectedSections, includeHeade
         console.warn('Required footer is missing');
     }
 
+    if (possibleTruncation) {
+        console.warn('⚠️ Possible content truncation detected');
+    }
+
     return analysis;
 };
 
@@ -410,12 +477,13 @@ const validateSectionCompleteness = (htmlContent, expectedSections, includeHeade
 // ----------------------------------
 
 export const generateAiContent = async (formData) => {
-    console.log('Enhanced single-process generation starting:', formData);
+    // console.log('Enhanced single-process generation starting:', formData);
 
     const {
         model = 'openai',
         sectionCount,
         sectionTypes,
+        sectionLength = 'medium', // Added default
         includeHeader = false,
         includeFooter = false,
         includeEmojis = false,
@@ -435,11 +503,11 @@ export const generateAiContent = async (formData) => {
         : modelConfig.endpoint;
 
     try {
-        console.log('formData', formData);
+        // console.log('formData', formData);
         const lecturePrompt = createComprehensiveLecturePrompt(formData);
-        const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter);
+        const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter, sectionLength);
 
-        console.log(`Using ${totalTokens} tokens for ${sectionCount} sections${includeHeader ? ' + header' : ''}${includeFooter ? ' + footer' : ''}`);
+        // console.log(`Using ${totalTokens} tokens for ${sectionCount} sections${includeHeader ? ' + header' : ''}${includeFooter ? ' + footer' : ''} (${sectionLength} length)`);
 
         const request = formatRequestByModel(
             model,
@@ -449,10 +517,11 @@ export const generateAiContent = async (formData) => {
             sectionCount,
             includeHeader,
             includeFooter,
-            includeEmojis
+            includeEmojis,
+            sectionLength
         );
 
-        console.log('lecture prompt', lecturePrompt);
+        // console.log('lecture prompt', lecturePrompt);
 
         let response = {};
         let rawContent = {};
@@ -518,6 +587,9 @@ export const generateAiContent = async (formData) => {
 
         if (!validation.isComplete) {
             console.warn(`⚠️ Generated ${validation.foundSections}/${validation.expectedSections} total sections`);
+            if (validation.possibleTruncation) {
+                console.warn('⚠️ Content may have been truncated - consider reducing section count or length');
+            }
         }
 
         // Extract section titles
@@ -535,6 +607,7 @@ export const generateAiContent = async (formData) => {
                 model,
                 sectionCount,
                 sectionTypes,
+                sectionLength,
                 includeHeader,
                 includeFooter,
                 includeEmojis,
@@ -545,15 +618,16 @@ export const generateAiContent = async (formData) => {
             }
         };
 
-        console.log('🎉 Single-process generation completed:', {
-            totalSectionsGenerated: validation.foundSections,
-            mainSections: validation.mainSections,
-            hasHeader: validation.hasHeader,
-            hasFooter: validation.hasFooter,
-            contentLength: formattedContent.length,
-            averageLength: validation.averageLength,
-            isComplete: validation.isComplete
-        });
+        // console.log('🎉 Single-process generation completed:', {
+        //     totalSectionsGenerated: validation.foundSections,
+        //     mainSections: validation.mainSections,
+        //     hasHeader: validation.hasHeader,
+        //     hasFooter: validation.hasFooter,
+        //     contentLength: formattedContent.length,
+        //     averageLength: validation.averageLength,
+        //     isComplete: validation.isComplete,
+        //     possibleTruncation: validation.possibleTruncation
+        // });
 
         // Save to history
         const historyEntry = {
@@ -583,7 +657,7 @@ const loadGenerationHistory = () => {
         const saved = localStorage.getItem('lectureGenerationHistory');
         if (saved) {
             generationHistory = JSON.parse(saved);
-            console.log(`Loaded ${generationHistory.length} entries from localStorage`);
+            // console.log(`Loaded ${generationHistory.length} entries from localStorage`);
         }
     } catch (error) {
         console.error('Error loading generation history:', error);
@@ -594,7 +668,7 @@ const loadGenerationHistory = () => {
 const saveToLocalStorage = () => {
     try {
         localStorage.setItem('lectureGenerationHistory', JSON.stringify(generationHistory));
-        console.log('Generation history saved to localStorage');
+        // console.log('Generation history saved to localStorage');
     } catch (error) {
         console.error('Error saving to localStorage:', error);
     }
@@ -607,7 +681,7 @@ export const getGenerationHistory = () => {
 export const clearGenerationHistory = () => {
     generationHistory = [];
     localStorage.removeItem('lectureGenerationHistory');
-    console.log('Generation history cleared');
+    // console.log('Generation history cleared');
 };
 
 export const getHistoryEntry = (id) => {

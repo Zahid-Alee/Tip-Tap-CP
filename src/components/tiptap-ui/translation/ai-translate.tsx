@@ -154,6 +154,7 @@ export const TranslationModule = ({
     const existingIndex = getExistingTranslationIndex(langCode);
 
     if (existingIndex >= 0) {
+      console.log('exiiting',existingIndex)
       // Replace existing translation, preserving audio if it exists
       setTranslationHistory((prev) =>
         prev.map((item, index) =>
@@ -188,7 +189,7 @@ export const TranslationModule = ({
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await axios.post("/api/gen/text-to-speech", {
+      const response = await axios.post("http://lms.localhost:8001/api/gen/text-to-speech", {
         text: textContent,
         voice: "alloy",
         path: "/app/course/1000/narrations",
@@ -197,7 +198,7 @@ export const TranslationModule = ({
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
       }
-      console.log("data", response.data);
+      // console.log("data", response.data);
       const data = response.data;
       updateTranslationWithAudio(translationIndex, data?.data);
     } catch (err) {
@@ -257,8 +258,8 @@ export const TranslationModule = ({
 
       const endpoint =
         translationService === "deepl"
-          ? "/api/translate/deepl"
-          : "/api/translate/chatgpt";
+          ? "http://lms.localhost:8001/api/translate/deepl"
+          : "http://lms.localhost:8001/api/translate/chatgpt";
 
       const payload =
         translationService === "deepl"
@@ -293,7 +294,7 @@ export const TranslationModule = ({
       let translatedContent;
       let detectedSourceLang = "EN";
 
-      console.log("data from translate api", data);
+      // console.log("data from translate api", data);
 
       if (
         data.success &&
@@ -592,7 +593,7 @@ export const TranslationModule = ({
                       Translation History
                     </h4>
                     <div className="max-h-64 overflow-y-auto space-y-2">
-                      {translationHistory.map((translation, index) => (
+                      {translationHistory?.map((translation, index) => (
                         <div
                           key={index}
                           className="p-3 border border-gray-200 rounded-md bg-gray-50"

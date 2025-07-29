@@ -421,7 +421,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
           { type: "IFRAME_HEIGHT", height: height + 60, editorId },
           "*"
         );
-        console.log("[AutoResizer] Sent new height:", height);
+        // console.log("[AutoResizer] Sent new height:", height);
       }
     };
 
@@ -453,9 +453,9 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       stopTimeout = setTimeout(() => {
         resizeObserver.disconnect();
         mutationObserver.disconnect();
-        console.log(
-          "[AutoResizer] Disconnected observers after 3s (read-only)"
-        );
+        // console.log(
+        //   "[AutoResizer] Disconnected observers after 3s (read-only)"
+        // );
       }, 3000);
     }
 

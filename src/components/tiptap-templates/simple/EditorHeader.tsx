@@ -56,6 +56,8 @@ export function EditorHeader({
   onTranslationChange,
   setIsUpdatingFromTranslation,
 }) {
+
+  console.log('translationHistory',translationHistory)
   const [isSaving, setIsSaving] = React.useState(false);
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
     React.useState(false);
@@ -139,10 +141,12 @@ export function EditorHeader({
     }
   };
 
+  console.log('readonly value',readOnlyValue)
+
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
       <div className="editor-title flex items-center gap-4">
-        <div className="w-full">
+        {!readOnlyValue&&<div className="w-full">
           {isEditTitle && !readOnlyValue ? (
             <div className="bg-gray-50 flex w-full max-w-xl items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
               <input
@@ -171,7 +175,7 @@ export function EditorHeader({
           ) : (
             <h2 className="text-lg font-medium m-0">{titleValue}</h2>
           )}
-        </div>
+        </div>}
 
         {!isEditTitle && !readOnlyValue && (
           <button
@@ -213,7 +217,7 @@ export function EditorHeader({
                           align="end"
                           className="w-64 !rounded-md !p-2"
                         >
-                          {translationHistory.map((translation, index) => (
+                          {translationHistory?.map((translation, index) => (
                             <DropdownMenuItem
                               key={index}
                               className={`flex flex-col items-start p-3 hover:ring-0 hover:outline-0 hover:cursor-pointer hover:bg-gray-100 rounded-md ${
