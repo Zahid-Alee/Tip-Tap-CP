@@ -80,6 +80,7 @@ import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
 import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
 import { ColumnExtensions } from "../../tiptap-extension/column/column-extension";
 import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
+import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
 
 const lowlight = createLowlight(all);
 
@@ -392,6 +393,7 @@ const EditorMenus: React.FC<EditorMenusProps> = ({ editor, readOnlyValue }) => {
       <>
         {editor && <BubbleToolbar editor={editor} />}
         {editor && <ImageBubbleMenu editor={editor} />}
+        {editor && <CardBubbleMenu editor={editor} />}
         {editor && <TableBubbleMenu readonly={readOnlyValue} editor={editor} />}
         {editor && (
           <ColumnBubbleMenu readonly={readOnlyValue} editor={editor} />

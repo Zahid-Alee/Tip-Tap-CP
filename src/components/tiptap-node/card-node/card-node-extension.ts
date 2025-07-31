@@ -30,18 +30,7 @@ declare module "@tiptap/core" {
        */
       setCardTextColor: (color: string) => ReturnType;
       /**
-       * Set card width
-       */
-      setCardWidth: (width: string) => ReturnType;
-      /**
-       * Set card height
-       */
-      setCardHeight: (height: string) => ReturnType;
-      /**
-       * Set card size (width and height)
-       */
-      setCardSize: (size: { width?: string; height?: string }) => ReturnType;
-      /**
+  
        * Set multiple card colors at once
        */
       setCardColors: (colors: {
@@ -93,50 +82,21 @@ export const CardNode = Node.create<CardNodeOptions>({
         default: null,
         parseHTML: (element) => element.style.backgroundColor || null,
         renderHTML: (attributes) => {
-          if (!attributes.backgroundColor) return {};
-          return {
-            style: `background-color: ${attributes.backgroundColor};`,
-          };
+          return {};
         },
       },
       borderColor: {
         default: null,
         parseHTML: (element) => element.style.borderColor || null,
         renderHTML: (attributes) => {
-          if (!attributes.borderColor) return {};
-          return {
-            style: `border-color: ${attributes.borderColor};`,
-          };
+          return {};
         },
       },
       textColor: {
         default: null,
         parseHTML: (element) => element.style.color || null,
         renderHTML: (attributes) => {
-          if (!attributes.textColor) return {};
-          return {
-            style: `color: ${attributes.textColor};`,
-          };
-        },
-      },
-      width: {
-        default: null,
-        parseHTML: (element) => element.style.width || null,
-        renderHTML: (attributes) => {
-          if (!attributes.width) return {};
-          return {
-            style: `width: ${attributes.width};`,
-          };
-        },
-      },
-      height: {
-        default: null,
-        parseHTML: (element) => element.style.height || null,
-        renderHTML: (attributes) => {
-          if (!attributes.height) return {};
-          return {
-            style: `height: ${attributes.height};`,
-          };
+          return {};
         },
       },
     };
@@ -151,15 +111,15 @@ export const CardNode = Node.create<CardNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const { variant, backgroundColor, borderColor, textColor, width, height } =
-      node.attrs;
+    const { variant, backgroundColor, borderColor, textColor } = node.attrs;
 
-    let style = "";
-    if (backgroundColor) style += `background-color: ${backgroundColor}; `;
-    if (borderColor) style += `border-color: ${borderColor}; `;
-    if (textColor) style += `color: ${textColor}; `;
-    if (width) style += `width: ${width}; `;
-    if (height) style += `height: ${height}; `;
+    // Build style string from individual color attributes
+    const styles: string[] = [];
+    if (backgroundColor) styles.push(`background-color: ${backgroundColor}`);
+    if (borderColor) styles.push(`border-color: ${borderColor}`);
+    if (textColor) styles.push(`color: ${textColor}`);
+
+    const styleAttribute = styles.length > 0 ? styles.join("; ") : undefined;
 
     return [
       "div",
@@ -168,7 +128,7 @@ export const CardNode = Node.create<CardNodeOptions>({
           "data-type": "card",
           "data-variant": variant,
           class: `tiptap-card tiptap-card--${variant}`,
-          style: style.trim() || undefined,
+          ...(styleAttribute && { style: styleAttribute }),
         },
         this.options.HTMLAttributes,
         HTMLAttributes
@@ -225,40 +185,6 @@ export const CardNode = Node.create<CardNodeOptions>({
         ({ commands }) => {
           return commands.updateAttributes(this.name, colors);
         },
-      setCardWidth:
-        (width) =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, { width });
-        },
-      setCardHeight:
-        (height) =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, { height });
-        },
-      setCardSize:
-        (size) =>
-        ({ commands }) => {
-          return commands.updateAttributes(this.name, size);
-        },
-      resetCardToVariant:
-        (variant) =>
-        ({ commands }) => {
-          const variantStyles = {
-            dark: {
-              variant: "dark",
-              backgroundColor: "#1a1a1a",
-              borderColor: "#2a2a2a",
-              textColor: "#f5f5f5",
-            },
-            "gray-outline": {
-              variant: "gray-outline",
-              backgroundColor: "transparent",
-              borderColor: "#6b7280",
-              textColor: null,
-            },
-          };
-          return commands.updateAttributes(this.name, variantStyles[variant]);
-        },
     };
   },
 
@@ -275,10 +201,3 @@ export const CardNode = Node.create<CardNodeOptions>({
     };
   },
 });
-
-// Custom card extension with resize functionality like the table extension
-export const CustomCardExtension = CardNode.configure({
-  resizable: true,
-});
-
-export default CustomCardExtension;

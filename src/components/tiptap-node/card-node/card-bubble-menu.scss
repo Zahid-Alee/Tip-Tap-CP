@@ -16,6 +16,7 @@
 
 .card-bubble-menu-content {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -49,6 +50,28 @@
   }
 }
 
+.card-color-picker-wrapper {
+  display: flex;
+  align-items: center;
+
+  // Hide the default popover trigger styling to make it more compact
+  .tiptap-button {
+    min-width: 32px;
+    min-height: 32px;
+    padding: 4px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+
+    .dark & {
+      border-color: #6b7280;
+    }
+
+    &:hover {
+      border-color: #3b82f6;
+    }
+  }
+}
+
 .card-variant-preview {
   width: 16px;
   height: 12px;
@@ -64,4 +87,114 @@
     background: transparent;
     border-color: #6b7280;
   }
+}
+
+// Separator between preset buttons and color pickers
+.card-bubble-menu-content > .card-bubble-menu-btn:last-of-type::after {
+  content: "";
+  position: absolute;
+  right: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 24px;
+  background: #e5e7eb;
+
+  .dark & {
+    background: #6b7280;
+  }
+}
+
+.card-bubble-menu-separator {
+  width: 1px;
+  height: 24px;
+  background: #e5e7eb;
+  margin: 0 4px;
+
+  .dark & {
+    background: #6b7280;
+  }
+}
+
+// Border color picker specific styles
+.border-color-trigger {
+  position: relative;
+}
+
+.border-color-preview {
+  width: 16px;
+  height: 16px;
+  border: 2px solid;
+  border-radius: 3px;
+  background: transparent;
+}
+
+.card-border-color-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  z-index: 1100;
+
+  .dark & {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+.border-color-button {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px;
+}
+
+// Add click outside handler for popover
+.card-border-color-popover {
+  position: fixed;
+}
+
+// Additional utility classes for the color pickers
+.w-4 {
+  width: 1rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.h-1 {
+  height: 0.25rem;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.border {
+  border-width: 1px;
 }

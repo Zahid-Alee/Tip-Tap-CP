@@ -139,39 +139,6 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     cardStyle: cardStyleWithVars,
   });
 
-  const handleCustomColorChange = useCallback(
-    (colorType: string, color: string) => {
-      updateAttributes({
-        [colorType]: color,
-      });
-    },
-    [updateAttributes]
-  );
-
-  const handleSizeChange = useCallback(
-    (sizeType: string, value: string) => {
-      const newDimensions = { ...dimensions };
-      newDimensions[sizeType] = value || "auto";
-      setDimensions(newDimensions);
-      updateAttributes({
-        [sizeType]: value || null,
-      });
-    },
-    [dimensions, updateAttributes]
-  );
-
-  const handlePresetSize = useCallback(
-    (presetAttrs: any) => {
-      const newDimensions = {
-        width: presetAttrs.width || "auto",
-        height: presetAttrs.height || "auto",
-      };
-      setDimensions(newDimensions);
-      updateAttributes(presetAttrs);
-    },
-    [updateAttributes]
-  );
-
   return (
     <NodeViewWrapper
       className="card-node-wrapper"
@@ -191,30 +158,9 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     >
       <div
         ref={cardRef}
-        className={`tiptap-card tiptap-card--${variant} ${
-          selected ? "tiptap-card--selected" : ""
-        }`}
+        className={`tiptap-card tiptap-card--${variant} `}
         style={cardStyleWithVars}
         data-variant={variant}
-        onClick={(e) => {
-          // Select the card when clicking on the border or card itself
-          const target = e.target as HTMLElement;
-          const isCardElement =
-            target.classList.contains("tiptap-card") ||
-            target === e.currentTarget ||
-            target.closest(".tiptap-card-controls");
-
-          if (isCardElement && !selected) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (getPos) {
-              const pos = getPos();
-              editor.chain().focus().setNodeSelection(pos).run();
-            } else {
-              editor.chain().focus().run();
-            }
-          }
-        }}
       >
         <div className="tiptap-card-content">
           <NodeViewContent />
