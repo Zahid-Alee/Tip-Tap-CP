@@ -1,0 +1,67 @@
+// Card Bubble Menu Styles
+.card-bubble-menu {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  padding: 8px;
+  z-index: 1000;
+
+  .dark & {
+    background: #374151;
+    border-color: #4b5563;
+  }
+}
+
+.card-bubble-menu-content {
+  display: flex;
+  gap: 8px;
+}
+
+.card-bubble-menu-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #3b82f6;
+  }
+
+  .dark & {
+    color: #f3f4f6;
+    border-color: #6b7280;
+
+    &:hover {
+      background: #4b5563;
+      border-color: #3b82f6;
+    }
+  }
+}
+
+.card-variant-preview {
+  width: 16px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid;
+
+  &--dark {
+    background: #1a1a1a;
+    border-color: #2a2a2a;
+  }
+
+  &--gray {
+    background: transparent;
+    border-color: #6b7280;
+  }
+}

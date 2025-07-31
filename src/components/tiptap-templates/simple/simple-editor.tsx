@@ -35,10 +35,12 @@ import { Toolbar } from "@/components/tiptap-ui-primitive/toolbar";
 
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+import { CardNode } from "@/components/tiptap-node/card-node/card-node-extension";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/image-node/image-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "@/components/tiptap-node/card-node/card-node.scss";
 import "@/components/tiptap-ui/output-block/styles.scss";
 
 // --- Hooks ---
@@ -224,6 +226,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     }),
     TrailingNode,
     Link.configure({ openOnClick: false }),
+    CardNode,
     ...TableExtensions,
     ...ColumnExtensions,
     FindReplace,
@@ -468,7 +471,10 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   }, [isReadOnly]);
 
   return (
-    <div ref={contentWrapperRef} className={`content-wrapper ${isReadOnly ?'py-5':'p-5'}`}>
+    <div
+      ref={contentWrapperRef}
+      className={`content-wrapper ${isReadOnly ? "py-5" : "p-5"}`}
+    >
       <EditorContent
         editor={editor}
         role="presentation"
