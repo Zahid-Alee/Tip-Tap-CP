@@ -196,13 +196,13 @@ const useEditorExtensions = ({ readOnlyValue }) => {
         return {
           ...this.parent?.(),
           lowlight: null,
-          readOnlyValue: false,
+          readOnlyValue: readOnlyValue,
         };
       },
       addNodeView() {
         return ReactNodeViewRenderer(CodeBlockComponent);
       },
-    }).configure({ lowlight, readOnlyValue }),
+    }).configure({ lowlight }),
 
     TextAlign.configure({ types: ["heading", "paragraph", "image"] }),
     Underline,
@@ -468,7 +468,10 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   }, [isReadOnly]);
 
   return (
-    <div ref={contentWrapperRef} className={`content-wrapper ${isReadOnly ?'py-5':'p-5'}`}>
+    <div
+      ref={contentWrapperRef}
+      className={`content-wrapper ${isReadOnly ? "py-5" : "p-5"}`}
+    >
       <EditorContent
         editor={editor}
         role="presentation"

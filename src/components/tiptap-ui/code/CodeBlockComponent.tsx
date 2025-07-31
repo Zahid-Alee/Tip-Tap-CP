@@ -9,8 +9,9 @@ const CodeBlockComponent = ({
   },
   updateAttributes,
   extension,
-  readOnlyValue = true,
+  // readOnlyValue = true,
 }) => {
+  const readOnlyValue = extension.options.readOnlyValue;
   // console.log('readonlyvalue',readOnlyValue)
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);

@@ -12,7 +12,7 @@ const App = () => {
   const [mounted, setMounted] = useState(false);
   const [config, setConfig] = useState({
     loadUrl: null,
-    saveUrl: null,
+    saveUrl: "null",
     headers: {
       "X-CSRF-TOKEN": getCsrfToken(),
     },
@@ -125,7 +125,7 @@ const App = () => {
   );
 };
 
-const container = window?.shadowEditorRoot || document.getElementById('root');
+const container = window?.shadowEditorRoot || document.getElementById("root");
 createRoot(container).render(<App />);
 
 // import { createRoot } from "react-dom/client";
