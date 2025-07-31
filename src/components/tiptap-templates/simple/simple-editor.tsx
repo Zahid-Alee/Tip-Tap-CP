@@ -78,6 +78,7 @@ import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
 import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
 import { ColumnExtensions } from "../../tiptap-extension/column/column-extension";
 import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
+import SelectAllExtension from "../../tiptap-extension/select-all/select-all-extension";
 
 const lowlight = createLowlight(all);
 
@@ -185,6 +186,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     TextStyle,
     Color,
     ExtendedListExtension,
+    SelectAllExtension,
     StarterKit.configure({
       codeBlock: false,
       bold: false,
