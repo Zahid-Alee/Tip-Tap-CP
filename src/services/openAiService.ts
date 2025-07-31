@@ -55,6 +55,10 @@ const createComprehensiveLecturePrompt = (formData) => {
         additionalInstructions = ''
     } = formData;
 
+
+
+    console.log('sectiontypes', sectionTypes)
+
     const lengthDescription = LENGTH_MAP[sectionLength];
     const emojiInstruction = includeEmojis
         ? 'Include relevant emojis throughout to boost engagement and visual appeal.'
@@ -90,14 +94,21 @@ ${includeHeader ? `1. HEADER SECTION:
   <p>Briefly introduce the lecture in an engaging, motivational style (max 3 sentences).</p>
 </header>\n\n` : ''}
 
-${sectionTypes.map((type, index) => `${includeHeader ? index + 2 : index + 1}. ${type.toUpperCase()} SECTION:
-- Clearly formatted using:
-  - Short paragraphs
-  - Bullet points or numbered lists
-  - Nested lists for detailed breakdowns
-  - Tables for comparisons or structured data
-  - Frequent use of <blockquote> to highlight key insights or tips, blockqoute should never be wrapped in quotation marks.
-  - Include <hr class="section-divider" />${index === sectionTypes.length - 1 ? ' (except last main section)' : ''}`).join('\n\n')}
+${sectionTypes.map((type, index) => {
+        const sectionNumber = includeHeader ? index + 2 : index + 1;
+        const isLast = index === sectionTypes.length - 1;
+        return `${sectionNumber}. ${type.toUpperCase()} SECTION
+
+Please elaborate the content relevant to the **${type.toLowerCase()}**. Use clear explanations and concise structure.
+
+Include:
+- Necessary details
+- Key points
+- Examples (if any)
+
+<hr class="section-divider" />${isLast ? ' <!-- Divider excluded after the last main section -->' : ''}`;
+    }).join('\n\n')}
+
 
 ${includeFooter ? `\n${totalSections}. FOOTER SECTION:
 <footer>
@@ -136,13 +147,13 @@ Generate the full lecture, ensuring each section is complete and engaging.`;
 
 const MODEL_CONFIGS = {
     openai: {
-        maxTokens: 7000,       
-        optimalPromptLength: 1500, 
-        safetyBuffer: 1000,     
+        maxTokens: 7000,
+        optimalPromptLength: 1500,
+        safetyBuffer: 1000,
         maxSafeTokens: 6100
     },
     gemini: {
-        maxTokens: 8192,        
+        maxTokens: 8192,
         optimalPromptLength: 2000,
         safetyBuffer: 1000,
         maxSafeTokens: 7000
@@ -168,25 +179,25 @@ const calculateOptimalTokens = (model, sectionCount, includeHeader = false, incl
     };
 
     const multiplier = lengthMultiplier[sectionLength] || 1.0;
-    
+
     // Calculate available tokens for content
     const availableTokens = config.maxSafeTokens - config.optimalPromptLength;
-    
+
     // Base tokens per section (conservative)
     let baseTokensPerSection = Math.floor(availableTokens / totalSections);
-    
+
     // Apply length multiplier
     baseTokensPerSection = Math.floor(baseTokensPerSection * multiplier);
-    
+
     // Set reasonable bounds
     const minTokensPerSection = 200;
     const maxTokensPerSection = model === 'openai' ? 400 : 600; // OpenAI gets stricter limits
-    
+
     const tokensPerSection = Math.max(
-        minTokensPerSection, 
+        minTokensPerSection,
         Math.min(maxTokensPerSection, baseTokensPerSection)
     );
-    
+
     // Calculate total with overhead
     const totalTokens = Math.min(
         config.maxSafeTokens,
@@ -259,7 +270,7 @@ Your goal is to create a complete, professional lecture that students would be e
 const formatRequestByModel = (model, prompt, maxTokens, temperature, sectionCount, includeHeader = false, includeFooter = false, includeEmojis = false, sectionLength = 'medium') => {
     const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
     const { totalTokens } = calculateOptimalTokens(model, sectionCount, includeHeader, includeFooter, sectionLength);
-    
+
     // Use the more conservative calculated tokens instead of requested maxTokens
     const actualMaxTokens = Math.min(maxTokens, totalTokens);
 
@@ -419,7 +430,7 @@ const validateSectionCompleteness = (htmlContent, expectedSections, includeHeade
     // Check for truncation indicators
     const lastElement = doc.body.lastElementChild;
     const contentStr = htmlContent.toLowerCase();
-    const possibleTruncation = 
+    const possibleTruncation =
         !contentStr.includes('</section>') ||
         !contentStr.includes('</footer>') && includeFooter ||
         contentStr.endsWith('...') ||
@@ -530,6 +541,9 @@ export const generateAiContent = async (formData) => {
         if (model === 'openai') {
 
             const systemPrompt = createSystemPrompt(sectionCount, model, includeHeader, includeFooter, includeEmojis);
+
+            console.log('system prompt', systemPrompt);
+            console.log('lecturePrompt', lecturePrompt)
 
             response = await fetch('/api/generate/text-lecture', {
                 method: 'POST',
