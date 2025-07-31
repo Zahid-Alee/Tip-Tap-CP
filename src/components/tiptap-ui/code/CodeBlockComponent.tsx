@@ -36,7 +36,7 @@ const CodeBlockComponent = ({
   return (
     <NodeViewWrapper className="code-block">
       <div className={`code-block-header ${readOnlyValue ? "!border-0" : ""}`}>
-        {!readOnlyValue ? (
+        {!true ? (
           <select
             className="code-block-language"
             contentEditable={false}
@@ -55,7 +55,7 @@ const CodeBlockComponent = ({
           </select>
         ) : (
           <div className="code-block-language-display text-white uppercase">
-            {defaultLanguage === "null" ? "auto" : defaultLanguage}
+            {defaultLanguage === null ? "auto" : defaultLanguage}
           </div>
         )}
 
