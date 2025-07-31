@@ -56,8 +56,7 @@ export function EditorHeader({
   onTranslationChange,
   setIsUpdatingFromTranslation,
 }) {
-
-  console.log('translationHistory',translationHistory)
+  console.log("translationHistory", translationHistory);
   const [isSaving, setIsSaving] = React.useState(false);
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
     React.useState(false);
@@ -68,19 +67,19 @@ export function EditorHeader({
     setIsAIModalOpen(true);
   };
 
-  const getUpdatedSaveUrl = (customTitle) => {
-    const splitedHeader = saveUrl.split("/");
-    const newTitle = encodeURIComponent(customTitle || titleValue);
-    let updatedHeaders = "";
+  // const getUpdatedSaveUrl = (customTitle) => {
+  //   const splitedHeader = saveUrl.split("/");
+  //   const newTitle = encodeURIComponent(customTitle || titleValue);
+  //   let updatedHeaders = "";
 
-    if (splitedHeader.length === 6 || splitedHeader.length === 7) {
-      splitedHeader[5] = newTitle;
-      updatedHeaders = splitedHeader.join("/");
-    } else {
-      updatedHeaders = saveUrl;
-    }
-    return updatedHeaders;
-  };
+  //   if (splitedHeader.length === 6 || splitedHeader.length === 7) {
+  //     splitedHeader[5] = newTitle;
+  //     updatedHeaders = splitedHeader.join("/");
+  //   } else {
+  //     updatedHeaders = saveUrl;
+  //   }
+  //   return updatedHeaders;
+  // };
 
   const handleSave = async () => {
     if (!editor || !saveUrl || isSaving) {
@@ -97,10 +96,11 @@ export function EditorHeader({
         "Content-Type": "application/json",
         ...(headers || {}),
       };
-      const response = await fetch(getUpdatedSaveUrl(titleValue), {
+      const response = await fetch(saveUrl, {
         method: "POST",
         headers: requestHeaders,
         body: JSON.stringify({
+          title: titleValue,
           content,
           translation: translationHistory,
           currentTranslationIndex: currentTranslationIndex,
@@ -141,41 +141,43 @@ export function EditorHeader({
     }
   };
 
-  console.log('translatin hisotry',translationHistory)
+  console.log("translatin hisotry", translationHistory);
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
       <div className="editor-title flex items-center gap-4">
-        {!readOnlyValue&&<div className="w-full">
-          {isEditTitle && !readOnlyValue ? (
-            <div className="bg-gray-50 flex w-full max-w-xl items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
-              <input
-                type="text"
-                id="first_name"
-                value={titleValue}
-                onChange={(e) => setTitleValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setIsEditTitle(false);
-                  }
-                }}
-                className="block py-2 w-full bg-transparent outline-none focus:outline-none"
-                placeholder="Enter title here"
-                required
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setIsEditTitle(false)}
-                className="flex-shrink-0 p-1 rounded hover:bg-gray-200 transition-colors"
-              >
-                <X size={16} className="text-gray-500 hover:text-gray-700" />
-              </button>
-            </div>
-          ) : (
-            <h2 className="text-lg font-medium m-0">{titleValue}</h2>
-          )}
-        </div>}
+        {!readOnlyValue && (
+          <div className="w-full">
+            {isEditTitle && !readOnlyValue ? (
+              <div className="bg-gray-50 flex w-full max-w-xl items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
+                <input
+                  type="text"
+                  id="first_name"
+                  value={titleValue}
+                  onChange={(e) => setTitleValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      setIsEditTitle(false);
+                    }
+                  }}
+                  className="block py-2 w-full bg-transparent outline-none focus:outline-none"
+                  placeholder="Enter title here"
+                  required
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsEditTitle(false)}
+                  className="flex-shrink-0 p-1 rounded hover:bg-gray-200 transition-colors"
+                >
+                  <X size={16} className="text-gray-500 hover:text-gray-700" />
+                </button>
+              </div>
+            ) : (
+              <h2 className="text-lg font-medium m-0">{titleValue}</h2>
+            )}
+          </div>
+        )}
 
         {!isEditTitle && !readOnlyValue && (
           <button
@@ -232,11 +234,12 @@ export function EditorHeader({
                                   <span className="font-medium text-sm">
                                     {translation.title.split("to")[1]}
                                   </span>
-                                  {translation.lastModified && !readOnlyValue&& (
-                                    <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
-                                      Modified
-                                    </span>
-                                  )}
+                                  {translation.lastModified &&
+                                    !readOnlyValue && (
+                                      <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                        Modified
+                                      </span>
+                                    )}
                                 </div>
                                 <div className="flex items-center gap-1">
                                   {currentTranslationIndex === index && (
