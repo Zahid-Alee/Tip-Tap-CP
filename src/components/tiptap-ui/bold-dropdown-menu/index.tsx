@@ -66,21 +66,16 @@ export function BoldDropdownMenu({
   const getActiveWeight = React.useCallback((): FontWeight | undefined => {
     if (!editor) return undefined;
 
-    // Check for font weight in all supported node types
-    const nodeTypes = ["paragraph", "heading", "textStyle"];
+    // Check if the textStyle mark is active and get its font weight
+    const textStyleAttributes = editor.getAttributes("textStyle");
+    const fontWeight = textStyleAttributes.fontWeight;
 
-    for (const nodeType of nodeTypes) {
-      const attrs = editor.getAttributes(nodeType);
-      const fontWeight = attrs.fontWeight;
-
-      if (fontWeight) {
-        // Handle both numeric and named font weights
-        if (fontWeight === "800" || fontWeight === "extrabold")
-          return "extrabold";
-        if (fontWeight === "700" || fontWeight === "bold") return "bold";
-        if (fontWeight === "600" || fontWeight === "semibold")
-          return "semibold";
-      }
+    if (fontWeight && fontWeight !== "normal" && fontWeight !== "400") {
+      // Handle both numeric and named font weights
+      if (fontWeight === "800" || fontWeight === "extrabold")
+        return "extrabold";
+      if (fontWeight === "700" || fontWeight === "bold") return "bold";
+      if (fontWeight === "600" || fontWeight === "semibold") return "semibold";
     }
 
     return undefined;
@@ -93,11 +88,11 @@ export function BoldDropdownMenu({
       const currentWeight = getActiveWeight();
       const config = fontWeightConfig[weight];
 
-      // If clicking the same weight, remove it (toggle off)
+      // If clicking the same weight, set to normal (toggle off)
       if (currentWeight === weight) {
-        editor.chain().focus().unsetFontWeight().run();
+        editor.chain().focus().setFontWeight("normal").run();
       } else {
-        // Apply the new weight using our FontWeight extension
+        // Apply the new weight using our Bold extension with textStyle
         editor.chain().focus().setFontWeight(config.value).run();
       }
     },
@@ -107,8 +102,8 @@ export function BoldDropdownMenu({
   const canApplyWeight = React.useCallback((): boolean => {
     if (!editor) return false;
 
-    // Check if we can apply font weight using our extension
-    return editor.can().setFontWeight && editor.can().setFontWeight("600");
+    // Check if we can apply the textStyle mark with fontWeight
+    return editor.can().setMark("textStyle", { fontWeight: "600" });
   }, [editor]);
 
   const isDisabled = !canApplyWeight();
@@ -163,7 +158,7 @@ export function BoldDropdownMenu({
                   data-active-state={isActive ? "on" : "off"}
                   onClick={() => handleWeightClick(weight)}
                 >
-                  <span className=" w-full text-left">{config.label}</span>
+                  <span className="w-full text-left">{config.label}</span>
                 </Button>
               </DropdownMenuItem>
             );

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Paste Debug</title>
+  </head>
+  <body>
+    <div
+      contenteditable="true"
+      id="test-editor"
+      style="border: 1px solid #ccc; padding: 10px; min-height: 100px"
+    >
+      Type here and try Ctrl+V to paste...
+    </div>
+
+    <script>
+      const editor = document.getElementById("test-editor");
+
+      // Log all paste events
+      editor.addEventListener("paste", (e) => {
+        console.log("Paste event detected:", e);
+        console.log("Clipboard data:", e.clipboardData);
+        console.log("Clipboard text:", e.clipboardData?.getData("text/plain"));
+      });
+
+      // Log all keydown events
+      editor.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key.toLowerCase() === "v") {
+          console.log("Ctrl+V detected:", e);
+        }
+      });
+
+      // Global event listeners
+      document.addEventListener("paste", (e) => {
+        console.log("Global paste event:", e);
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.ctrlKey && e.key.toLowerCase() === "v") {
+          console.log("Global Ctrl+V detected:", e);
+        }
+      });
+    </script>
+  </body>
+</html>

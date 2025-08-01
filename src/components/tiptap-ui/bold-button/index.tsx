@@ -8,16 +8,17 @@ const BoldButton: React.FC<{ editor: Editor; size?: string }> = ({
   size = "sm",
 }) => {
   const isBold = React.useMemo(() => {
-    const types = ["paragraph", "heading", "textStyle"];
-    return types.some((type) => {
-      const attrs = editor.getAttributes(type);
-      return (
-        attrs.fontWeight &&
-        attrs.fontWeight !== "400" &&
-        attrs.fontWeight !== "normal" &&
-        attrs.fontWeight !== null
-      );
-    });
+    // Check if textStyle mark has fontWeight attribute that indicates bold
+    const textStyleAttrs = editor.getAttributes("textStyle");
+    const fontWeight = textStyleAttrs.fontWeight;
+
+    return (
+      fontWeight &&
+      fontWeight !== "400" &&
+      fontWeight !== "normal" &&
+      fontWeight !== null &&
+      fontWeight !== undefined
+    );
   }, [editor.state.selection]);
 
   const handleClick = () => {

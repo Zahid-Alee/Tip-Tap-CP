@@ -1,5 +1,7 @@
-import { Extension, CommandProps } from "@tiptap/core";
+import { Extension } from "@tiptap/core";
+import { TextStyle } from "@tiptap/extension-text-style";
 
+// LineHeight Extension (unchanged)
 interface LineHeightOptions {
   types: string[];
   defaultHeight: string;
@@ -24,7 +26,6 @@ export const LineHeight = Extension.create<LineHeightOptions>({
             default: this.options.defaultHeight,
             parseHTML: (element: HTMLElement) => {
               const lineHeight = element.style.lineHeight;
-              // If no line height is set or it's the default, return the default
               if (!lineHeight || lineHeight === "normal") {
                 return this.options.defaultHeight;
               }
@@ -32,11 +33,9 @@ export const LineHeight = Extension.create<LineHeightOptions>({
             },
             renderHTML: (attributes: Record<string, any>) => {
               const lineHeight = attributes.lineHeight;
-              // Don't render if it's the default value
               if (!lineHeight || lineHeight === this.options.defaultHeight) {
                 return {};
               }
-
               return {
                 style: `line-height: ${lineHeight}`,
               };
@@ -51,7 +50,7 @@ export const LineHeight = Extension.create<LineHeightOptions>({
     return {
       setLineHeight:
         (lineHeight: string) =>
-        ({ commands }: CommandProps) => {
+        ({ commands }) => {
           return this.options.types.every((type) =>
             commands.updateAttributes(type, { lineHeight: String(lineHeight) })
           );
@@ -60,7 +59,7 @@ export const LineHeight = Extension.create<LineHeightOptions>({
   },
 });
 
-// WordSpacing
+// WordSpacing Extension (unchanged)
 interface WordSpacingOptions {
   types: string[];
   defaultSpacing: string;
@@ -85,7 +84,6 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
             default: this.options.defaultSpacing,
             parseHTML: (element: HTMLElement) => {
               const wordSpacing = element.style.wordSpacing;
-              // If no word spacing is set or it's normal, return default
               if (!wordSpacing || wordSpacing === "normal") {
                 return this.options.defaultSpacing;
               }
@@ -93,11 +91,9 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
             },
             renderHTML: (attributes: Record<string, any>) => {
               const wordSpacing = attributes.wordSpacing;
-              // Don't render if it's the default value
               if (!wordSpacing || wordSpacing === this.options.defaultSpacing) {
                 return {};
               }
-
               return {
                 style: `word-spacing: ${wordSpacing}`,
               };
@@ -112,13 +108,11 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
     return {
       setWordSpacing:
         (wordSpacing: string) =>
-        ({ commands }: CommandProps) => {
-          // Support both em and px units, default to px if no unit is specified
+        ({ commands }) => {
           let value = wordSpacing;
           if (!wordSpacing.includes("em") && !wordSpacing.includes("px")) {
             value = `${wordSpacing}px`;
           }
-
           return this.options.types.every((type) =>
             commands.updateAttributes(type, { wordSpacing: value })
           );
@@ -127,7 +121,7 @@ export const WordSpacing = Extension.create<WordSpacingOptions>({
   },
 });
 
-// LetterSpacing
+// LetterSpacing Extension (unchanged)
 interface LetterSpacingOptions {
   types: string[];
   defaultSpacing: string;
@@ -152,7 +146,6 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
             default: this.options.defaultSpacing,
             parseHTML: (element: HTMLElement) => {
               const letterSpacing = element.style.letterSpacing;
-              // If no letter spacing is set or it's normal, return default
               if (!letterSpacing || letterSpacing === "normal") {
                 return this.options.defaultSpacing;
               }
@@ -160,14 +153,12 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
             },
             renderHTML: (attributes: Record<string, any>) => {
               const letterSpacing = attributes.letterSpacing;
-              // Don't render if it's the default value
               if (
                 !letterSpacing ||
                 letterSpacing === this.options.defaultSpacing
               ) {
                 return {};
               }
-
               return {
                 style: `letter-spacing: ${letterSpacing}`,
               };
@@ -182,13 +173,11 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
     return {
       setLetterSpacing:
         (letterSpacing: string) =>
-        ({ commands }: CommandProps) => {
-          // Support both em and px units, default to px if no unit is specified
+        ({ commands }) => {
           let value = letterSpacing;
           if (!letterSpacing.includes("em") && !letterSpacing.includes("px")) {
             value = `${letterSpacing}px`;
           }
-
           return this.options.types.every((type) =>
             commands.updateAttributes(type, { letterSpacing: value })
           );
@@ -197,12 +186,9 @@ export const LetterSpacing = Extension.create<LetterSpacingOptions>({
   },
 });
 
-// Bold Extension
-
+// CORRECTED Bold Extension - Extends TextStyle for inline styling
 interface BoldOptions {
-  types: string[];
   defaultWeight: string;
-  HTMLAttributes: Record<string, any>;
 }
 
 export const Bold = Extension.create<BoldOptions>({
@@ -210,26 +196,22 @@ export const Bold = Extension.create<BoldOptions>({
 
   addOptions() {
     return {
-      types: ["paragraph", "heading", "textStyle"],
       defaultWeight: "700",
-      HTMLAttributes: {},
     };
   },
 
   addGlobalAttributes() {
     return [
       {
-        types: this.options.types,
+        types: ["textStyle"],
         attributes: {
           fontWeight: {
             default: null,
             parseHTML: (element: HTMLElement) => {
               const weight = element.style.fontWeight;
-              // Handle both numeric and named font weights
-              if (weight) {
+              if (weight && weight !== "normal" && weight !== "400") {
                 // Convert named weights to numeric
                 const namedWeights: Record<string, string> = {
-                  normal: "400",
                   bold: "700",
                   bolder: "800",
                   lighter: "300",
@@ -239,10 +221,13 @@ export const Bold = Extension.create<BoldOptions>({
               return null;
             },
             renderHTML: (attributes: Record<string, any>) => {
-              if (!attributes.fontWeight) {
+              if (
+                !attributes.fontWeight ||
+                attributes.fontWeight === "400" ||
+                attributes.fontWeight === "normal"
+              ) {
                 return {};
               }
-
               return {
                 style: `font-weight: ${attributes.fontWeight}`,
               };
@@ -257,78 +242,93 @@ export const Bold = Extension.create<BoldOptions>({
     return {
       setFontWeight:
         (fontWeight?: string) =>
-        ({ commands }: CommandProps) => {
+        ({ commands }) => {
           const weight = fontWeight || this.options.defaultWeight;
-
-          return this.options.types.every((type) =>
-            commands.updateAttributes(type, { fontWeight: String(weight) })
-          );
+          return commands.setMark("textStyle", { fontWeight: String(weight) });
         },
 
       toggleBold:
         () =>
-        ({ commands, editor }: CommandProps) => {
-          // Check if any of the current selection has bold applied
-          const hasBold = this.options.types.some((type) => {
-            const attrs = editor.getAttributes(type);
-            return (
-              attrs.fontWeight &&
-              attrs.fontWeight !== "400" &&
-              attrs.fontWeight !== "normal" &&
-              attrs.fontWeight !== null
-            );
-          });
+        ({ commands, editor }) => {
+          // Check if textStyle mark with fontWeight is active
+          const currentAttributes = editor.getAttributes("textStyle");
+          const currentWeight = currentAttributes.fontWeight;
 
-          if (hasBold) {
-            // Remove bold by setting to normal weight
-            return this.options.types.every((type) =>
-              commands.updateAttributes(type, { fontWeight: null })
-            );
+          if (
+            currentWeight &&
+            currentWeight !== "400" &&
+            currentWeight !== "normal" &&
+            currentWeight !== null &&
+            currentWeight !== undefined
+          ) {
+            // Set font weight to normal instead of removing it
+            return commands.setMark("textStyle", {
+              ...currentAttributes,
+              fontWeight: "normal",
+            });
           } else {
             // Apply bold with default weight
-            return this.options.types.every((type) =>
-              commands.updateAttributes(type, {
-                fontWeight: this.options.defaultWeight,
-              })
-            );
+            return commands.setMark("textStyle", {
+              ...currentAttributes,
+              fontWeight: this.options.defaultWeight,
+            });
           }
         },
 
       toggleFontWeight:
         (fontWeight?: string) =>
-        ({ commands, editor }: CommandProps) => {
+        ({ commands, editor }) => {
           const weight = fontWeight || this.options.defaultWeight;
+          const currentAttributes = editor.getAttributes("textStyle");
+          const currentWeight = currentAttributes.fontWeight;
 
-          // Check if any of the current selection has bold applied
-          const hasBold = this.options.types.some((type) => {
-            const attrs = editor.getAttributes(type);
-            return (
-              attrs.fontWeight &&
-              attrs.fontWeight !== "400" &&
-              attrs.fontWeight !== "normal" &&
-              attrs.fontWeight !== null
-            );
-          });
-
-          if (hasBold) {
-            // Remove bold by setting to null
-            return this.options.types.every((type) =>
-              commands.updateAttributes(type, { fontWeight: null })
-            );
+          if (currentWeight === weight) {
+            // Remove this specific weight
+            if (Object.keys(currentAttributes).length === 1) {
+              return commands.unsetMark("textStyle");
+            } else {
+              const newAttributes = { ...currentAttributes };
+              delete newAttributes.fontWeight;
+              return commands.setMark("textStyle", newAttributes);
+            }
           } else {
-            // Apply bold with specified weight
-            return this.options.types.every((type) =>
-              commands.updateAttributes(type, { fontWeight: String(weight) })
-            );
+            // Apply the specified weight
+            return commands.setMark("textStyle", {
+              ...currentAttributes,
+              fontWeight: String(weight),
+            });
           }
         },
 
       unsetFontWeight:
         () =>
-        ({ commands }: CommandProps) => {
-          return this.options.types.every((type) =>
-            commands.updateAttributes(type, { fontWeight: null })
-          );
+        ({ commands, editor }) => {
+          const currentAttributes = editor.getAttributes("textStyle");
+
+          // If no textStyle attributes exist, nothing to do
+          if (
+            !currentAttributes ||
+            Object.keys(currentAttributes).length === 0
+          ) {
+            return true;
+          }
+
+          // Create new attributes without fontWeight
+          const newAttributes = { ...currentAttributes };
+          delete newAttributes.fontWeight;
+
+          // If no attributes remain after removing fontWeight, unset the entire mark
+          if (Object.keys(newAttributes).length === 0) {
+            return commands.unsetMark("textStyle");
+          } else {
+            // Otherwise, update the mark with remaining attributes
+            // First unset the mark, then set it with new attributes to ensure clean update
+            return commands
+              .chain()
+              .unsetMark("textStyle")
+              .setMark("textStyle", newAttributes)
+              .run();
+          }
         },
     };
   },
