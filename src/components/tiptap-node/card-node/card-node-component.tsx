@@ -113,6 +113,9 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   // Handle resize start
   const handleResizeStart = useCallback(
     (e: React.MouseEvent, handle: ResizeHandle) => {
+      // Don't allow resize in read-only mode
+      if (!editor?.isEditable) return;
+
       e.preventDefault();
       e.stopPropagation();
 
@@ -125,7 +128,7 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
         startHeight: dimensions.height,
       });
     },
-    [dimensions]
+    [dimensions, editor]
   );
 
   // Handle resize during mouse move
@@ -250,6 +253,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
 
   // Render resize handles
   const renderResizeHandles = () => {
+    // Don't show resize handles in read-only mode
+    if (!editor?.isEditable) return null;
     if (!selected && !isHovered) return null;
 
     const handleStyle = {
@@ -385,8 +390,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
           height: `${dimensions.height}px`,
           display: "inline-block",
         }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => editor?.isEditable && setIsHovered(true)}
+        onMouseLeave={() => editor?.isEditable && setIsHovered(false)}
       >
         <div
           ref={cardRef}

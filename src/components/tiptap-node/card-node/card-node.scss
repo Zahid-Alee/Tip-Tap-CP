@@ -35,6 +35,19 @@
     border-color: rgba(59, 130, 246, 0.3);
   }
 
+  // Disable hover effects in read-only mode
+  .read-only & {
+    cursor: default;
+
+    &:hover::before {
+      border-color: transparent;
+    }
+
+    &:hover {
+      border-color: var(--card-border-color, currentColor);
+    }
+  }
+
   // Default dark variant
   &--dark {
     background-color: var(--card-bg-color, #1a1a1a); // off-black
@@ -43,6 +56,11 @@
 
     &:hover {
       border-color: var(--card-border-color, #3a3a3a);
+    }
+
+    // Disable hover in read-only mode
+    .read-only &:hover {
+      border-color: var(--card-border-color, #2a2a2a);
     }
 
     // Override default styles when custom values are provided
@@ -66,6 +84,12 @@
     &:hover {
       border-color: var(--card-border-color, #9ca3af);
       background-color: var(--card-bg-color, rgba(107, 114, 128, 0.05));
+    }
+
+    // Disable hover in read-only mode
+    .read-only &:hover {
+      border-color: var(--card-border-color, #6b7280);
+      background-color: var(--card-bg-color, transparent);
     }
 
     // Override default styles when custom values are provided

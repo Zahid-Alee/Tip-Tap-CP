@@ -612,7 +612,7 @@ function BorderRadiusPopover({
 }
 
 export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
-  if (!editor) {
+  if (!editor || !editor.isEditable) {
     return null;
   }
 
