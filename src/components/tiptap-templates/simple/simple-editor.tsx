@@ -425,7 +425,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       if (height !== lastHeightRef.current) {
         lastHeightRef.current = height;
         window.parent.postMessage(
-          { type: "IFRAME_HEIGHT", height: height + 40, editorId },
+          { type: "IFRAME_HEIGHT", height: height + 50, editorId },
           "*"
         );
         // console.log("[AutoResizer] Sent new height:", height);
