@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Trash } from "lucide-react";
 import "./CodeBlockComponent.scss";
 
 const CodeBlockComponent = ({
@@ -9,10 +9,10 @@ const CodeBlockComponent = ({
   },
   updateAttributes,
   extension,
+  deleteNode,
   // readOnlyValue = true,
 }) => {
   const readOnlyValue = extension.options.readOnlyValue;
-  // console.log('readonlyvalue',readOnlyValue)
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);
 
@@ -30,6 +30,12 @@ const CodeBlockComponent = ({
         });
     } else {
       console.warn("Code content not found for copying.");
+    }
+  };
+
+  const handleDelete = () => {
+    if (deleteNode) {
+      deleteNode();
     }
   };
 
@@ -59,14 +65,26 @@ const CodeBlockComponent = ({
           </div>
         )}
 
-        <button
-          className="code-block-copy"
-          onClick={handleCopy}
-          aria-label={copied ? "Copied!" : "Copy code"}
-          title={copied ? "Copied!" : "Copy code"}
-        >
-          {copied ? <Check size={18} /> : <Copy size={18} />}
-        </button>
+        <div className="flex gap-2">
+          {!readOnlyValue && (
+            <button
+              className="code-block-copy"
+              onClick={handleDelete}
+              aria-label="Delete code block"
+              title="Delete code block"
+            >
+              <Trash size={18} />
+            </button>
+          )}
+          <button
+            className="code-block-copy"
+            onClick={handleCopy}
+            aria-label={copied ? "Copied!" : "Copy code"}
+            title={copied ? "Copied!" : "Copy code"}
+          >
+            {copied ? <Check size={18} /> : <Copy size={18} />}
+          </button>
+        </div>
       </div>
 
       <pre className="code-block-pre relative">

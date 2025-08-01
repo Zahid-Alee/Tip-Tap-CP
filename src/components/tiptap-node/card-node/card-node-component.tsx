@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import { Settings, Palette } from "lucide-react";
+import { Settings, Palette, X, Trash } from "lucide-react";
 import "./card-node.scss";
 
 interface CardNodeComponentProps {
@@ -364,6 +364,20 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
       </>
     );
   };
+
+  // Add delete handler
+  const handleDelete = useCallback(() => {
+    if (getPos && editor?.isEditable) {
+      const pos = getPos();
+      editor
+        .chain()
+        .focus()
+        .deleteRange({ from: pos, to: pos + node.nodeSize })
+        .run();
+    }
+  }, [getPos, editor, node.nodeSize]);
+
+  // Render delete button
 
   return (
     <NodeViewWrapper

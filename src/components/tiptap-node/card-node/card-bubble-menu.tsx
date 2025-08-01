@@ -9,7 +9,14 @@ import {
 import { Button, ButtonProps } from "../../tiptap-ui-primitive/button";
 import { Separator } from "../../tiptap-ui-primitive/separator";
 import { BanIcon } from "../../tiptap-icons/ban-icon";
-import { Plus, Palette, Brush, Square, CornerDownRight } from "lucide-react";
+import {
+  Plus,
+  Palette,
+  Brush,
+  Square,
+  CornerDownRight,
+  Trash,
+} from "lucide-react";
 
 // Import the highlight popover styles to maintain consistency
 import "@/components/tiptap-ui/highlight-popover/highlight-popover.scss";
@@ -630,6 +637,28 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
       .run();
   };
 
+  const handleDelete = () => {
+    if (!editor || !editor.isEditable) return;
+
+    // Find the current card node position and delete it
+    const { selection } = editor.state;
+    const { $from } = selection;
+
+    // Find the card node that contains the current selection
+    for (let depth = $from.depth; depth > 0; depth--) {
+      const node = $from.node(depth);
+      if (node.type.name === "cardNode") {
+        const pos = $from.before(depth);
+        editor
+          .chain()
+          .focus()
+          .deleteRange({ from: pos, to: pos + node.nodeSize })
+          .run();
+        return;
+      }
+    }
+  };
+
   return (
     <BubbleMenu
       editor={editor}
@@ -663,6 +692,17 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
         <CardColorPopover editor={editor} colorType="background" />
         <CardColorPopover editor={editor} colorType="border" />
         <BorderRadiusPopover editor={editor} />
+        <Button
+          type="button"
+          role="menuitem"
+          tabIndex={-1}
+          data-style="ghost"
+          className="flex-1 text-sm text-red-500"
+          onClick={handleDelete}
+          aria-label="Delete card"
+        >
+          <Trash size={14} color="red" />
+        </Button>
       </div>
     </BubbleMenu>
   );
