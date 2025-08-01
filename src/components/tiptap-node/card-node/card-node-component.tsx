@@ -175,7 +175,7 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
       }
 
       // Apply constraints
-      newWidth = Math.max(200, Math.min(800, newWidth));
+      newWidth = Math.max(200, newWidth);
       newHeight = Math.max(100, Math.min(600, newHeight));
 
       setDimensions({ width: newWidth, height: newHeight });
