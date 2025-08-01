@@ -38,6 +38,7 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
 
         if (editor.isActive("link")) return false;
         if (editor.isActive("code-block")) return false;
+        if (editor.isActive("cardNode")) return false;
 
         return true;
       }}

@@ -35,10 +35,12 @@ import { Toolbar } from "@/components/tiptap-ui-primitive/toolbar";
 
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+import { CardNode } from "@/components/tiptap-node/card-node/card-node-extension";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/image-node/image-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
+import "@/components/tiptap-node/card-node/card-node.scss";
 import "@/components/tiptap-ui/output-block/styles.scss";
 
 // --- Hooks ---
@@ -79,6 +81,7 @@ import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
 import { ColumnExtensions } from "../../tiptap-extension/column/column-extension";
 import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
 import SelectAllExtension from "../../tiptap-extension/select-all/select-all-extension";
+import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
 
 const lowlight = createLowlight(all);
 
@@ -226,6 +229,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     }),
     TrailingNode,
     Link.configure({ openOnClick: false }),
+    CardNode,
     ...TableExtensions,
     ...ColumnExtensions,
     FindReplace,
@@ -391,6 +395,7 @@ const EditorMenus: React.FC<EditorMenusProps> = ({ editor, readOnlyValue }) => {
       <>
         {editor && <BubbleToolbar editor={editor} />}
         {editor && <ImageBubbleMenu editor={editor} />}
+        {editor && <CardBubbleMenu editor={editor} />}
         {editor && <TableBubbleMenu readonly={readOnlyValue} editor={editor} />}
         {editor && (
           <ColumnBubbleMenu readonly={readOnlyValue} editor={editor} />
