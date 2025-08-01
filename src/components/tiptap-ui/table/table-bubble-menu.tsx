@@ -13,7 +13,6 @@ export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({
   editor,
   readonly,
 }) => {
-
   const shouldShow = ({ editor }: BubbleMenuProps) => {
     return editor.isActive("tableCell") || editor.isActive("tableHeader");
   };

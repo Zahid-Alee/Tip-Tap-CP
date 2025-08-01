@@ -30,13 +30,17 @@ declare module "@tiptap/core" {
        */
       setCardTextColor: (color: string) => ReturnType;
       /**
-  
+       * Set card border radius
+       */
+      setCardBorderRadius: (radius: string) => ReturnType;
+      /**
        * Set multiple card colors at once
        */
       setCardColors: (colors: {
         backgroundColor?: string;
         borderColor?: string;
         textColor?: string;
+        borderRadius?: string;
       }) => ReturnType;
       /**
        * Reset card to default variant styles
@@ -99,6 +103,33 @@ export const CardNode = Node.create<CardNodeOptions>({
           return {};
         },
       },
+      borderRadius: {
+        default: null,
+        parseHTML: (element) => element.style.borderRadius || null,
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
+      width: {
+        default: 300,
+        parseHTML: (element) => {
+          const width = element.style.width;
+          return width ? parseInt(width) : 300;
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
+      height: {
+        default: 200,
+        parseHTML: (element) => {
+          const height = element.style.height;
+          return height ? parseInt(height) : 200;
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
     };
   },
 
@@ -111,13 +142,24 @@ export const CardNode = Node.create<CardNodeOptions>({
   },
 
   renderHTML({ HTMLAttributes, node }) {
-    const { variant, backgroundColor, borderColor, textColor } = node.attrs;
+    const {
+      variant,
+      backgroundColor,
+      borderColor,
+      textColor,
+      borderRadius,
+      width,
+      height,
+    } = node.attrs;
 
-    // Build style string from individual color attributes
+    // Build style string from individual color attributes and dimensions
     const styles: string[] = [];
     if (backgroundColor) styles.push(`background-color: ${backgroundColor}`);
     if (borderColor) styles.push(`border-color: ${borderColor}`);
     if (textColor) styles.push(`color: ${textColor}`);
+    if (borderRadius) styles.push(`border-radius: ${borderRadius}`);
+    if (width) styles.push(`width: ${width}px`);
+    if (height) styles.push(`height: ${height}px`);
 
     const styleAttribute = styles.length > 0 ? styles.join("; ") : undefined;
 
@@ -179,6 +221,11 @@ export const CardNode = Node.create<CardNodeOptions>({
         (color) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, { textColor: color });
+        },
+      setCardBorderRadius:
+        (radius) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { borderRadius: radius });
         },
       setCardColors:
         (colors) =>

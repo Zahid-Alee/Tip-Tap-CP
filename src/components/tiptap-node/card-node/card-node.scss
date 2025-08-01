@@ -581,6 +581,27 @@
   }
 }
 
+// Resizable container
+.card-resizable-container {
+  display: block !important;
+
+  .tiptap-card {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: unset !important;
+    min-height: unset !important;
+  }
+}
+
+/* Optional: Hide resize handles when not selected */
+.card-node-wrapper:not(.ProseMirror-selectednode) {
+  .card-resizable-container {
+    [data-direction] {
+      display: none !important;
+    }
+  }
+}
+
 // Responsive adjustments
 @media (max-width: 768px) {
   .tiptap-card {

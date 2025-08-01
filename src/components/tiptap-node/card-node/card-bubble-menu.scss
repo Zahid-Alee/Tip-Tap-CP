@@ -4,7 +4,7 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    0 2px 4px -1px rgba(151, 131, 131, 0.06);
   padding: 4px;
   z-index: 1000;
 
@@ -47,7 +47,20 @@
 .card-bubble-menu-content {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+
+  .tiptap-button {
+    min-width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .tiptap-button-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .card-bubble-menu-btn {
