@@ -104,7 +104,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
-        <HeadingDropdownMenu levels={[1, 2, 3, 4]} />
+        <HeadingDropdownMenu levels={[1, 2, 3, 4]} showCustomFontSize={true} />
         <ListDropdownMenu
           types={[
             "bulletList",
@@ -123,7 +123,6 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
           ]}
         />
         <NodeButton type="blockquote" />
-        <CardButton editor={editor} />
         <TableButton editor={editor} />
         {/* <ColumnButton editor={editor}/> */}
         <HorizontalRuleButton editor={editor} />
@@ -141,6 +140,8 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
       <ToolbarSeparator />
 
       <ToolbarGroup>
+        <CardButton editor={editor} />
+
         <MarkButton type="code" />
         <NodeButton type="codeBlock" />
         <OutputBlockButton editor={editor} />

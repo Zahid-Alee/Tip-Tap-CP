@@ -3,6 +3,7 @@ import { forwardRef } from "react";
 import { EditorContext } from "@tiptap/react";
 import { EditorContent, ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
+import FontSize from "@tiptap/extension-font-size";
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
@@ -184,10 +185,16 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     LineHeight,
     WordSpacing,
     LetterSpacing,
-    TextStyle,
+    TextStyle.configure({
+      HTMLAttributes: {
+        class: "custom-text-style",
+      },
+    }),
     Bold,
     FontFamily,
-    Color,
+    Color.configure({
+      types: ["textStyle"],
+    }),
     ExtendedListExtension,
     SelectAllExtension,
     StarterKit.configure({
@@ -233,6 +240,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     ...TableExtensions,
     ...ColumnExtensions,
     FindReplace,
+    FontSize,
   ];
 };
 
