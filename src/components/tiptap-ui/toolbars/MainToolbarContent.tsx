@@ -160,6 +160,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         ) : (
           <HighlighterButton onClick={onHighlighterClick} />
         )}
+
         {!isMobile ? <LinkPopover /> : <LinkButton onClick={onLinkClick} />}
       </ToolbarGroup>
 
