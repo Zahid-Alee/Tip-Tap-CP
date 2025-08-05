@@ -197,16 +197,13 @@ export const ClipboardPaste = Extension.create<ClipboardPasteOptions>({
                   const { selection } = view.state;
                   const position = selection.$head.pos;
 
-                  // Create upload progress indicator
-                  const filename =
-                    imageFile.name.replace(/\.[^/.]+$/, "") ||
-                    "clipboard-image";
-
-                  // Insert temporary upload node first
+                  // Insert upload node with clipboard file and flag
                   const tempAttrs = {
                     accept: "image/*",
                     limit: 1,
                     maxSize: options.maxSize,
+                    isFromClipboard: true,
+                    clipboardFile: imageFile, // Pass the file directly
                   };
 
                   const uploadNode =
@@ -214,53 +211,6 @@ export const ClipboardPaste = Extension.create<ClipboardPasteOptions>({
 
                   if (uploadNode) {
                     view.dispatch(view.state.tr.insert(position, uploadNode));
-                  }
-
-                  // Start upload process
-                  if (options.upload) {
-                    const url = await options.upload(imageFile, (progress) => {
-                      // Progress updates could be handled here
-                      console.log(`Upload progress: ${progress.progress}%`);
-                    });
-
-                    if (url) {
-                      // Find and replace the upload node with the actual image
-                      const newState = view.state;
-                      let uploadNodePos = -1;
-
-                      newState.doc.descendants((node, pos) => {
-                        if (node.type.name === "imageUpload") {
-                          uploadNodePos = pos;
-                          return false; // Stop searching after finding first upload node
-                        }
-                      });
-
-                      if (uploadNodePos !== -1) {
-                        const imageAttrs = {
-                          src: url,
-                          alt: filename,
-                          title: filename,
-                          width: null,
-                          height: null,
-                          align: "left",
-                        };
-
-                        const imageNode =
-                          view.state.schema.nodes.resizableImage?.create(
-                            imageAttrs
-                          );
-
-                        if (imageNode) {
-                          view.dispatch(
-                            view.state.tr
-                              .delete(uploadNodePos, uploadNodePos + 1)
-                              .insert(uploadNodePos, imageNode)
-                          );
-                        }
-
-                        options.onSuccess?.(url);
-                      }
-                    }
                   }
                 } catch (error) {
                   options.onError?.(
