@@ -3,6 +3,7 @@ import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
 import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import "@/components/tiptap-node/image-upload-node/image-upload-node.scss";
+import { Loader2 } from "lucide-react";
 
 export interface FileItem {
   id: string;
@@ -293,7 +294,7 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
         <div className="tiptap-image-upload-actions">
           {status === "uploading" && (
             <span className="tiptap-image-upload-progress-text">
-              {progress}%
+              <Loader2 className="animate-spin" />
             </span>
           )}
           <button
