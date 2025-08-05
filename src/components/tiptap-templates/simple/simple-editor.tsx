@@ -83,6 +83,7 @@ import { ColumnExtensions } from "../../tiptap-extension/column/column-extension
 import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
 import SelectAllExtension from "../../tiptap-extension/select-all/select-all-extension";
 import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
+import { ClipboardPaste } from "../../tiptap-extension/clipboard-paste-extension";
 
 const lowlight = createLowlight(all);
 
@@ -241,6 +242,23 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     ...ColumnExtensions,
     FindReplace,
     FontSize,
+    ClipboardPaste.configure({
+      upload: (
+        file: File,
+        onProgress?: (event: { progress: number }) => void,
+        abortSignal?: AbortSignal
+      ) => handleImageUpload(file, {}, onProgress, abortSignal),
+      onError: (error) => console.error("Clipboard paste error:", error),
+      onSuccess: (url) => console.log("Image pasted successfully:", url),
+      maxSize: MAX_FILE_SIZE,
+      allowedTypes: [
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/webp",
+        "image/svg+xml",
+      ],
+    }),
   ];
 };
 
