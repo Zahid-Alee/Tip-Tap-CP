@@ -171,6 +171,11 @@ export const CardNode = Node.create<CardNodeOptions>({
       overlayColor: {
         default: null,
         parseHTML: (element) => {
+          // First try to get from data attribute
+          const dataOverlayColor = element.getAttribute("data-overlay-color");
+          if (dataOverlayColor) return dataOverlayColor;
+
+          // Then try to get from overlay element
           const overlay = element.querySelector(".card-overlay") as HTMLElement;
           return overlay ? overlay.style.backgroundColor || null : null;
         },
@@ -181,6 +186,13 @@ export const CardNode = Node.create<CardNodeOptions>({
       overlayOpacity: {
         default: 0.5,
         parseHTML: (element) => {
+          // First try to get from data attribute
+          const dataOverlayOpacity = element.getAttribute(
+            "data-overlay-opacity"
+          );
+          if (dataOverlayOpacity) return parseFloat(dataOverlayOpacity);
+
+          // Then try to get from overlay element
           const overlay = element.querySelector(".card-overlay") as HTMLElement;
           if (overlay) {
             const opacity = overlay.style.opacity;
@@ -195,6 +207,11 @@ export const CardNode = Node.create<CardNodeOptions>({
       textAlignment: {
         default: "left",
         parseHTML: (element) => {
+          // First try to get from data attribute
+          const dataTextAlignment = element.getAttribute("data-text-alignment");
+          if (dataTextAlignment) return dataTextAlignment;
+
+          // Then try to get from content element
           const content = element.querySelector(
             ".tiptap-card-content"
           ) as HTMLElement;
@@ -207,14 +224,21 @@ export const CardNode = Node.create<CardNodeOptions>({
       verticalAlignment: {
         default: "top",
         parseHTML: (element) => {
+          // First try to get from data attribute
+          const dataVerticalAlignment = element.getAttribute(
+            "data-vertical-alignment"
+          );
+          if (dataVerticalAlignment) return dataVerticalAlignment;
+
+          // Then try to get from content element
           const content = element.querySelector(
             ".tiptap-card-content"
           ) as HTMLElement;
           if (content) {
             const display = content.style.display;
-            const alignItems = content.style.alignItems;
+            const justifyContent = content.style.justifyContent;
             if (display === "flex") {
-              switch (alignItems) {
+              switch (justifyContent) {
                 case "center":
                   return "center";
                 case "flex-end":
@@ -274,6 +298,38 @@ export const CardNode = Node.create<CardNodeOptions>({
 
     const styleAttribute = styles.length > 0 ? styles.join("; ") : undefined;
 
+    // Create the overlay HTML if overlay is set
+    let overlayHTML = "";
+    if (overlayColor && overlayOpacity !== undefined) {
+      overlayHTML = `<div class="card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; pointer-events: none; z-index: 1;"></div>`;
+    }
+
+    // Create content wrapper with alignment styles
+    const contentStyles: string[] = [];
+    if (textAlignment) {
+      contentStyles.push(`text-align: ${textAlignment}`);
+    }
+    if (verticalAlignment) {
+      contentStyles.push(`display: flex`);
+      contentStyles.push(`flex-direction: column`);
+      contentStyles.push(`height: 100%`);
+      contentStyles.push(`min-height: inherit`);
+
+      switch (verticalAlignment) {
+        case "center":
+          contentStyles.push(`justify-content: center`);
+          break;
+        case "bottom":
+          contentStyles.push(`justify-content: flex-end`);
+          break;
+        default:
+          contentStyles.push(`justify-content: flex-start`);
+      }
+    }
+
+    const contentStyleAttribute =
+      contentStyles.length > 0 ? contentStyles.join("; ") : "";
+
     return [
       "div",
       mergeAttributes(
@@ -299,7 +355,27 @@ export const CardNode = Node.create<CardNodeOptions>({
         this.options.HTMLAttributes,
         HTMLAttributes
       ),
-      0,
+      [
+        ...(overlayHTML
+          ? [
+              [
+                "div",
+                {
+                  class: "card-overlay",
+                  style: `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; pointer-events: none; z-index: 1;`,
+                },
+              ],
+            ]
+          : []),
+        [
+          "div",
+          {
+            class: "tiptap-card-content",
+            ...(contentStyleAttribute && { style: contentStyleAttribute }),
+          },
+          0,
+        ],
+      ],
     ];
   },
 
