@@ -54,6 +54,18 @@ declare module "@tiptap/core" {
         overlayOpacity?: number;
       }) => ReturnType;
       /**
+       * Set card text alignment
+       */
+      setCardTextAlignment: (
+        alignment: "left" | "center" | "right" | "justify"
+      ) => ReturnType;
+      /**
+       * Set card vertical alignment
+       */
+      setCardVerticalAlignment: (
+        alignment: "top" | "center" | "bottom"
+      ) => ReturnType;
+      /**
        * Reset card to default variant styles
        */
       resetCardToVariant: (variant: "dark" | "gray-outline") => ReturnType;
@@ -180,6 +192,44 @@ export const CardNode = Node.create<CardNodeOptions>({
           return {};
         },
       },
+      textAlignment: {
+        default: "left",
+        parseHTML: (element) => {
+          const content = element.querySelector(
+            ".tiptap-card-content"
+          ) as HTMLElement;
+          return content ? content.style.textAlign || "left" : "left";
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
+      verticalAlignment: {
+        default: "top",
+        parseHTML: (element) => {
+          const content = element.querySelector(
+            ".tiptap-card-content"
+          ) as HTMLElement;
+          if (content) {
+            const display = content.style.display;
+            const alignItems = content.style.alignItems;
+            if (display === "flex") {
+              switch (alignItems) {
+                case "center":
+                  return "center";
+                case "flex-end":
+                  return "bottom";
+                default:
+                  return "top";
+              }
+            }
+          }
+          return "top";
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
     };
   },
 
@@ -203,6 +253,8 @@ export const CardNode = Node.create<CardNodeOptions>({
       backgroundImage,
       overlayColor,
       overlayOpacity,
+      textAlignment,
+      verticalAlignment,
     } = node.attrs;
 
     // Build style string from individual color attributes and dimensions
@@ -235,6 +287,12 @@ export const CardNode = Node.create<CardNodeOptions>({
               "data-overlay-color": overlayColor,
               "data-overlay-opacity": overlayOpacity || 0.5,
             }),
+          ...(textAlignment && {
+            "data-text-alignment": textAlignment,
+          }),
+          ...(verticalAlignment && {
+            "data-vertical-alignment": verticalAlignment,
+          }),
         },
         this.options.HTMLAttributes,
         HTMLAttributes
@@ -307,6 +365,20 @@ export const CardNode = Node.create<CardNodeOptions>({
         (overlaySettings) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, overlaySettings);
+        },
+      setCardTextAlignment:
+        (alignment) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, {
+            textAlignment: alignment,
+          });
+        },
+      setCardVerticalAlignment:
+        (alignment) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, {
+            verticalAlignment: alignment,
+          });
         },
     };
   },

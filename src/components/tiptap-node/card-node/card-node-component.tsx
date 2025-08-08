@@ -81,6 +81,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     backgroundImage,
     overlayColor,
     overlayOpacity,
+    textAlignment = "left",
+    verticalAlignment = "top",
   } = node.attrs;
 
   // Close settings when clicking outside
@@ -261,6 +263,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     "--card-bg-image": backgroundImage || "",
     "--card-overlay-color": overlayColor || "",
     "--card-overlay-opacity": overlayOpacity || "0.5",
+    "--card-text-alignment": textAlignment || "left",
+    "--card-vertical-alignment": verticalAlignment || "top",
   } as React.CSSProperties;
 
   // Render resize handles
@@ -447,7 +451,22 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
               }}
             />
           )}
-          <div className="tiptap-card-content">
+          <div
+            className="tiptap-card-content"
+            style={{
+              textAlign: textAlignment as any,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent:
+                verticalAlignment === "center"
+                  ? "center"
+                  : verticalAlignment === "bottom"
+                  ? "flex-end"
+                  : "flex-start",
+              height: "100%",
+              minHeight: "inherit",
+            }}
+          >
             <NodeViewContent />
           </div>
         </div>

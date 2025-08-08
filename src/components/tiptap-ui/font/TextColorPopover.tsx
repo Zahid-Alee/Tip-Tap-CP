@@ -1,39 +1,39 @@
-import * as React from "react"
-import { isNodeSelection, type Editor } from "@tiptap/react"
+import * as React from "react";
+import { isNodeSelection, type Editor } from "@tiptap/react";
 
 // --- Hooks ---
-import { useMenuNavigation } from "@/hooks/use-menu-navigation"
-import { useTiptapEditor } from "@/hooks/use-tiptap-editor"
+import { useMenuNavigation } from "@/hooks/use-menu-navigation";
+import { useTiptapEditor } from "@/hooks/use-tiptap-editor";
 
 // --- Icons ---
-import { BanIcon } from "@/components/tiptap-icons/ban-icon"
-import { Plus,Brush } from "lucide-react"
+import { BanIcon } from "@/components/tiptap-icons/ban-icon";
+import { Plus, Brush } from "lucide-react";
 
 // --- Lib ---
-import { isMarkInSchema } from "@/lib/tiptap-utils"
+import { isMarkInSchema } from "@/lib/tiptap-utils";
 
 // --- UI Primitives ---
-import { Button, ButtonProps } from "@/components/tiptap-ui-primitive/button"
+import { Button, ButtonProps } from "@/components/tiptap-ui-primitive/button";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/tiptap-ui-primitive/popover"
-import { Separator } from "@/components/tiptap-ui-primitive/separator"
+} from "@/components/tiptap-ui-primitive/popover";
+import { Separator } from "@/components/tiptap-ui-primitive/separator";
 
 // --- Styles ---
-import "@/components/tiptap-ui/highlight-popover/highlight-popover.scss"
+import "@/components/tiptap-ui/highlight-popover/highlight-popover.scss";
 
 export interface TextColor {
-  label: string
-  value: string
-  border?: string
+  label: string;
+  value: string;
+  border?: string;
 }
 
 export interface TextColorContentProps {
-  editor?: Editor | null
-  colors?: TextColor[]
-  activeNode?: number
+  editor?: Editor | null;
+  colors?: TextColor[];
+  activeNode?: number;
 }
 
 export const DEFAULT_TEXT_COLORS: TextColor[] = [
@@ -65,52 +65,51 @@ export const DEFAULT_TEXT_COLORS: TextColor[] = [
     label: "Gray",
     value: "#6b7280",
   },
-]
+];
 
 export const useTextColor = (editor: Editor | null) => {
-  const markAvailable = isMarkInSchema("textStyle", editor)
+  const markAvailable = isMarkInSchema("textStyle", editor);
 
   const getActiveColor = React.useCallback(() => {
-    if (!editor) return null
-    if (!editor.isActive("textStyle", { color: /.*/ })) return null
-    const attrs = editor.getAttributes("textStyle")
-    return attrs.color || null
-  }, [editor])
+    if (!editor) return null;
+    if (!editor.isActive("textStyle", { color: /.*/ })) return null;
+    const attrs = editor.getAttributes("textStyle");
+    return attrs.color || null;
+  }, [editor]);
 
   const toggleTextColor = React.useCallback(
     (color: string) => {
-      if (!markAvailable || !editor) return
+      if (!markAvailable || !editor) return;
       if (color === "none") {
-        editor.chain().focus().unsetColor().run()
+        editor.chain().focus().unsetColor().run();
       } else {
-        editor.chain().focus().setColor(color).run()
+        editor.chain().focus().setColor(color).run();
       }
     },
     [markAvailable, editor]
-  )
+  );
 
   return {
     markAvailable,
     getActiveColor,
     toggleTextColor,
-  }
-}
+  };
+};
 
 // Custom Text Color Icon
 const TextColorIcon = ({ color }: { color: string | null }) => {
   return (
     <div className="relative flex items-center justify-center">
-     
-     <Brush className='tiptap-button-icon' />
+      <Brush className="tiptap-button-icon" />
       {color && color !== "none" && (
-        <div 
-          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 rounded-sm" 
+        <div
+          className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 rounded-sm"
           style={{ backgroundColor: color }}
         />
       )}
     </div>
-  )
-}
+  );
+};
 
 export const TextColorButton = React.forwardRef<
   HTMLButtonElement,
@@ -131,25 +130,25 @@ export const TextColorButton = React.forwardRef<
     >
       {children || <TextColorIcon color={activeColor} />}
     </Button>
-  )
-})
+  );
+});
 
 // New component for custom color input
 export function CustomColorInput({
   onSelectColor,
 }: {
-  onSelectColor: (color: string) => void
+  onSelectColor: (color: string) => void;
 }) {
-  const [customColor, setCustomColor] = React.useState("#000000")
-  
+  const [customColor, setCustomColor] = React.useState("#000000");
+
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCustomColor(e.target.value)
-  }
-  
+    setCustomColor(e.target.value);
+  };
+
   const handleApply = () => {
-    onSelectColor(customColor)
-  }
-  
+    onSelectColor(customColor);
+  };
+
   return (
     <div className="flex flex-row items-center gap-2">
       <input
@@ -176,7 +175,7 @@ export function CustomColorInput({
         Apply
       </Button>
     </div>
-  )
+  );
 }
 
 export function TextColorContent({
@@ -184,38 +183,38 @@ export function TextColorContent({
   colors = DEFAULT_TEXT_COLORS,
   onClose,
 }: {
-  editor?: Editor | null
-  colors?: TextColor[]
-  onClose?: () => void
+  editor?: Editor | null;
+  colors?: TextColor[];
+  onClose?: () => void;
 }) {
-  const editor = useTiptapEditor(providedEditor)
-  const containerRef = React.useRef<HTMLDivElement>(null)
-  const { getActiveColor, toggleTextColor } = useTextColor(editor)
-  const activeColor = getActiveColor()
-  const [showCustomColorInput, setShowCustomColorInput] = React.useState(false)
+  const editor = useTiptapEditor(providedEditor);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const { getActiveColor, toggleTextColor } = useTextColor(editor);
+  const activeColor = getActiveColor();
+  const [showCustomColorInput, setShowCustomColorInput] = React.useState(false);
 
   const menuItems = React.useMemo(
     () => [...colors, { label: "Remove color", value: "none" }],
     [colors]
-  )
+  );
 
   const { selectedIndex } = useMenuNavigation({
     containerRef,
     items: menuItems,
     orientation: "both",
     onSelect: (item) => {
-      toggleTextColor(item.value)
-      onClose?.()
+      toggleTextColor(item.value);
+      onClose?.();
     },
     onClose,
     autoSelectFirstItem: false,
-  })
+  });
 
   // Handle custom color selection
   const handleCustomColorSelect = (color: string) => {
-    toggleTextColor(color)
-    onClose?.()
-  }
+    toggleTextColor(color);
+    onClose?.();
+  };
 
   return (
     <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
@@ -256,7 +255,7 @@ export function TextColorContent({
         >
           <BanIcon className="tiptap-button-icon" />
         </Button>
-        
+
         <Button
           onClick={() => setShowCustomColorInput(!showCustomColorInput)}
           aria-label="Custom color"
@@ -267,7 +266,7 @@ export function TextColorContent({
           <Plus className="tiptap-button-icon" />
         </Button>
       </div>
-      
+
       {showCustomColorInput && (
         <>
           <Separator className="my-2" />
@@ -275,22 +274,22 @@ export function TextColorContent({
         </>
       )}
     </div>
-  )
+  );
 }
 
 export interface TextColorPopoverProps extends Omit<ButtonProps, "type"> {
   /**
    * The TipTap editor instance.
    */
-  editor?: Editor | null
+  editor?: Editor | null;
   /**
    * The text colors to display in the popover.
    */
-  colors?: TextColor[]
+  colors?: TextColor[];
   /**
    * Whether to hide the text color popover.
    */
-  hideWhenUnavailable?: boolean
+  hideWhenUnavailable?: boolean;
 }
 
 export function TextColorPopover({
@@ -299,47 +298,47 @@ export function TextColorPopover({
   hideWhenUnavailable = false,
   ...props
 }: TextColorPopoverProps) {
-  const editor = useTiptapEditor(providedEditor)
-  const { markAvailable, getActiveColor } = useTextColor(editor)
-  const activeColor = getActiveColor()
-  const [isOpen, setIsOpen] = React.useState(false)
+  const editor = useTiptapEditor(providedEditor);
+  const { markAvailable, getActiveColor } = useTextColor(editor);
+  const activeColor = getActiveColor();
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const isDisabled = React.useMemo(() => {
     if (!markAvailable || !editor) {
-      return true
+      return true;
     }
 
     return (
       editor.isActive("code") ||
       editor.isActive("codeBlock") ||
       editor.isActive("imageUpload")
-    )
-  }, [markAvailable, editor])
+    );
+  }, [markAvailable, editor]);
 
   const canSetMark = React.useMemo(() => {
-    if (!editor || !markAvailable) return false
+    if (!editor || !markAvailable) return false;
 
     try {
-      return editor.can().setColor("#000000")
+      return editor.can().setColor("#000000");
     } catch {
-      return false
+      return false;
     }
-  }, [editor, markAvailable])
+  }, [editor, markAvailable]);
 
-  const isActive = editor?.isActive("textStyle", { color: /.*/ }) ?? false
+  const isActive = editor?.isActive("textStyle", { color: /.*/ }) ?? false;
 
   const show = React.useMemo(() => {
     if (hideWhenUnavailable) {
       if (isNodeSelection(editor?.state.selection) || !canSetMark) {
-        return false
+        return false;
       }
     }
 
-    return true
-  }, [hideWhenUnavailable, editor, canSetMark])
+    return true;
+  }, [hideWhenUnavailable, editor, canSetMark]);
 
   if (!show || !editor || !editor.isEditable) {
-    return null
+    return null;
   }
 
   return (
@@ -363,9 +362,9 @@ export function TextColorPopover({
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
-TextColorButton.displayName = "TextColorButton"
+TextColorButton.displayName = "TextColorButton";
 
-export default TextColorPopover
+export default TextColorPopover;

@@ -18,6 +18,13 @@ import {
   Trash,
   Image,
   Layers,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  AlignStartVertical,
+  AlignCenterVertical,
+  AlignEndVertical,
 } from "lucide-react";
 
 // Import the highlight popover styles to maintain consistency
@@ -108,6 +115,52 @@ const OverlayIcon = ({ hasOverlay }: { hasOverlay: boolean }) => {
       {hasOverlay && (
         <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-purple-500 rounded-sm" />
       )}
+    </div>
+  );
+};
+
+// Text Alignment Icon Component
+const TextAlignmentIcon = ({ alignment }: { alignment: string | null }) => {
+  const getIcon = () => {
+    switch (alignment) {
+      case "center":
+        return AlignCenter;
+      case "right":
+        return AlignRight;
+      case "justify":
+        return AlignJustify;
+      default:
+        return AlignLeft;
+    }
+  };
+
+  const IconComponent = getIcon();
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <IconComponent className="tiptap-button-icon" />
+    </div>
+  );
+};
+
+// Vertical Alignment Icon Component
+const VerticalAlignmentIcon = ({ alignment }: { alignment: string | null }) => {
+  const getIcon = () => {
+    switch (alignment) {
+      case "center":
+        return AlignCenterVertical;
+      case "bottom":
+        return AlignEndVertical;
+      default:
+        return AlignStartVertical;
+    }
+  };
+
+  const IconComponent = getIcon();
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <IconComponent className="tiptap-button-icon" />
     </div>
   );
 };
@@ -253,6 +306,52 @@ const OverlayButton = React.forwardRef<
       {...props}
     >
       {children || <OverlayIcon hasOverlay={hasOverlay || false} />}
+    </Button>
+  );
+});
+
+// Text Alignment Button Component
+const TextAlignmentButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonProps & { alignment?: string | null }
+>(({ className, children, alignment, ...props }, ref) => {
+  return (
+    <Button
+      type="button"
+      className={className}
+      data-style="ghost"
+      data-appearance="default"
+      role="button"
+      tabIndex={-1}
+      aria-label="Text alignment"
+      tooltip="Text alignment"
+      ref={ref}
+      {...props}
+    >
+      {children || <TextAlignmentIcon alignment={alignment || null} />}
+    </Button>
+  );
+});
+
+// Vertical Alignment Button Component
+const VerticalAlignmentButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonProps & { alignment?: string | null }
+>(({ className, children, alignment, ...props }, ref) => {
+  return (
+    <Button
+      type="button"
+      className={className}
+      data-style="ghost"
+      data-appearance="default"
+      role="button"
+      tabIndex={-1}
+      aria-label="Vertical alignment"
+      tooltip="Vertical alignment"
+      ref={ref}
+      {...props}
+    >
+      {children || <VerticalAlignmentIcon alignment={alignment || null} />}
     </Button>
   );
 });
@@ -841,6 +940,137 @@ function OverlayContent({
   );
 }
 
+// Text Alignment Content Component
+function TextAlignmentContent({
+  editor,
+  onClose,
+}: {
+  editor?: Editor | null;
+  onClose?: () => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleAlignmentSelect = (
+    alignment: "left" | "center" | "right" | "justify"
+  ) => {
+    if (!editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", { textAlignment: alignment })
+      .run();
+    onClose?.();
+  };
+
+  const getCurrentAlignment = () => {
+    if (!editor) return "left";
+    const cardAttrs = editor.getAttributes("cardNode");
+    return cardAttrs.textAlignment || "left";
+  };
+
+  const activeAlignment = getCurrentAlignment();
+
+  const alignmentOptions = [
+    { value: "left", icon: AlignLeft, label: "Left" },
+    { value: "center", icon: AlignCenter, label: "Center" },
+    { value: "right", icon: AlignRight, label: "Right" },
+    { value: "justify", icon: AlignJustify, label: "Justify" },
+  ];
+
+  return (
+    <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
+      <div className="tiptap-button-group" data-orientation="horizontal">
+        {alignmentOptions.map((option) => {
+          const IconComponent = option.icon;
+          return (
+            <Button
+              key={option.value}
+              type="button"
+              role="menuitem"
+              data-active-state={
+                activeAlignment === option.value ? "on" : "off"
+              }
+              aria-label={`${option.label} align text`}
+              tabIndex={-1}
+              data-style="ghost"
+              onClick={() => handleAlignmentSelect(option.value as any)}
+              className="flex items-center justify-center w-8 h-8"
+            >
+              <IconComponent className="tiptap-button-icon" />
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Vertical Alignment Content Component
+function VerticalAlignmentContent({
+  editor,
+  onClose,
+}: {
+  editor?: Editor | null;
+  onClose?: () => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const handleVerticalAlignmentSelect = (
+    alignment: "top" | "center" | "bottom"
+  ) => {
+    if (!editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", { verticalAlignment: alignment })
+      .run();
+    onClose?.();
+  };
+
+  const getCurrentVerticalAlignment = () => {
+    if (!editor) return "top";
+    const cardAttrs = editor.getAttributes("cardNode");
+    return cardAttrs.verticalAlignment || "top";
+  };
+
+  const activeVerticalAlignment = getCurrentVerticalAlignment();
+
+  const verticalAlignmentOptions = [
+    { value: "top", icon: AlignStartVertical, label: "Top" },
+    { value: "center", icon: AlignCenterVertical, label: "Center" },
+    { value: "bottom", icon: AlignEndVertical, label: "Bottom" },
+  ];
+
+  return (
+    <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
+      <div className="tiptap-button-group" data-orientation="horizontal">
+        {verticalAlignmentOptions.map((option) => {
+          const IconComponent = option.icon;
+          return (
+            <Button
+              key={option.value}
+              type="button"
+              role="menuitem"
+              data-active-state={
+                activeVerticalAlignment === option.value ? "on" : "off"
+              }
+              aria-label={`${option.label} vertical align`}
+              tabIndex={-1}
+              data-style="ghost"
+              onClick={() => handleVerticalAlignmentSelect(option.value as any)}
+              className="flex items-center justify-center w-8 h-8"
+            >
+              <IconComponent className="tiptap-button-icon" />
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // Main Popover Component (following TextColorPopover pattern)
 function CardColorPopover({
   editor,
@@ -1031,6 +1261,92 @@ function OverlayPopover({
   );
 }
 
+// Text Alignment Popover Component
+function TextAlignmentPopover({
+  editor,
+  ...props
+}: {
+  editor?: Editor | null;
+} & ButtonProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const getCurrentAlignment = () => {
+    if (!editor) return "left";
+    const cardAttrs = editor.getAttributes("cardNode");
+    return cardAttrs.textAlignment || "left";
+  };
+
+  const currentAlignment = getCurrentAlignment();
+  const isActive = editor?.isActive("cardNode") ?? false;
+
+  if (!editor || !editor.isEditable) {
+    return null;
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <TextAlignmentButton
+          data-active-state={isActive ? "on" : "off"}
+          aria-pressed={isActive}
+          alignment={currentAlignment}
+          {...props}
+        />
+      </PopoverTrigger>
+
+      <PopoverContent aria-label="Text alignment" className="w-auto">
+        <TextAlignmentContent
+          editor={editor}
+          onClose={() => setIsOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// Vertical Alignment Popover Component
+function VerticalAlignmentPopover({
+  editor,
+  ...props
+}: {
+  editor?: Editor | null;
+} & ButtonProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const getCurrentVerticalAlignment = () => {
+    if (!editor) return "top";
+    const cardAttrs = editor.getAttributes("cardNode");
+    return cardAttrs.verticalAlignment || "top";
+  };
+
+  const currentVerticalAlignment = getCurrentVerticalAlignment();
+  const isActive = editor?.isActive("cardNode") ?? false;
+
+  if (!editor || !editor.isEditable) {
+    return null;
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <VerticalAlignmentButton
+          data-active-state={isActive ? "on" : "off"}
+          aria-pressed={isActive}
+          alignment={currentVerticalAlignment}
+          {...props}
+        />
+      </PopoverTrigger>
+
+      <PopoverContent aria-label="Vertical alignment" className="w-auto">
+        <VerticalAlignmentContent
+          editor={editor}
+          onClose={() => setIsOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
   if (!editor || !editor.isEditable) {
     return null;
@@ -1083,7 +1399,7 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
         placement: "top",
         animation: "fade",
       }}
-      className="card-bubble-menu"
+      className="card-bubble-menu w-[410px]"
     >
       <div className="card-bubble-menu-content">
         <div className="flex gap-2">
@@ -1107,6 +1423,8 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
         <BorderRadiusPopover editor={editor} />
         <BackgroundImagePopover editor={editor} />
         <OverlayPopover editor={editor} />
+        <TextAlignmentPopover editor={editor} />
+        <VerticalAlignmentPopover editor={editor} />
         <Button
           type="button"
           role="menuitem"
@@ -1127,5 +1445,7 @@ CardColorButton.displayName = "CardColorButton";
 BorderRadiusButton.displayName = "BorderRadiusButton";
 BackgroundImageButton.displayName = "BackgroundImageButton";
 OverlayButton.displayName = "OverlayButton";
+TextAlignmentButton.displayName = "TextAlignmentButton";
+VerticalAlignmentButton.displayName = "VerticalAlignmentButton";
 
 export default CardBubbleMenu;

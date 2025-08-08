@@ -198,9 +198,40 @@
   position: relative;
   z-index: 2; // Ensure content is above overlay
   cursor: text;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: inherit;
+
+  // Apply text alignment from CSS custom property
+  text-align: var(--card-text-alignment, left);
+
+  // Apply vertical alignment from CSS custom property
+  justify-content: var(--card-vertical-alignment-flex, flex-start);
 
   // Inherit card text color from CSS custom property
   color: var(--card-text-color, inherit);
+
+  // Target the actual TipTap content wrapper
+  .ProseMirror {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: inherit;
+    text-align: inherit;
+    outline: none;
+    flex: 1;
+
+    // Ensure content elements fill the space properly
+    > * {
+      text-align: inherit;
+    }
+
+    // For vertical center alignment, make sure paragraphs don't have default margins
+    &:has(p:only-child) {
+      align-items: center;
+    }
+  }
 
   // Ensure content inherits card text color
   p,
@@ -244,6 +275,80 @@
   pointer-events: none;
   border-radius: inherit;
   z-index: 1;
+}
+
+// Vertical alignment support via data attributes
+.tiptap-card[data-vertical-alignment="top"] .tiptap-card-content {
+  justify-content: flex-start;
+
+  .ProseMirror {
+    justify-content: flex-start;
+  }
+}
+
+.tiptap-card[data-vertical-alignment="center"] .tiptap-card-content {
+  justify-content: center;
+
+  .ProseMirror {
+    justify-content: center;
+  }
+}
+
+.tiptap-card[data-vertical-alignment="bottom"] .tiptap-card-content {
+  justify-content: flex-end;
+
+  .ProseMirror {
+    justify-content: flex-end;
+  }
+}
+
+// Text alignment support via data attributes
+.tiptap-card[data-text-alignment="left"] .tiptap-card-content {
+  text-align: left;
+
+  .ProseMirror {
+    text-align: left;
+
+    > * {
+      text-align: left;
+    }
+  }
+}
+
+.tiptap-card[data-text-alignment="center"] .tiptap-card-content {
+  text-align: center;
+
+  .ProseMirror {
+    text-align: center;
+
+    > * {
+      text-align: center;
+    }
+  }
+}
+
+.tiptap-card[data-text-alignment="right"] .tiptap-card-content {
+  text-align: right;
+
+  .ProseMirror {
+    text-align: right;
+
+    > * {
+      text-align: right;
+    }
+  }
+}
+
+.tiptap-card[data-text-alignment="justify"] .tiptap-card-content {
+  text-align: justify;
+
+  .ProseMirror {
+    text-align: justify;
+
+    > * {
+      text-align: justify;
+    }
+  }
 }
 
 // Card Controls
