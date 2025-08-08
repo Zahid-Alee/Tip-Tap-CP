@@ -282,11 +282,13 @@ export const CardNode = Node.create<CardNodeOptions>({
           "data-variant": variant,
           class: `tiptap-card tiptap-card--${variant}`,
           ...(styleAttribute && { style: styleAttribute }),
-          ...(backgroundImage &&
-            overlayColor && {
-              "data-overlay-color": overlayColor,
-              "data-overlay-opacity": overlayOpacity || 0.5,
-            }),
+          ...(backgroundImage && {
+            "data-background-image": backgroundImage,
+          }),
+          ...(overlayColor && {
+            "data-overlay-color": overlayColor,
+            "data-overlay-opacity": overlayOpacity || 0.5,
+          }),
           ...(textAlignment && {
             "data-text-alignment": textAlignment,
           }),

@@ -449,22 +449,15 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
                 opacity: overlayOpacity || 0.5,
                 pointerEvents: "none",
                 borderRadius: "inherit",
-                zIndex: 0,
+                zIndex: 1,
               }}
             />
           )}
           <div
             className="tiptap-card-content"
             style={{
-              textAlign: textAlignment as any,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent:
-                verticalAlignment === "center"
-                  ? "center"
-                  : verticalAlignment === "bottom"
-                  ? "flex-end"
-                  : "flex-start",
+              position: "relative",
+              zIndex: 2,
               height: "100%",
               minHeight: "inherit",
             }}
