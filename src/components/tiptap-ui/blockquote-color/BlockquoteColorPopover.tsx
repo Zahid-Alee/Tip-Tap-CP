@@ -355,13 +355,20 @@ export function BlockquoteColorPopover({
     e.preventDefault();
     if (!editor || isDisabled) return;
 
-    // If blockquote is not active, toggle it on
-    if (!isActive) {
+    // Check if cursor is currently inside a blockquote
+    const isCurrentlyInBlockquote = editor.isActive("blockquote");
+    console.log("it is owrking ");
+
+    if (!isCurrentlyInBlockquote) {
+      // If not in blockquote, create one
       editor.chain().focus().toggleWrap("blockquote").run();
-    } else {
-      // If blockquote is active, open the color picker
-      setIsOpen(true);
+      setTimeout(() => setIsOpen(true), 100); // Delay to ensure blockquote is created
     }
+    // } else {
+    //   console.log("Already in blockquote, opening color picker");
+    //   // If already in blockquote, open the color picker
+    //   setIsOpen(true);
+    // }
   };
 
   if (!show || !editor || !editor.isEditable) {
@@ -382,13 +389,15 @@ export function BlockquoteColorPopover({
         />
       </PopoverTrigger>
 
-      <PopoverContent aria-label="Blockquote colors" className="w-auto">
-        <BlockquoteColorContent
-          editor={editor}
-          colors={colors}
-          onClose={() => setIsOpen(false)}
-        />
-      </PopoverContent>
+      {isOpen && (
+        <PopoverContent aria-label="Blockquote colors" className="w-auto">
+          <BlockquoteColorContent
+            editor={editor}
+            colors={colors}
+            onClose={() => setIsOpen(false)}
+          />
+        </PopoverContent>
+      )}
     </Popover>
   );
 }
