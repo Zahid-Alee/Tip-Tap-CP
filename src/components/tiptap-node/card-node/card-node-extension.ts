@@ -298,12 +298,6 @@ export const CardNode = Node.create<CardNodeOptions>({
 
     const styleAttribute = styles.length > 0 ? styles.join("; ") : undefined;
 
-    // Create the overlay HTML if overlay is set
-    let overlayHTML = "";
-    if (overlayColor && overlayOpacity !== undefined) {
-      overlayHTML = `<div class="card-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; pointer-events: none; z-index: 1;"></div>`;
-    }
-
     // Create content wrapper with alignment styles
     const contentStyles: string[] = [];
     if (textAlignment) {
@@ -330,6 +324,30 @@ export const CardNode = Node.create<CardNodeOptions>({
     const contentStyleAttribute =
       contentStyles.length > 0 ? contentStyles.join("; ") : "";
 
+    // Build children array
+    const children: any[] = [];
+
+    // Add overlay if needed
+    if (overlayColor && overlayOpacity !== undefined) {
+      children.push([
+        "div",
+        {
+          class: "card-overlay",
+          style: `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; pointer-events: none; z-index: 1;`,
+        },
+      ]);
+    }
+
+    // Add content wrapper
+    children.push([
+      "div",
+      {
+        class: "tiptap-card-content",
+        ...(contentStyleAttribute && { style: contentStyleAttribute }),
+      },
+      0,
+    ]);
+
     return [
       "div",
       mergeAttributes(
@@ -355,27 +373,7 @@ export const CardNode = Node.create<CardNodeOptions>({
         this.options.HTMLAttributes,
         HTMLAttributes
       ),
-      [
-        ...(overlayHTML
-          ? [
-              [
-                "div",
-                {
-                  class: "card-overlay",
-                  style: `position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: ${overlayColor}; opacity: ${overlayOpacity}; pointer-events: none; z-index: 1;`,
-                },
-              ],
-            ]
-          : []),
-        [
-          "div",
-          {
-            class: "tiptap-card-content",
-            ...(contentStyleAttribute && { style: contentStyleAttribute }),
-          },
-          0,
-        ],
-      ],
+      ...children,
     ];
   },
 
