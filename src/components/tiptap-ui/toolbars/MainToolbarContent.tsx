@@ -23,6 +23,7 @@ import { TextAlignButton } from "@/components/tiptap-ui/text-align-button";
 import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button";
 import FontPopover from "../font/FontPopover";
 import TextColorPopover from "../font/TextColorPopover";
+import BlockquoteColorPopover from "../blockquote-color/BlockquoteColorPopover";
 
 import { TableButton } from "@/components/tiptap-ui/table/table-ui";
 import { AIFeaturesButton } from "../ai-features/ai-features-ui";
@@ -122,9 +123,8 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
             "checkList",
           ]}
         />
-        <NodeButton type="blockquote" />
+        <BlockquoteColorPopover editor={editor} />
         <TableButton editor={editor} />
-        {/* <ColumnButton editor={editor}/> */}
         <HorizontalRuleButton editor={editor} />
       </ToolbarGroup>
 
