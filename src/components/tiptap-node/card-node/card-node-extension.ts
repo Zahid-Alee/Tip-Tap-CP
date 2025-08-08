@@ -66,6 +66,14 @@ declare module "@tiptap/core" {
         alignment: "top" | "center" | "bottom"
       ) => ReturnType;
       /**
+       * Set card width (in percentage)
+       */
+      setCardWidth: (width: string) => ReturnType;
+      /**
+       * Set card height (in pixels)
+       */
+      setCardHeight: (height: number) => ReturnType;
+      /**
        * Reset card to default variant styles
        */
       resetCardToVariant: (variant: "dark" | "gray-outline") => ReturnType;
@@ -134,10 +142,19 @@ export const CardNode = Node.create<CardNodeOptions>({
         },
       },
       width: {
-        default: 300,
+        default: "50%",
         parseHTML: (element) => {
           const width = element.style.width;
-          return width ? Math.min(1200, parseInt(width)) : 300; // Enforce max width
+          if (width) {
+            // If it's a percentage, return as is
+            if (width.includes("%")) {
+              return width;
+            }
+            // Convert pixels to percentage (assuming parent container width)
+            // Default to 50% for responsive behavior
+            return "50%";
+          }
+          return "50%";
         },
         renderHTML: (attributes) => {
           return {};
@@ -287,7 +304,7 @@ export const CardNode = Node.create<CardNodeOptions>({
     if (borderColor) styles.push(`border-color: ${borderColor}`);
     if (textColor) styles.push(`color: ${textColor}`);
     if (borderRadius) styles.push(`border-radius: ${borderRadius}`);
-    if (width) styles.push(`width: ${width}px`);
+    if (width) styles.push(`width: ${width}`);
     if (height) styles.push(`height: ${height}px`);
     if (backgroundImage) {
       styles.push(`background-image: url('${backgroundImage}')`);
@@ -384,7 +401,7 @@ export const CardNode = Node.create<CardNodeOptions>({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { variant },
+            attrs: { variant, width: "50%" },
             content: [
               {
                 type: "paragraph",
@@ -455,6 +472,16 @@ export const CardNode = Node.create<CardNodeOptions>({
           return commands.updateAttributes(this.name, {
             verticalAlignment: alignment,
           });
+        },
+      setCardWidth:
+        (width) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { width });
+        },
+      setCardHeight:
+        (height) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { height });
         },
     };
   },

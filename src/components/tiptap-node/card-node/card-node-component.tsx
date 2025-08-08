@@ -34,7 +34,7 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
 
   // Add resize state with default dimensions
   const [dimensions, setDimensions] = useState({
-    width: node.attrs.width || 300,
+    width: node.attrs.width || "50%",
     height: node.attrs.height || 200,
   });
 
@@ -56,7 +56,7 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   // Update dimensions when node attributes change
   useEffect(() => {
     setDimensions({
-      width: node.attrs.width || 300,
+      width: node.attrs.width || "50%",
       height: node.attrs.height || 200,
     });
   }, [node.attrs.width, node.attrs.height]);
@@ -119,17 +119,29 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   const handleResizeStart = useCallback(
     (e: React.MouseEvent, handle: ResizeHandle) => {
       // Don't allow resize in read-only mode
-      if (!editor?.isEditable) return;
+      if (!editor?.isEditable || !containerRef.current) return;
 
       e.preventDefault();
       e.stopPropagation();
+
+      // Get parent container width for percentage calculations
+      const parentWidth =
+        containerRef.current.parentElement?.offsetWidth || 800;
+
+      // Convert current width to pixels if it's a percentage
+      const currentWidthPx =
+        typeof dimensions.width === "string" && dimensions.width.includes("%")
+          ? (parseFloat(dimensions.width) / 100) * parentWidth
+          : typeof dimensions.width === "number"
+          ? dimensions.width
+          : parseFloat(dimensions.width.toString());
 
       setIsResizing(true);
       setResizeHandle(handle);
       setResizeStartData({
         startX: e.clientX,
         startY: e.clientY,
-        startWidth: dimensions.width,
+        startWidth: currentWidthPx,
         startHeight: dimensions.height,
       });
     },
@@ -139,21 +151,39 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   // Handle resize during mouse move
   const handleResizeMove = useCallback(
     (e: MouseEvent) => {
-      if (!isResizing || !resizeStartData || !resizeHandle) return;
+      if (
+        !isResizing ||
+        !resizeStartData ||
+        !resizeHandle ||
+        !containerRef.current
+      )
+        return;
 
       const deltaX = e.clientX - resizeStartData.startX;
       const deltaY = e.clientY - resizeStartData.startY;
 
-      let newWidth = resizeStartData.startWidth;
+      // Get parent container width for percentage calculations
+      const parentWidth =
+        containerRef.current.parentElement?.offsetWidth || 800;
+
+      // Convert current width to pixels if it's a percentage
+      let currentWidthPx =
+        typeof dimensions.width === "string" && dimensions.width.includes("%")
+          ? (parseFloat(dimensions.width) / 100) * parentWidth
+          : typeof dimensions.width === "number"
+          ? dimensions.width
+          : parseFloat(dimensions.width.toString());
+
+      let newWidthPx = currentWidthPx;
       let newHeight = resizeStartData.startHeight;
 
       // Calculate new dimensions based on resize handle
       switch (resizeHandle) {
         case "e":
-          newWidth = resizeStartData.startWidth + deltaX;
+          newWidthPx = resizeStartData.startWidth + deltaX;
           break;
         case "w":
-          newWidth = resizeStartData.startWidth - deltaX;
+          newWidthPx = resizeStartData.startWidth - deltaX;
           break;
         case "s":
           newHeight = resizeStartData.startHeight + deltaY;
@@ -162,30 +192,39 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
           newHeight = resizeStartData.startHeight - deltaY;
           break;
         case "se":
-          newWidth = resizeStartData.startWidth + deltaX;
+          newWidthPx = resizeStartData.startWidth + deltaX;
           newHeight = resizeStartData.startHeight + deltaY;
           break;
         case "sw":
-          newWidth = resizeStartData.startWidth - deltaX;
+          newWidthPx = resizeStartData.startWidth - deltaX;
           newHeight = resizeStartData.startHeight + deltaY;
           break;
         case "ne":
-          newWidth = resizeStartData.startWidth + deltaX;
+          newWidthPx = resizeStartData.startWidth + deltaX;
           newHeight = resizeStartData.startHeight - deltaY;
           break;
         case "nw":
-          newWidth = resizeStartData.startWidth - deltaX;
+          newWidthPx = resizeStartData.startWidth - deltaX;
           newHeight = resizeStartData.startHeight - deltaY;
           break;
       }
 
-      // Apply constraints
-      newWidth = Math.max(200, Math.min(1200, newWidth)); // Max width 1200px
+      // Apply constraints for width in pixels then convert to percentage
+      newWidthPx = Math.max(200, Math.min(parentWidth, newWidthPx));
+      const newWidthPercent = Math.max(
+        10,
+        Math.min(100, (newWidthPx / parentWidth) * 100)
+      );
+
+      // Apply constraints for height
       newHeight = Math.max(100, Math.min(newHeight));
 
-      setDimensions({ width: newWidth, height: newHeight });
+      setDimensions({
+        width: `${Math.round(newWidthPercent)}%`,
+        height: newHeight,
+      });
     },
-    [isResizing, resizeStartData, resizeHandle]
+    [isResizing, resizeStartData, resizeHandle, dimensions.width]
   );
 
   // Handle resize end
@@ -416,7 +455,7 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
         className="card-resizable-container"
         style={{
           position: "relative",
-          width: `${dimensions.width}px`,
+          width: dimensions.width,
           height: `${dimensions.height}px`,
           display: "inline-block",
         }}
