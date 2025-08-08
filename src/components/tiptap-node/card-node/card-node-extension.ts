@@ -137,7 +137,7 @@ export const CardNode = Node.create<CardNodeOptions>({
         default: 300,
         parseHTML: (element) => {
           const width = element.style.width;
-          return width ? parseInt(width) : 300;
+          return width ? Math.min(1200, parseInt(width)) : 300; // Enforce max width
         },
         renderHTML: (attributes) => {
           return {};

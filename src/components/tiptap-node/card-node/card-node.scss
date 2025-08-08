@@ -12,6 +12,7 @@
   transition: all 0.2s ease;
   min-height: 60px;
   cursor: pointer;
+  max-width: 1200px; // Maximum width constraint
 
   // Apply custom width and height if provided
   width: var(--card-width, auto);
@@ -725,12 +726,14 @@
 // Resizable container
 .card-resizable-container {
   display: block !important;
+  max-width: 1200px; // Maximum width constraint
 
   .tiptap-card {
     width: 100% !important;
     height: 100% !important;
     min-width: unset !important;
     min-height: unset !important;
+    max-width: 1200px !important; // Ensure card respects max-width
   }
 }
 

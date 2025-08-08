@@ -180,8 +180,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
       }
 
       // Apply constraints
-      newWidth = Math.max(200, newWidth);
-      newHeight = Math.max(100, Math.min(600, newHeight));
+      newWidth = Math.max(200, Math.min(1200, newWidth)); // Max width 1200px
+      newHeight = Math.max(100, Math.min(newHeight));
 
       setDimensions({ width: newWidth, height: newHeight });
     },
@@ -432,6 +432,8 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
             height: "100%",
           }}
           data-variant={variant}
+          data-text-alignment={textAlignment}
+          data-vertical-alignment={verticalAlignment}
         >
           {/* Background overlay */}
           {backgroundImage && overlayColor && (
