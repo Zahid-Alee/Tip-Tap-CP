@@ -43,6 +43,17 @@ declare module "@tiptap/core" {
         borderRadius?: string;
       }) => ReturnType;
       /**
+       * Set card background image
+       */
+      setCardBackgroundImage: (imageUrl: string) => ReturnType;
+      /**
+       * Set card background overlay
+       */
+      setCardBackgroundOverlay: (colors: {
+        overlayColor?: string;
+        overlayOpacity?: number;
+      }) => ReturnType;
+      /**
        * Reset card to default variant styles
        */
       resetCardToVariant: (variant: "dark" | "gray-outline") => ReturnType;
@@ -130,6 +141,45 @@ export const CardNode = Node.create<CardNodeOptions>({
           return {};
         },
       },
+      backgroundImage: {
+        default: null,
+        parseHTML: (element) => {
+          const bgImage = element.style.backgroundImage;
+          if (bgImage && bgImage !== "none") {
+            // Extract URL from CSS backgroundImage property
+            const match = bgImage.match(/url\(['"]?([^'"]+)['"]?\)/);
+            return match ? match[1] : null;
+          }
+          return null;
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
+      overlayColor: {
+        default: null,
+        parseHTML: (element) => {
+          const overlay = element.querySelector(".card-overlay") as HTMLElement;
+          return overlay ? overlay.style.backgroundColor || null : null;
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
+      overlayOpacity: {
+        default: 0.5,
+        parseHTML: (element) => {
+          const overlay = element.querySelector(".card-overlay") as HTMLElement;
+          if (overlay) {
+            const opacity = overlay.style.opacity;
+            return opacity ? parseFloat(opacity) : 0.5;
+          }
+          return 0.5;
+        },
+        renderHTML: (attributes) => {
+          return {};
+        },
+      },
     };
   },
 
@@ -150,6 +200,9 @@ export const CardNode = Node.create<CardNodeOptions>({
       borderRadius,
       width,
       height,
+      backgroundImage,
+      overlayColor,
+      overlayOpacity,
     } = node.attrs;
 
     // Build style string from individual color attributes and dimensions
@@ -160,6 +213,12 @@ export const CardNode = Node.create<CardNodeOptions>({
     if (borderRadius) styles.push(`border-radius: ${borderRadius}`);
     if (width) styles.push(`width: ${width}px`);
     if (height) styles.push(`height: ${height}px`);
+    if (backgroundImage) {
+      styles.push(`background-image: url('${backgroundImage}')`);
+      styles.push(`background-size: cover`);
+      styles.push(`background-position: center`);
+      styles.push(`background-repeat: no-repeat`);
+    }
 
     const styleAttribute = styles.length > 0 ? styles.join("; ") : undefined;
 
@@ -171,6 +230,11 @@ export const CardNode = Node.create<CardNodeOptions>({
           "data-variant": variant,
           class: `tiptap-card tiptap-card--${variant}`,
           ...(styleAttribute && { style: styleAttribute }),
+          ...(backgroundImage &&
+            overlayColor && {
+              "data-overlay-color": overlayColor,
+              "data-overlay-opacity": overlayOpacity || 0.5,
+            }),
         },
         this.options.HTMLAttributes,
         HTMLAttributes
@@ -231,6 +295,18 @@ export const CardNode = Node.create<CardNodeOptions>({
         (colors) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, colors);
+        },
+      setCardBackgroundImage:
+        (imageUrl) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, {
+            backgroundImage: imageUrl,
+          });
+        },
+      setCardBackgroundOverlay:
+        (overlaySettings) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, overlaySettings);
         },
     };
   },

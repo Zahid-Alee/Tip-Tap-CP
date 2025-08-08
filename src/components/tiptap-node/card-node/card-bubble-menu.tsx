@@ -16,10 +16,15 @@ import {
   Square,
   CornerDownRight,
   Trash,
+  Image,
+  Layers,
 } from "lucide-react";
 
 // Import the highlight popover styles to maintain consistency
 import "@/components/tiptap-ui/highlight-popover/highlight-popover.scss";
+
+// Import the image upload utility
+import { handleImageUpload } from "../../../lib/tiptap-utils";
 
 interface CardBubbleMenuProps {
   editor: Editor;
@@ -82,6 +87,30 @@ const CARD_PRESETS: CardPreset[] = [
 ];
 
 type ColorType = "background" | "border" | "text";
+
+// Background Image Icon Component
+const BackgroundImageIcon = ({ hasImage }: { hasImage: boolean }) => {
+  return (
+    <div className="relative flex items-center justify-center">
+      <Image className="tiptap-button-icon" />
+      {hasImage && (
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-blue-500 rounded-sm" />
+      )}
+    </div>
+  );
+};
+
+// Overlay Icon Component
+const OverlayIcon = ({ hasOverlay }: { hasOverlay: boolean }) => {
+  return (
+    <div className="relative flex items-center justify-center">
+      <Layers className="tiptap-button-icon" />
+      {hasOverlay && (
+        <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-1 bg-purple-500 rounded-sm" />
+      )}
+    </div>
+  );
+};
 
 // Custom Color Icon Components
 const CardColorIcon = ({
@@ -182,6 +211,52 @@ const BorderRadiusButton = React.forwardRef<
   );
 });
 
+// Background Image Button Component
+const BackgroundImageButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonProps & { hasImage?: boolean }
+>(({ className, children, hasImage, ...props }, ref) => {
+  return (
+    <Button
+      type="button"
+      className={className}
+      data-style="ghost"
+      data-appearance="default"
+      role="button"
+      tabIndex={-1}
+      aria-label="Card background image"
+      tooltip="Card background image"
+      ref={ref}
+      {...props}
+    >
+      {children || <BackgroundImageIcon hasImage={hasImage || false} />}
+    </Button>
+  );
+});
+
+// Overlay Button Component
+const OverlayButton = React.forwardRef<
+  HTMLButtonElement,
+  ButtonProps & { hasOverlay?: boolean }
+>(({ className, children, hasOverlay, ...props }, ref) => {
+  return (
+    <Button
+      type="button"
+      className={className}
+      data-style="ghost"
+      data-appearance="default"
+      role="button"
+      tabIndex={-1}
+      aria-label="Card overlay"
+      tooltip="Card overlay"
+      ref={ref}
+      {...props}
+    >
+      {children || <OverlayIcon hasOverlay={hasOverlay || false} />}
+    </Button>
+  );
+});
+
 // Custom Color Input Component (same as TextColorPopover)
 function CustomCardColorInput({
   onSelectColor,
@@ -233,7 +308,7 @@ function CustomCardColorInput({
         onClick={handleApply}
         type="button"
         data-style="solid"
-        className="px-2 py-1 text-sm"
+        className="px-2 py-1  text-sm"
         aria-label={`Apply custom ${getColorLabel()} color`}
       >
         Apply
@@ -511,6 +586,261 @@ function BorderRadiusContent({
   );
 }
 
+// Background Image Content Component
+function BackgroundImageContent({
+  editor,
+  onClose,
+}: {
+  editor?: Editor | null;
+  onClose?: () => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [imageUrl, setImageUrl] = React.useState("");
+  const [isUploading, setIsUploading] = React.useState(false);
+
+  const getCurrentBackgroundImage = () => {
+    if (!editor) return null;
+    const cardAttrs = editor.getAttributes("cardNode");
+    return cardAttrs.backgroundImage || null;
+  };
+
+  const handleImageUploadFile = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      // Use your existing server upload function
+      const uploadedUrl = await handleImageUpload(file);
+
+      if (uploadedUrl) {
+        editor
+          ?.chain()
+          .focus()
+          .updateAttributes("cardNode", { backgroundImage: uploadedUrl })
+          .run();
+        onClose?.();
+      }
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      alert("Failed to upload image. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleUrlSubmit = () => {
+    if (!imageUrl.trim() || !editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", { backgroundImage: imageUrl.trim() })
+      .run();
+    onClose?.();
+  };
+
+  const handleRemoveImage = () => {
+    if (!editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", {
+        backgroundImage: "",
+        overlayColor: "",
+        overlayOpacity: 0.5,
+      })
+      .run();
+    onClose?.();
+  };
+
+  const currentImage = getCurrentBackgroundImage();
+
+  return (
+    <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
+      <div className="flex flex-col gap-1 p-1 bg-white border border-gray-200 rounded-md shadow-sm">
+        {/* Action Row */}
+        <div className="flex gap-1  justify-between items-center">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            type="button"
+            data-style="ghost"
+            aria-label="Upload image"
+            className="flex items-center  justify-center bg-gray-100 hover:bg-gray-200 rounded px-2 text-xs h-7 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isUploading ? "📤 Uploading..." : "📁 Upload"}
+          </button>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUploadFile}
+            className="hidden"
+            disabled={isUploading}
+          />
+
+          <input
+            type="text"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            placeholder="Paste URL..."
+            disabled={isUploading}
+            className="flex-1 h-7 px-2 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+            aria-label="Image URL"
+          />
+
+          <button
+            onClick={handleUrlSubmit}
+            disabled={!imageUrl.trim() || isUploading}
+            type="button"
+            data-style="ghost"
+            className="bg-blue-500  text-white hover:bg-blue-600 rounded px-2 text-xs h-7 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            Apply
+          </button>
+
+          {currentImage && (
+            <button
+              onClick={handleRemoveImage}
+              disabled={isUploading}
+              type="button"
+              data-style="ghost"
+              className="bg-red-100 rounded-[50%] h-6 min-w-6  flex-grow-0     text-xs text-red-500 hover:bg-red-200 cursor-pointer"
+              aria-label="Remove image"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Overlay Content Component
+function OverlayContent({
+  editor,
+  onClose,
+}: {
+  editor?: Editor | null;
+  onClose?: () => void;
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [overlayColor, setOverlayColor] = React.useState("#000000");
+  const [overlayOpacity, setOverlayOpacity] = React.useState(0.5);
+
+  React.useEffect(() => {
+    if (editor) {
+      const cardAttrs = editor.getAttributes("cardNode");
+      if (cardAttrs.overlayColor) setOverlayColor(cardAttrs.overlayColor);
+      if (cardAttrs.overlayOpacity) setOverlayOpacity(cardAttrs.overlayOpacity);
+    }
+  }, [editor]);
+
+  const handleApplyOverlay = () => {
+    if (!editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", {
+        overlayColor,
+        overlayOpacity,
+      })
+      .run();
+    onClose?.();
+  };
+
+  const handleRemoveOverlay = () => {
+    if (!editor) return;
+
+    editor
+      .chain()
+      .focus()
+      .updateAttributes("cardNode", {
+        overlayColor: "",
+        overlayOpacity: 0.5,
+      })
+      .run();
+    onClose?.();
+  };
+
+  const getCurrentOverlay = () => {
+    if (!editor) return { color: null, opacity: null };
+    const cardAttrs = editor.getAttributes("cardNode");
+    return {
+      color: cardAttrs.overlayColor || null,
+      opacity: cardAttrs.overlayOpacity || null,
+    };
+  };
+
+  const currentOverlay = getCurrentOverlay();
+
+  return (
+    <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
+      <div className="flex flex-col gap-1.5 p-2">
+        {/* Compact controls row */}
+        <div className="flex items-center gap-2">
+          <input
+            type="color"
+            value={overlayColor}
+            onChange={(e) => setOverlayColor(e.target.value)}
+            className="w-6 h-6 rounded cursor-pointer border-0 flex-shrink-0"
+            aria-label="Overlay color"
+          />
+
+          <div className="flex-1 flex items-center gap-1">
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={overlayOpacity}
+              onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
+              className="flex-1 h-1"
+              aria-label="Overlay opacity"
+            />
+            <span className="text-xs text-gray-500 min-w-[30px]">
+              {Math.round(overlayOpacity * 100)}%
+            </span>
+          </div>
+        </div>
+
+        {/* Action buttons */}
+        <div className="flex gap-1 items-center">
+          <button
+            onClick={handleApplyOverlay}
+            type="button"
+            data-style="solid"
+            className="flex-1 bg-gray-200 rounded-md h-7 px-2 text-xs"
+            aria-label="Apply overlay"
+          >
+            Apply
+          </button>
+
+          {currentOverlay.color && (
+            <button
+              onClick={handleRemoveOverlay}
+              type="button"
+              data-style="ghost"
+              className="h-6 bg-red-100 rounded-[50%]   max-w-6  text-xs text-red-500 hover:bg-red-200 cursor-pointer"
+              aria-label="Remove overlay"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main Popover Component (following TextColorPopover pattern)
 function CardColorPopover({
   editor,
@@ -618,6 +948,89 @@ function BorderRadiusPopover({
   );
 }
 
+// Background Image Popover Component
+function BackgroundImagePopover({
+  editor,
+  ...props
+}: {
+  editor?: Editor | null;
+} & ButtonProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const hasBackgroundImage = () => {
+    if (!editor) return false;
+    const cardAttrs = editor.getAttributes("cardNode");
+    return !!cardAttrs.backgroundImage;
+  };
+
+  const hasImage = hasBackgroundImage();
+  const isActive = editor?.isActive("cardNode") ?? false;
+
+  if (!editor || !editor.isEditable) {
+    return null;
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <BackgroundImageButton
+          data-active-state={isActive ? "on" : "off"}
+          aria-pressed={isActive}
+          hasImage={hasImage}
+          {...props}
+        />
+      </PopoverTrigger>
+
+      <PopoverContent aria-label="Card background image" className="w-auto">
+        <BackgroundImageContent
+          editor={editor}
+          onClose={() => setIsOpen(false)}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// Overlay Popover Component
+function OverlayPopover({
+  editor,
+  ...props
+}: {
+  editor?: Editor | null;
+} & ButtonProps) {
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  const hasOverlay = () => {
+    if (!editor) return false;
+    const cardAttrs = editor.getAttributes("cardNode");
+    return !!cardAttrs.overlayColor;
+  };
+
+  const hasActiveOverlay = hasOverlay();
+  const isActive = editor?.isActive("cardNode") ?? false;
+
+  if (!editor || !editor.isEditable) {
+    return null;
+  }
+
+  return (
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger asChild>
+        <OverlayButton
+          data-active-state={isActive ? "on" : "off"}
+          aria-pressed={isActive}
+          hasOverlay={hasActiveOverlay}
+          {...props}
+        />
+      </PopoverTrigger>
+
+      <PopoverContent aria-label="Card overlay" className="w-auto">
+        <OverlayContent editor={editor} onClose={() => setIsOpen(false)} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
   if (!editor || !editor.isEditable) {
     return null;
@@ -692,6 +1105,8 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
         <CardColorPopover editor={editor} colorType="background" />
         <CardColorPopover editor={editor} colorType="border" />
         <BorderRadiusPopover editor={editor} />
+        <BackgroundImagePopover editor={editor} />
+        <OverlayPopover editor={editor} />
         <Button
           type="button"
           role="menuitem"
@@ -710,5 +1125,7 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
 
 CardColorButton.displayName = "CardColorButton";
 BorderRadiusButton.displayName = "BorderRadiusButton";
+BackgroundImageButton.displayName = "BackgroundImageButton";
+OverlayButton.displayName = "OverlayButton";
 
 export default CardBubbleMenu;

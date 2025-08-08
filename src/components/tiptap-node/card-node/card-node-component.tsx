@@ -78,6 +78,9 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     borderColor,
     textColor,
     borderRadius,
+    backgroundImage,
+    overlayColor,
+    overlayOpacity,
   } = node.attrs;
 
   // Close settings when clicking outside
@@ -240,6 +243,12 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     borderColor: borderColor || undefined,
     color: textColor || undefined,
     borderRadius: borderRadius || undefined,
+    ...(backgroundImage && {
+      backgroundImage: `url('${backgroundImage}')`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+    }),
   };
 
   // Create CSS custom properties for better style application
@@ -249,6 +258,9 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
     "--card-border-color": borderColor || "",
     "--card-text-color": textColor || "",
     "--card-border-radius": borderRadius || "",
+    "--card-bg-image": backgroundImage || "",
+    "--card-overlay-color": overlayColor || "",
+    "--card-overlay-opacity": overlayOpacity || "0.5",
   } as React.CSSProperties;
 
   // Render resize handles
@@ -417,6 +429,24 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
           }}
           data-variant={variant}
         >
+          {/* Background overlay */}
+          {backgroundImage && overlayColor && (
+            <div
+              className="card-overlay"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: overlayColor,
+                opacity: overlayOpacity || 0.5,
+                pointerEvents: "none",
+                borderRadius: "inherit",
+                zIndex: 0,
+              }}
+            />
+          )}
           <div className="tiptap-card-content">
             <NodeViewContent />
           </div>
