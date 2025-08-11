@@ -98,26 +98,56 @@ You must leverage the following custom blocks when it improves clarity or UX. Us
 
 1. Card Component (callouts / summaries / key ideas)
 Purpose: Highlight key concepts, summaries, tips, warnings, scenarios, definitions.
-Variants: dark | gray-outline (choose one based on emphasis; dark = strong emphasis, gray-outline = neutral framing)
+Variants: dark | gray-outline (choose one based on emphasis; dark = strong emphasis, gray-outline = neutral framing). DEFAULT: dark.
+Default Visuals: background-color must default to a dark tone (e.g. #111 or #121212) unless you intentionally specify an image background.
 Minimal Markup (DO NOT wrap in extra containers):
-<div data-type="card" data-variant="dark" class="tiptap-card tiptap-card--dark">
-    <div class="tiptap-card-content">
-        <h3>[Short Card Title]</h3>
-        <p>[One or two concise supporting sentences.]</p>
-        <ul>
-            <li>[Optional bullet]</li>
-        </ul>
-    </div>
+<div data-type="card" data-variant="dark" class="tiptap-card tiptap-card--dark" style="background-color:#111;width:50%;height:200px;">
+  <div class="tiptap-card-content" data-text-alignment="left" data-vertical-alignment="top">
+    <h3>[Short Card Title]</h3>
+    <p>[One or two concise supporting sentences.]</p>
+    <ul>
+      <li>[Optional bullet]</li>
+    </ul>
+  </div>
 </div>
-Rules:
-- Always include exactly one .tiptap-card-content child wrapper.
+Sizing & Overflow Rules (CRITICAL):
+- NEVER allow overflowing text. If content would exceed the fixed height, either:
+  1) Increase height (e.g. 220px, 260px, 300px) OR
+  2) Split content into multiple cards OR
+  3) Condense wording (preferred first) + use a list.
+- Base heuristic (approximate):
+  * Up to 2 short paragraphs (or 1 paragraph + list <=3 items): height 180–210px
+  * Add 30–40px per additional paragraph
+  * Add 20–24px per list item after the 3rd
+  * Round to nearest 20px (e.g. 200, 220, 240, 260)
+- width defaults to 50%. Increase to 60–70% only if content needs one additional wrapping line in most paragraphs. Never exceed 80%. Use narrower (40%) for very brief highlight cards (<=40 words).
+- If using a background image, still include a dark overlay via style attributes if readability would suffer (e.g. style="background-image:url('...');background-size:cover;background-position:center;"). Optionally pair with overlayColor / overlayOpacity if those attributes are supported elsewhere.
+
+Alignment & Layout:
+- data-text-alignment may be left | center | right | justify – default left.
+- data-vertical-alignment may be top | center | bottom – default top; use center only for very short emphasis cards.
+- Do NOT center-align long multi-line lists.
+
+Content Rules:
+- Always include exactly one .tiptap-card-content wrapper.
 - Inside the content wrapper you may use headings, paragraphs, lists, inline formatting.
-- Keep cards compact (max ~80 words unless it's a summary card at end of a section).
-- Do NOT nest sections inside a card.
-- For multiple related tips use a SINGLE card with a list.
+- Keep cards concise (target <=80 words). For summaries at section end you may extend to ~110 words with bullet list.
+- Do NOT nest <section> elements inside a card.
+- Combine related tips in one card with a list instead of multiple tiny cards.
 
 Optional Styling Attributes (only include if needed):
-- Inline style attributes: background-color, border-color, color, border-radius, width (percent e.g. 50%), height (px). Example: style="background-color:#111;border-color:#333;border-radius:12px;width:70%".
+- Inline style attributes: background-color, border-color, color, border-radius, width (percentage), height (px), background-image.
+  Example: style="background-color:#111;border-color:#333;color:#eee;border-radius:12px;width:60%;height:240px;".
+  Example with image: style="background-image:url('https://example.com/hero.jpg');background-size:cover;background-position:center;height:260px;" (ensure text remains readable; keep textColor light via style or color attribute if necessary).
+Failure Cases To Avoid:
+- Missing height when content is long enough to overflow the default 200px.
+- Height too small causing cut-off content.
+- Excessive empty vertical space (height more than needed by >80px). Adjust instead of padding with blank lines.
+Overflow Prevention Strategy for the Model:
+1. Draft card content.
+2. Estimate required height using heuristic.
+3. If >300px, consider trimming or splitting into second card.
+4. Output final card markup with appropriately scaled height and width.
 
 2. Output Block (terminal / program output / captured result – NOT source code)
 Purpose: Show the RESULT of executing code, CLI session excerpts, logs, JSON responses, evaluation outputs.
