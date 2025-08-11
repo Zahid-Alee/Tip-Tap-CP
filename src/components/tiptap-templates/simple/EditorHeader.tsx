@@ -560,6 +560,89 @@ export function EditorHeader({
 
       <div className="flex items-center gap-3">
         <div className="flex gap-2">
+          {!readOnlyValue && (
+            <div className="flex items-center gap-2">
+              {/* EXPORT MENU */}
+              <DropdownMenu open={isExportOpen} onOpenChange={setIsExportOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
+                    <Upload className="h-4 w-4 mr-1" />
+                    <span className="mr-1">Export</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-44 !rounded-md !p-2"
+                >
+                  <DropdownMenuItem
+                    onSelect={() => handleExport("html")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileCode2 className="h-4 w-4" />{" "}
+                    <span className="text-sm">HTML</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => handleExport("json")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileJson className="h-4 w-4" />{" "}
+                    <span className="text-sm">JSON</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => handleExport("markdown")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileText className="h-4 w-4" />{" "}
+                    <span className="text-sm">Markdown</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {/* IMPORT MENU */}
+              <DropdownMenu open={isImportOpen} onOpenChange={setIsImportOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
+                    <Download className="h-4 w-4 mr-1" />
+                    <span className="mr-1">Import</span>
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 !rounded-md !p-2"
+                >
+                  <DropdownMenuItem
+                    onSelect={() => startImport("html")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileCode2 className="h-4 w-4" />{" "}
+                    <span className="text-sm">HTML (.html)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => startImport("json")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileJson className="h-4 w-4" />{" "}
+                    <span className="text-sm">JSON (.json)</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onSelect={() => startImport("markdown")}
+                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                  >
+                    <FileText className="h-4 w-4" />{" "}
+                    <span className="text-sm">Markdown (.md)</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <input
+                ref={fileInputRef}
+                type="file"
+                hidden
+                onChange={handleFileChange}
+              />
+            </div>
+          )}
+
           {translationHistory.length > 0 && (
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -654,89 +737,6 @@ export function EditorHeader({
               </TooltipContent>
             </Tooltip>
           )}
-
-          {/* {!readOnlyValue && ( */}
-          <div className="flex items-center gap-2">
-            {/* EXPORT MENU */}
-            <DropdownMenu open={isExportOpen} onOpenChange={setIsExportOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
-                  <Download className="h-4 w-4 mr-1" />
-                  <span className="mr-1">Export</span>
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-44 !rounded-md !p-2"
-              >
-                <DropdownMenuItem
-                  onSelect={() => handleExport("html")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileCode2 className="h-4 w-4" />{" "}
-                  <span className="text-sm">HTML</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => handleExport("json")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileJson className="h-4 w-4" />{" "}
-                  <span className="text-sm">JSON</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => handleExport("markdown")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileText className="h-4 w-4" />{" "}
-                  <span className="text-sm">Markdown</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            {/* IMPORT MENU */}
-            <DropdownMenu open={isImportOpen} onOpenChange={setIsImportOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
-                  <Upload className="h-4 w-4 mr-1" />
-                  <span className="mr-1">Import</span>
-                  <ChevronDown className="h-3 w-3" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 !rounded-md !p-2"
-              >
-                <DropdownMenuItem
-                  onSelect={() => startImport("html")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileCode2 className="h-4 w-4" />{" "}
-                  <span className="text-sm">HTML (.html)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => startImport("json")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileJson className="h-4 w-4" />{" "}
-                  <span className="text-sm">JSON (.json)</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onSelect={() => startImport("markdown")}
-                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                >
-                  <FileText className="h-4 w-4" />{" "}
-                  <span className="text-sm">Markdown (.md)</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <input
-              ref={fileInputRef}
-              type="file"
-              hidden
-              onChange={handleFileChange}
-            />
-          </div>
-          {/* )} */}
           {!readOnlyValue && (
             <Tooltip>
               <TooltipTrigger asChild>
