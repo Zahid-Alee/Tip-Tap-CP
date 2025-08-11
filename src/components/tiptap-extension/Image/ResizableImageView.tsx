@@ -194,7 +194,7 @@ export function ResizableImageView(props: any) {
         draggable={isEditable ? "true" : undefined}
         style={imageMaxStyle}
         className={`image-view__body ${
-          props?.selected ? "image-view__body--focused" : ""
+          props?.selected && isEditable ? "image-view__body--focused" : ""
         } ${resizing ? "image-view__body--resizing" : ""}`}
       >
         <img
