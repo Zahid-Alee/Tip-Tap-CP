@@ -545,6 +545,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     },
     ref
   ) {
+    console.log("here is the simple content ", initialContent);
     const isMobile = useMobile();
     const windowSize = useWindowSize();
     const [state, setState] = useEditorState(readOnlyValue, translations);
