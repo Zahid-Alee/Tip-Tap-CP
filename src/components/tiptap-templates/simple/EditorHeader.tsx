@@ -14,9 +14,7 @@ import {
   X,
   Download,
   Upload,
-  FileJson,
   FileCode2,
-  FileText,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,6 +22,31 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/tiptap-ui-primitive/dropdown-menu";
+
+// ---- Types ----
+interface TranslationItem {
+  title: string;
+  text?: string;
+  lastModified?: string;
+  [key: string]: any; // allow extra metadata
+}
+
+interface EditorHeaderProps {
+  title?: string;
+  saveUrl?: string;
+  headers?: Record<string, string>;
+  onSaveSuccess?: (data: any) => void;
+  onSaveError?: (error: Error) => void;
+  readOnlyValue?: boolean;
+  editor?: any;
+  setIsAIModalOpen?: (open: boolean) => void;
+  isGenerating?: boolean;
+  setSaveStatus?: (status: string) => void;
+  translationHistory?: TranslationItem[];
+  currentTranslationIndex?: number;
+  onTranslationChange?: (index: number) => void;
+  setIsUpdatingFromTranslation?: (updating: boolean) => void;
+}
 
 const SaveIcon = () => (
   <svg
@@ -56,460 +79,157 @@ export function EditorHeader({
   setIsAIModalOpen,
   isGenerating = true,
   setSaveStatus,
-  translationHistory,
-  currentTranslationIndex,
+  translationHistory = [],
+  currentTranslationIndex = -1,
   onTranslationChange,
   setIsUpdatingFromTranslation,
-}) {
-  console.log("translationHistory", translationHistory);
+}: EditorHeaderProps) {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
     React.useState(false);
-
-  const [isExportOpen, setIsExportOpen] = React.useState(false);
-  const [isImportOpen, setIsImportOpen] = React.useState(false);
-  const [importType, setImportType] = React.useState(null);
-  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-
   const [titleValue, setTitleValue] = React.useState(title);
   const [isEditTitle, setIsEditTitle] = React.useState(false);
-  const handleOpenAIModal = () => {
-    setIsAIModalOpen(true);
-  };
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // const getUpdatedSaveUrl = (customTitle) => {
-  //   const splitedHeader = saveUrl.split("/");
-  //   const newTitle = encodeURIComponent(customTitle || titleValue);
-  //   let updatedHeaders = "";
-
-  //   if (splitedHeader.length === 6 || splitedHeader.length === 7) {
-  //     splitedHeader[5] = newTitle;
-  //     updatedHeaders = splitedHeader.join("/");
-  //   } else {
-  //     updatedHeaders = saveUrl;
-  //   }
-  //   return updatedHeaders;
-  // };
-
-  const handleSave = async () => {
-    if (!editor || !saveUrl || isSaving) {
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveStatus(null);
-
-    try {
-      const content = editor.getHTML();
-
-      // Ensure we always include a base English translation when saving.
-      let translationsForSave = Array.isArray(translationHistory)
-        ? [...translationHistory]
-        : [];
-
-      const hasEnglish = translationsForSave.some(
-        (t) => typeof t?.title === "string" && /english/i.test(t.title)
-      );
-
-      if (!hasEnglish) {
-        translationsForSave.unshift({
-          title: "English",
-          text: content,
-          lastModified: new Date().toISOString(),
-        });
-      } else {
-        // Optionally sync the first English entry's text with current content.
-        translationsForSave = translationsForSave.map((t) =>
-          typeof t?.title === "string" && /english/i.test(t.title)
-            ? { ...t, text: content }
-            : t
-        );
+  // --- Utilities ---
+  const triggerDownload = React.useCallback(
+    (filename: string, data: string, mime: string) => {
+      try {
+        const blob = new Blob([data], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Download failed", err);
       }
+    },
+    []
+  );
 
-      const requestHeaders = {
-        "Content-Type": "application/json",
-        ...(headers || {}),
-      };
-      console.log("here is the content for saving ", content);
-      const response = await fetch(saveUrl, {
-        method: "POST",
-        headers: requestHeaders,
-        body: JSON.stringify({
-          title: titleValue,
-          content,
-          translation: translationsForSave,
-          currentTranslationIndex: currentTranslationIndex,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Save failed with status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setSaveStatus({ type: "success", message: "Content saved successfully" });
-
-      if (onSaveSuccess) {
-        onSaveSuccess(data);
-      }
-    } catch (error) {
-      console.error("Error saving content:", error);
-      setSaveStatus({ type: "error", message: "Failed to save content" });
-
-      if (onSaveError) {
-        onSaveError(error);
-      }
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleApplyTranslation = (index) => {
-    if (translationHistory[index]) {
-      setIsUpdatingFromTranslation(true);
-      editor.commands.setContent(translationHistory[index].text, false);
-      onTranslationChange(index);
-      setIsTranslationDropdownOpen(false);
-
-      // Reset the flag after content is set
-      setTimeout(() => setIsUpdatingFromTranslation(false), 100);
-    }
-  };
-
-  console.log("translatin hisotry", translationHistory);
-
-  // UTILITIES ------------------------------------------------------------
-  const triggerDownload = (filename, content, mime) => {
-    try {
-      const blob = new Blob([content], { type: mime });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error("Download failed", e);
-    }
-  };
-
-  const jsonMarksToMarkdown = (textNode) => {
-    if (!textNode || textNode.type !== "text") return "";
-    let txt = textNode.text || "";
-    if (textNode.marks) {
-      textNode.marks.forEach((m) => {
-        switch (m.type) {
-          case "bold":
-            txt = `**${txt}**`;
-            break;
-          case "italic":
-            txt = `*${txt}*`;
-            break;
-          case "strike":
-            txt = `~~${txt}~~`;
-            break;
-          case "code":
-            txt = `\`${txt}\``;
-            break;
-          case "link":
-            if (m.attrs?.href) txt = `[${txt}](${m.attrs.href})`;
-            break;
-        }
-      });
-    }
-    return txt;
-  };
-
-  const nodeToMarkdown = (node, listContext = { ordered: false, index: 1 }) => {
-    if (!node) return "";
-    if (node.type === "text") return jsonMarksToMarkdown(node);
-    const next = (children) =>
-      (children || []).map((c) => nodeToMarkdown(c, listContext)).join("");
-    switch (node.type) {
-      case "paragraph":
-        return `${next(node.content)}\n\n`;
-      case "heading": {
-        const level = node.attrs?.level || 1;
-        return `${"#".repeat(level)} ${next(node.content)}\n\n`;
-      }
-      case "bulletList": {
-        return (
-          (node.content || [])
-            .map((li) => nodeToMarkdown(li, { ordered: false, index: 1 }))
-            .join("") + "\n"
-        );
-      }
-      case "orderedList": {
-        return (
-          (node.content || [])
-            .map((li, i) => nodeToMarkdown(li, { ordered: true, index: i + 1 }))
-            .join("") + "\n"
-        );
-      }
-      case "listItem": {
-        const prefix = listContext.ordered ? `${listContext.index}. ` : `- `;
-        // Gather paragraph(s) inside list item
-        const body = (node.content || [])
-          .map((c) => {
-            if (c.type === "paragraph") {
-              return next(c.content).trim();
-            }
-            return nodeToMarkdown(c, listContext).trim();
-          })
-          .join(" ");
-        return `${prefix}${body}\n`;
-      }
-      case "blockquote":
-        return (
-          next(node.content)
-            .split("\n")
-            .map((l) => (l.trim() ? "> " + l : l))
-            .join("\n") + "\n\n"
-        );
-      case "codeBlock": {
-        const lang = node.attrs?.language || "";
-        return `\n\n\`\`\`${lang}\n${next(node.content)}\n\`\`\`\n\n`;
-      }
-      case "horizontalRule":
-        return `\n---\n\n`;
-      case "image": {
-        const alt = node.attrs?.alt || "";
-        const src = node.attrs?.src || "";
-        return `![${alt}](${src})\n\n`;
-      }
-      default:
-        return next(node.content);
-    }
-  };
-
-  const exportMarkdown = () => {
-    try {
-      const json = editor?.getJSON();
-      if (!json) return;
-      const md =
-        (json.content || [])
-          .map((n) => nodeToMarkdown(n))
-          .join("")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim() + "\n";
-      triggerDownload(
-        `${titleValue || "document"}.md`,
-        md,
-        "text/markdown;charset=utf-8"
-      );
-    } catch (e) {
-      console.error("Markdown export failed", e);
-    }
-  };
-
-  const handleExport = (type) => {
+  // --- Export (HTML only) ---
+  const handleExportHtml = () => {
     if (!editor) return;
-    switch (type) {
-      case "html": {
-        const html = editor.getHTML();
-        triggerDownload(
-          `${titleValue || "document"}.html`,
-          html,
-          "text/html;charset=utf-8"
-        );
-        break;
-      }
-      case "json": {
-        const json = JSON.stringify(editor.getJSON(), null, 2);
-        triggerDownload(
-          `${titleValue || "document"}.json`,
-          json,
-          "application/json;charset=utf-8"
-        );
-        break;
-      }
-      case "markdown":
-        exportMarkdown();
-        break;
-      default:
-        break;
-    }
-    setIsExportOpen(false);
+    const html = editor.getHTML();
+    triggerDownload(
+      `${titleValue || "document"}.html`,
+      html,
+      "text/html;charset=utf-8"
+    );
   };
 
-  // Basic markdown -> HTML (very naive) for import.
-  const simpleMarkdownToHTML = (md) => {
-    try {
-      const lines = md.replace(/\r/g, "").split(/\n/);
-      let html = "";
-      let inUl = false;
-      let inOl = false;
-      let inCode = false;
-      lines.forEach((rawLine) => {
-        let line = rawLine;
-        if (/^```/.test(line)) {
-          if (!inCode) {
-            inCode = true;
-            html += `<pre><code>`;
-          } else {
-            inCode = false;
-            html += `</code></pre>`;
-          }
-          return;
-        }
-        if (inCode) {
-          html += line.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "\n";
-          return;
-        }
-        const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-        if (headingMatch) {
-          const level = headingMatch[1].length;
-          html += `<h${level}>${headingMatch[2].trim()}</h${level}>`;
-          return;
-        }
-        if (/^>\s?/.test(line)) {
-          html += `<blockquote>${line
-            .replace(/^>\s?/, "")
-            .trim()}</blockquote>`;
-          return;
-        }
-        const ulMatch = /^[-*]\s+/.test(line);
-        const olMatch = /^\d+\.\s+/.test(line);
-        if (ulMatch || olMatch) {
-          if (ulMatch && !inUl) {
-            if (inOl) {
-              html += `</ol>`;
-              inOl = false;
-            }
-            html += `<ul>`;
-            inUl = true;
-          }
-          if (olMatch && !inOl) {
-            if (inUl) {
-              html += `</ul>`;
-              inUl = false;
-            }
-            html += `<ol>`;
-            inOl = true;
-          }
-          const item = line.replace(ulMatch ? /^[-*]\s+/ : /^\d+\.\s+/, "");
-          html += `<li>${item}</li>`;
-          return;
-        } else {
-          if (inUl) {
-            html += `</ul>`;
-            inUl = false;
-          }
-          if (inOl) {
-            html += `</ol>`;
-            inOl = false;
-          }
-        }
-        if (!line.trim()) {
-          return; // skip blank -> paragraph separation
-        }
-        // inline formatting
-        line = line
-          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-          .replace(/\*(.+?)\*/g, "<em>$1</em>")
-          .replace(/`([^`]+?)`/g, "<code>$1</code>")
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
-        html += `<p>${line}</p>`;
-      });
-      if (inUl) html += `</ul>`;
-      if (inOl) html += `</ol>`;
-      if (inCode) html += `</code></pre>`;
-      return html;
-    } catch (e) {
-      console.error("Markdown parse failed", e);
-      return md;
-    }
-  };
-
-  const handleFileChange = (e) => {
+  // --- Import (HTML only) ---
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !editor) return;
     const reader = new FileReader();
     reader.onload = (ev) => {
       const text = ev.target?.result;
+      if (typeof text !== "string") return;
       try {
-        if (typeof text !== "string") return;
-        if (importType === "json") {
-          const parsed = JSON.parse(text);
-          console.log("[IMPORT:JSON] parsed", parsed);
-          let docJSON: any = null;
-          // Case 1: Direct doc JSON (has type: 'doc')
-          if (parsed && parsed.type === "doc") {
-            docJSON = parsed;
+        let html = text.trim();
+        // Strip BOM
+        html = html.replace(/^\uFEFF/, "");
+        // If full HTML doc, extract body
+        if (/<html[\s>]/i.test(html)) {
+          const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+          if (bodyMatch) {
+            html = bodyMatch[1];
           }
-          // Case 2: Wrapped object { doc: {...} }
-          else if (parsed && parsed.doc && parsed.doc.type === "doc") {
-            docJSON = parsed.doc;
-          }
-          // Case 2b: Wrapped inside data/doc e.g. { data: { doc: {...} } }
-          else if (parsed?.data?.doc?.type === "doc") {
-            docJSON = parsed.data.doc;
-          }
-          // Case 3: Server style { title, content } where content is HTML string
-          else if (parsed && typeof parsed.content === "string") {
-            editor.commands.setContent(parsed.content, false);
-            return;
-          }
-          // Case 3b: { title, content: { type:'doc', ... } }
-          else if (parsed?.content?.type === "doc") {
-            docJSON = parsed.content;
-          }
-          // Case 4: Object with content array but missing type
-          else if (parsed && Array.isArray(parsed.content)) {
-            docJSON = { type: "doc", content: parsed.content };
-          }
-          // Case 5: Deeply nested maybe parsed.data.content
-          else if (parsed?.data?.content?.type === "doc") {
-            docJSON = parsed.data.content;
-          } else if (
-            parsed?.data?.content &&
-            Array.isArray(parsed.data.content)
-          ) {
-            docJSON = { type: "doc", content: parsed.data.content };
-          }
-
-          if (docJSON) {
-            // emitUpdate so dependent UI picks up new content
-            editor.commands.setContent(docJSON);
-          } else {
-            console.warn(
-              "[IMPORT:JSON] Unrecognized JSON shape, skipping",
-              parsed
-            );
-          }
-        } else if (importType === "html") {
-          editor.commands.setContent(text);
-        } else if (importType === "markdown") {
-          const html = simpleMarkdownToHTML(text);
-          editor.commands.setContent(html);
         }
+        // Remove head + doctype
+        html = html
+          .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
+          .replace(/<head[\s\S]*?<\/head>/gi, "")
+          .trim();
+        editor.commands.setContent(html); // emit update
       } catch (err) {
-        console.error("Import failed", err);
+        console.error("HTML import failed", err);
       } finally {
         e.target.value = ""; // reset
-        setImportType(null);
       }
     };
     reader.readAsText(file);
   };
 
-  const startImport = (type) => {
-    setImportType(type);
+  const startImport = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.accept =
-        type === "json"
-          ? "application/json,.json"
-          : type === "html"
-          ? "text/html,.html,.htm"
-          : ".md,text/plain";
+      fileInputRef.current.accept = "text/html,.html,.htm";
       fileInputRef.current.click();
     }
-    setIsImportOpen(false);
   };
 
-  // Using lucide-react icons now instead of inline SVGs.
+  // --- Translation handling ---
+  const handleApplyTranslation = (index: number) => {
+    if (!editor) return;
+    if (index < 0 || index >= translationHistory.length) return;
+    const translation = translationHistory[index] as TranslationItem;
+    setIsUpdatingFromTranslation?.(true);
+    onTranslationChange?.(index);
+    editor.commands.setContent(translation.text || "");
+    setTimeout(() => setIsUpdatingFromTranslation?.(false), 100);
+  };
+
+  // --- Save ---
+  const handleSave = async () => {
+    if (!editor || !saveUrl) return;
+    setIsSaving(true);
+    const html = editor.getHTML();
+
+    // Ensure default English translation exists/updated
+    const hasEnglish = translationHistory.some((t: TranslationItem) =>
+      /english/i.test(t.title || "")
+    );
+    let updatedTranslations: TranslationItem[] = [...translationHistory];
+    if (hasEnglish) {
+      updatedTranslations = updatedTranslations.map((t: TranslationItem) =>
+        /english/i.test(t.title || "")
+          ? { ...t, text: html, lastModified: new Date().toISOString() }
+          : t
+      );
+    } else {
+      updatedTranslations = [
+        {
+          title: "Translate to English",
+          text: html,
+          lastModified: new Date().toISOString(),
+        },
+        ...updatedTranslations,
+      ];
+    }
+
+    try {
+      const res = await fetch(saveUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(headers || {}),
+        },
+        body: JSON.stringify({
+          title: titleValue,
+          content: html,
+          translations: updatedTranslations,
+        }),
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+      const data = await res.json().catch(() => ({}));
+      onSaveSuccess?.(data);
+      setSaveStatus?.("saved");
+    } catch (err) {
+      console.error(err);
+      onSaveError?.(err as Error);
+      setSaveStatus?.("error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // --- AI Modal ---
+  const handleOpenAIModal = () => setIsAIModalOpen?.(true);
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
@@ -562,78 +282,20 @@ export function EditorHeader({
         <div className="flex gap-2">
           {!readOnlyValue && (
             <div className="flex items-center gap-2">
-              {/* EXPORT MENU */}
-              <DropdownMenu open={isExportOpen} onOpenChange={setIsExportOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
-                    <Upload className="h-4 w-4 mr-1" />
-                    <span className="mr-1">Export</span>
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-44 !rounded-md !p-2"
-                >
-                  <DropdownMenuItem
-                    onSelect={() => handleExport("html")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileCode2 className="h-4 w-4" />{" "}
-                    <span className="text-sm">HTML</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => handleExport("json")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileJson className="h-4 w-4" />{" "}
-                    <span className="text-sm">JSON</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => handleExport("markdown")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileText className="h-4 w-4" />{" "}
-                    <span className="text-sm">Markdown</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {/* IMPORT MENU */}
-              <DropdownMenu open={isImportOpen} onOpenChange={setIsImportOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
-                    <Download className="h-4 w-4 mr-1" />
-                    <span className="mr-1">Import</span>
-                    <ChevronDown className="h-3 w-3" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-48 !rounded-md !p-2"
-                >
-                  <DropdownMenuItem
-                    onSelect={() => startImport("html")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileCode2 className="h-4 w-4" />{" "}
-                    <span className="text-sm">HTML (.html)</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => startImport("json")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileJson className="h-4 w-4" />{" "}
-                    <span className="text-sm">JSON (.json)</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => startImport("markdown")}
-                    className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
-                  >
-                    <FileText className="h-4 w-4" />{" "}
-                    <span className="text-sm">Markdown (.md)</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                onClick={handleExportHtml}
+                className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
+                tooltip="Export HTML"
+              >
+                <Upload className="h-4 w-4 mr-2" /> Export HTML
+              </Button>
+              <Button
+                onClick={startImport}
+                className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
+                tooltip="Import HTML"
+              >
+                <Download className="h-4 w-4 mr-2" /> Import HTML
+              </Button>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -670,36 +332,38 @@ export function EditorHeader({
                           align="end"
                           className="w-64 !rounded-md !p-2"
                         >
-                          {translationHistory?.map((translation, index) => (
-                            <DropdownMenuItem
-                              key={index}
-                              className={`flex flex-col items-start p-3 hover:ring-0 hover:outline-0 hover:cursor-pointer hover:bg-gray-100 rounded-md ${
-                                currentTranslationIndex === index
-                                  ? "bg-blue-50 border border-blue-200"
-                                  : ""
-                              }`}
-                              onSelect={() => handleApplyTranslation(index)}
-                            >
-                              <div className="flex w-full justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-sm">
-                                    {translation.title.split("to")[1]}
-                                  </span>
-                                  {translation.lastModified &&
-                                    !readOnlyValue && (
-                                      <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
-                                        Modified
-                                      </span>
+                          {translationHistory?.map(
+                            (translation: TranslationItem, index: number) => (
+                              <DropdownMenuItem
+                                key={index}
+                                className={`flex flex-col items-start p-3 hover:ring-0 hover:outline-0 hover:cursor-pointer hover:bg-gray-100 rounded-md ${
+                                  currentTranslationIndex === index
+                                    ? "bg-blue-50 border border-blue-200"
+                                    : ""
+                                }`}
+                                onSelect={() => handleApplyTranslation(index)}
+                              >
+                                <div className="flex w-full justify-between items-center">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-sm">
+                                      {translation.title.split("to")[1]}
+                                    </span>
+                                    {translation.lastModified &&
+                                      !readOnlyValue && (
+                                        <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full">
+                                          Modified
+                                        </span>
+                                      )}
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    {currentTranslationIndex === index && (
+                                      <Check className="w-4 h-4 text-blue-600" />
                                     )}
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1">
-                                  {currentTranslationIndex === index && (
-                                    <Check className="w-4 h-4 text-blue-600" />
-                                  )}
-                                </div>
-                              </div>
-                            </DropdownMenuItem>
-                          ))}
+                              </DropdownMenuItem>
+                            )
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
