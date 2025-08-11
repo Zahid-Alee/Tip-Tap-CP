@@ -12,6 +12,11 @@ import {
   ChevronDown,
   PencilLine,
   X,
+  Download,
+  Upload,
+  FileJson,
+  FileCode2,
+  FileText,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -60,6 +65,11 @@ export function EditorHeader({
   const [isSaving, setIsSaving] = React.useState(false);
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
     React.useState(false);
+
+  const [isExportOpen, setIsExportOpen] = React.useState(false);
+  const [isImportOpen, setIsImportOpen] = React.useState(false);
+  const [importType, setImportType] = React.useState(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const [titleValue, setTitleValue] = React.useState(title);
   const [isEditTitle, setIsEditTitle] = React.useState(false);
@@ -142,6 +152,338 @@ export function EditorHeader({
   };
 
   console.log("translatin hisotry", translationHistory);
+
+  // UTILITIES ------------------------------------------------------------
+  const triggerDownload = (filename, content, mime) => {
+    try {
+      const blob = new Blob([content], { type: mime });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error("Download failed", e);
+    }
+  };
+
+  const jsonMarksToMarkdown = (textNode) => {
+    if (!textNode || textNode.type !== "text") return "";
+    let txt = textNode.text || "";
+    if (textNode.marks) {
+      textNode.marks.forEach((m) => {
+        switch (m.type) {
+          case "bold":
+            txt = `**${txt}**`;
+            break;
+          case "italic":
+            txt = `*${txt}*`;
+            break;
+          case "strike":
+            txt = `~~${txt}~~`;
+            break;
+          case "code":
+            txt = `\`${txt}\``;
+            break;
+          case "link":
+            if (m.attrs?.href) txt = `[${txt}](${m.attrs.href})`;
+            break;
+        }
+      });
+    }
+    return txt;
+  };
+
+  const nodeToMarkdown = (node, listContext = { ordered: false, index: 1 }) => {
+    if (!node) return "";
+    if (node.type === "text") return jsonMarksToMarkdown(node);
+    const next = (children) =>
+      (children || []).map((c) => nodeToMarkdown(c, listContext)).join("");
+    switch (node.type) {
+      case "paragraph":
+        return `${next(node.content)}\n\n`;
+      case "heading": {
+        const level = node.attrs?.level || 1;
+        return `${"#".repeat(level)} ${next(node.content)}\n\n`;
+      }
+      case "bulletList": {
+        return (
+          (node.content || [])
+            .map((li) => nodeToMarkdown(li, { ordered: false, index: 1 }))
+            .join("") + "\n"
+        );
+      }
+      case "orderedList": {
+        return (
+          (node.content || [])
+            .map((li, i) => nodeToMarkdown(li, { ordered: true, index: i + 1 }))
+            .join("") + "\n"
+        );
+      }
+      case "listItem": {
+        const prefix = listContext.ordered ? `${listContext.index}. ` : `- `;
+        // Gather paragraph(s) inside list item
+        const body = (node.content || [])
+          .map((c) => {
+            if (c.type === "paragraph") {
+              return next(c.content).trim();
+            }
+            return nodeToMarkdown(c, listContext).trim();
+          })
+          .join(" ");
+        return `${prefix}${body}\n`;
+      }
+      case "blockquote":
+        return (
+          next(node.content)
+            .split("\n")
+            .map((l) => (l.trim() ? "> " + l : l))
+            .join("\n") + "\n\n"
+        );
+      case "codeBlock": {
+        const lang = node.attrs?.language || "";
+        return `\n\n\`\`\`${lang}\n${next(node.content)}\n\`\`\`\n\n`;
+      }
+      case "horizontalRule":
+        return `\n---\n\n`;
+      case "image": {
+        const alt = node.attrs?.alt || "";
+        const src = node.attrs?.src || "";
+        return `![${alt}](${src})\n\n`;
+      }
+      default:
+        return next(node.content);
+    }
+  };
+
+  const exportMarkdown = () => {
+    try {
+      const json = editor?.getJSON();
+      if (!json) return;
+      const md =
+        (json.content || [])
+          .map((n) => nodeToMarkdown(n))
+          .join("")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim() + "\n";
+      triggerDownload(
+        `${titleValue || "document"}.md`,
+        md,
+        "text/markdown;charset=utf-8"
+      );
+    } catch (e) {
+      console.error("Markdown export failed", e);
+    }
+  };
+
+  const handleExport = (type) => {
+    if (!editor) return;
+    switch (type) {
+      case "html": {
+        const html = editor.getHTML();
+        triggerDownload(
+          `${titleValue || "document"}.html`,
+          html,
+          "text/html;charset=utf-8"
+        );
+        break;
+      }
+      case "json": {
+        const json = JSON.stringify(editor.getJSON(), null, 2);
+        triggerDownload(
+          `${titleValue || "document"}.json`,
+          json,
+          "application/json;charset=utf-8"
+        );
+        break;
+      }
+      case "markdown":
+        exportMarkdown();
+        break;
+      default:
+        break;
+    }
+    setIsExportOpen(false);
+  };
+
+  // Basic markdown -> HTML (very naive) for import.
+  const simpleMarkdownToHTML = (md) => {
+    try {
+      const lines = md.replace(/\r/g, "").split(/\n/);
+      let html = "";
+      let inUl = false;
+      let inOl = false;
+      let inCode = false;
+      lines.forEach((rawLine) => {
+        let line = rawLine;
+        if (/^```/.test(line)) {
+          if (!inCode) {
+            inCode = true;
+            html += `<pre><code>`;
+          } else {
+            inCode = false;
+            html += `</code></pre>`;
+          }
+          return;
+        }
+        if (inCode) {
+          html += line.replace(/</g, "&lt;").replace(/>/g, "&gt;") + "\n";
+          return;
+        }
+        const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+        if (headingMatch) {
+          const level = headingMatch[1].length;
+          html += `<h${level}>${headingMatch[2].trim()}</h${level}>`;
+          return;
+        }
+        if (/^>\s?/.test(line)) {
+          html += `<blockquote>${line
+            .replace(/^>\s?/, "")
+            .trim()}</blockquote>`;
+          return;
+        }
+        const ulMatch = /^[-*]\s+/.test(line);
+        const olMatch = /^\d+\.\s+/.test(line);
+        if (ulMatch || olMatch) {
+          if (ulMatch && !inUl) {
+            if (inOl) {
+              html += `</ol>`;
+              inOl = false;
+            }
+            html += `<ul>`;
+            inUl = true;
+          }
+          if (olMatch && !inOl) {
+            if (inUl) {
+              html += `</ul>`;
+              inUl = false;
+            }
+            html += `<ol>`;
+            inOl = true;
+          }
+          const item = line.replace(ulMatch ? /^[-*]\s+/ : /^\d+\.\s+/, "");
+          html += `<li>${item}</li>`;
+          return;
+        } else {
+          if (inUl) {
+            html += `</ul>`;
+            inUl = false;
+          }
+          if (inOl) {
+            html += `</ol>`;
+            inOl = false;
+          }
+        }
+        if (!line.trim()) {
+          return; // skip blank -> paragraph separation
+        }
+        // inline formatting
+        line = line
+          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*(.+?)\*/g, "<em>$1</em>")
+          .replace(/`([^`]+?)`/g, "<code>$1</code>")
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+        html += `<p>${line}</p>`;
+      });
+      if (inUl) html += `</ul>`;
+      if (inOl) html += `</ol>`;
+      if (inCode) html += `</code></pre>`;
+      return html;
+    } catch (e) {
+      console.error("Markdown parse failed", e);
+      return md;
+    }
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editor) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const text = ev.target?.result;
+      try {
+        if (typeof text !== "string") return;
+        if (importType === "json") {
+          const parsed = JSON.parse(text);
+          console.log("[IMPORT:JSON] parsed", parsed);
+          let docJSON: any = null;
+          // Case 1: Direct doc JSON (has type: 'doc')
+          if (parsed && parsed.type === "doc") {
+            docJSON = parsed;
+          }
+          // Case 2: Wrapped object { doc: {...} }
+          else if (parsed && parsed.doc && parsed.doc.type === "doc") {
+            docJSON = parsed.doc;
+          }
+          // Case 2b: Wrapped inside data/doc e.g. { data: { doc: {...} } }
+          else if (parsed?.data?.doc?.type === "doc") {
+            docJSON = parsed.data.doc;
+          }
+          // Case 3: Server style { title, content } where content is HTML string
+          else if (parsed && typeof parsed.content === "string") {
+            editor.commands.setContent(parsed.content, false);
+            return;
+          }
+          // Case 3b: { title, content: { type:'doc', ... } }
+          else if (parsed?.content?.type === "doc") {
+            docJSON = parsed.content;
+          }
+          // Case 4: Object with content array but missing type
+          else if (parsed && Array.isArray(parsed.content)) {
+            docJSON = { type: "doc", content: parsed.content };
+          }
+          // Case 5: Deeply nested maybe parsed.data.content
+          else if (parsed?.data?.content?.type === "doc") {
+            docJSON = parsed.data.content;
+          } else if (
+            parsed?.data?.content &&
+            Array.isArray(parsed.data.content)
+          ) {
+            docJSON = { type: "doc", content: parsed.data.content };
+          }
+
+          if (docJSON) {
+            editor.commands.setContent(docJSON, false);
+          } else {
+            console.warn(
+              "[IMPORT:JSON] Unrecognized JSON shape, skipping",
+              parsed
+            );
+          }
+        } else if (importType === "html") {
+          editor.commands.setContent(text, false);
+        } else if (importType === "markdown") {
+          const html = simpleMarkdownToHTML(text);
+          editor.commands.setContent(html, false);
+        }
+      } catch (err) {
+        console.error("Import failed", err);
+      } finally {
+        e.target.value = ""; // reset
+        setImportType(null);
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const startImport = (type) => {
+    setImportType(type);
+    if (fileInputRef.current) {
+      fileInputRef.current.accept =
+        type === "json"
+          ? "application/json,.json"
+          : type === "html"
+          ? "text/html,.html,.htm"
+          : ".md,text/plain";
+      fileInputRef.current.click();
+    }
+    setIsImportOpen(false);
+  };
+
+  // Using lucide-react icons now instead of inline SVGs.
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
@@ -287,6 +629,88 @@ export function EditorHeader({
             </Tooltip>
           )}
 
+          {/* {!readOnlyValue && ( */}
+          <div className="flex items-center gap-2">
+            {/* EXPORT MENU */}
+            <DropdownMenu open={isExportOpen} onOpenChange={setIsExportOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
+                  <Download className="h-4 w-4 mr-1" />
+                  <span className="mr-1">Export</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-44 !rounded-md !p-2"
+              >
+                <DropdownMenuItem
+                  onSelect={() => handleExport("html")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileCode2 className="h-4 w-4" />{" "}
+                  <span className="text-sm">HTML</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => handleExport("json")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileJson className="h-4 w-4" />{" "}
+                  <span className="text-sm">JSON</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => handleExport("markdown")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileText className="h-4 w-4" />{" "}
+                  <span className="text-sm">Markdown</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            {/* IMPORT MENU */}
+            <DropdownMenu open={isImportOpen} onOpenChange={setIsImportOpen}>
+              <DropdownMenuTrigger asChild>
+                <Button className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors">
+                  <Upload className="h-4 w-4 mr-1" />
+                  <span className="mr-1">Import</span>
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 !rounded-md !p-2"
+              >
+                <DropdownMenuItem
+                  onSelect={() => startImport("html")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileCode2 className="h-4 w-4" />{" "}
+                  <span className="text-sm">HTML (.html)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => startImport("json")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileJson className="h-4 w-4" />{" "}
+                  <span className="text-sm">JSON (.json)</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onSelect={() => startImport("markdown")}
+                  className="flex gap-2 items-center cursor-pointer p-2 rounded hover:bg-gray-100"
+                >
+                  <FileText className="h-4 w-4" />{" "}
+                  <span className="text-sm">Markdown (.md)</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              onChange={handleFileChange}
+            />
+          </div>
+          {/* )} */}
           {!readOnlyValue && (
             <Tooltip>
               <TooltipTrigger asChild>
