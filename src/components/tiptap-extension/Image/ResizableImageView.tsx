@@ -200,6 +200,7 @@ export function ResizableImageView(props: any) {
     },
     [resizing, selectImage]
   );
+  console.log("ResizableImageView props:", props);
 
   useEffect(() => {
     if (resizing) {
