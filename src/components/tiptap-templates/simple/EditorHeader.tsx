@@ -102,6 +102,30 @@ export function EditorHeader({
     try {
       const content = editor.getHTML();
 
+      // Ensure we always include a base English translation when saving.
+      let translationsForSave = Array.isArray(translationHistory)
+        ? [...translationHistory]
+        : [];
+
+      const hasEnglish = translationsForSave.some(
+        (t) => typeof t?.title === "string" && /english/i.test(t.title)
+      );
+
+      if (!hasEnglish) {
+        translationsForSave.unshift({
+          title: "English",
+          text: content,
+          lastModified: new Date().toISOString(),
+        });
+      } else {
+        // Optionally sync the first English entry's text with current content.
+        translationsForSave = translationsForSave.map((t) =>
+          typeof t?.title === "string" && /english/i.test(t.title)
+            ? { ...t, text: content }
+            : t
+        );
+      }
+
       const requestHeaders = {
         "Content-Type": "application/json",
         ...(headers || {}),
@@ -113,7 +137,7 @@ export function EditorHeader({
         body: JSON.stringify({
           title: titleValue,
           content,
-          translation: translationHistory,
+          translation: translationsForSave,
           currentTranslationIndex: currentTranslationIndex,
         }),
       });
