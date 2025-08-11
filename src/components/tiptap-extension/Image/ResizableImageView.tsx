@@ -208,7 +208,7 @@ export function ResizableImageView(props: any) {
         />
 
         {!isEditable && caption && (
-          <p className="text-xs text-gray-500 text-center mt-[-10px] italic">
+          <p className="text-xs text-gray-500 text-center !mt-[-20px] italic">
             {caption}
           </p>
         )}
