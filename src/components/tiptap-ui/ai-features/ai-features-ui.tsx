@@ -44,7 +44,6 @@ type ActionType =
   | "fix"
   | "change-tone";
 
-
 const getSystemPrompt = (
   type: ActionType,
   options?: { language?: string; tone?: string }
@@ -79,9 +78,7 @@ async function callOpenAI(
   systemPrompt: string,
   action: ActionType
 ): Promise<string> {
-  
-
-  const model = "gpt-4o-mini";
+  // const model = "gpt-4o-mini";
   let maxTokens = 1500;
   let temperature = 0.6;
 
@@ -101,21 +98,19 @@ async function callOpenAI(
       break;
   }
 
-
-    const response = await fetch('/api/generate/text-lecture', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                    systemPrompt,
-                    userPrompt:content,
-                    totalTokens:maxTokens,
-                    temperature
-                }),
-            });
-
+  const response = await fetch("/api/generate/text-lecture", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({
+      systemPrompt,
+      userPrompt: content,
+      totalTokens: maxTokens,
+      temperature,
+    }),
+  });
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => response.text());

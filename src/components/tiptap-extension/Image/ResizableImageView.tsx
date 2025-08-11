@@ -228,27 +228,11 @@ export function ResizableImageView(props: any) {
         {isEditable && (
           <div
             className="image-view__caption-wrapper"
-            onClick={(e) => e.stopPropagation()}
+            // onClick={(e) => e.stopPropagation()}
           >
-            <div
-              className="image-view__caption-input"
-              contentEditable
-              suppressContentEditableWarning
-              data-placeholder="Add caption"
-              onBlur={(e) =>
-                props.updateAttributes({
-                  caption: (e.currentTarget.textContent || "").trim() || null,
-                })
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  (e.target as HTMLElement).blur();
-                }
-              }}
-            >
+            <p className="text-xs text-gray-500 text-center !mt-[0px] italic">
               {caption}
-            </div>
+            </p>
           </div>
         )}
       </div>
