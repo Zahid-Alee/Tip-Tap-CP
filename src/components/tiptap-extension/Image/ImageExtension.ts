@@ -93,6 +93,39 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
 
   parseHTML() {
     return [
+      // Figure with figcaption and optional link-wrapped image
+      {
+        tag: "figure.tiptap-image-figure",
+        getAttrs: (element) => {
+          const figure = element as HTMLElement;
+          const img = figure.querySelector("img");
+          if (!img) return false;
+          const anchor =
+            img.parentElement?.tagName === "A"
+              ? (img.parentElement as HTMLAnchorElement)
+              : null;
+          const captionEl = figure.querySelector("figcaption");
+          return {
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt"),
+            title: img.getAttribute("title"),
+            width: img.getAttribute("width")
+              ? parseInt(img.getAttribute("width")!, 10)
+              : null,
+            height: img.getAttribute("height")
+              ? parseInt(img.getAttribute("height")!, 10)
+              : null,
+            align:
+              img.getAttribute("data-align") ||
+              figure.getAttribute("data-align") ||
+              "left",
+            flipX: img.getAttribute("data-flip-x") === "true",
+            flipY: img.getAttribute("data-flip-y") === "true",
+            href: anchor?.getAttribute("href") || null,
+            caption: captionEl?.textContent || null,
+          };
+        },
+      },
       {
         tag: "a img[src]", // Parse images inside anchor tags
         getAttrs: (element) => {
@@ -171,7 +204,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         "figure",
         { class: "tiptap-image-figure", "data-align": align },
         imageWithOptionalLink,
-        ["figcaption", { class: "tiptap-image-caption" }, 0, caption],
+        ["figcaption", { class: "tiptap-image-caption" }, caption],
       ] as any;
     }
 
@@ -206,7 +239,8 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
       setImageCaption:
         (caption) =>
         ({ commands }) => {
-          return commands.updateAttributes(this.name, { caption });
+          const value = caption && caption.trim() !== "" ? caption : null;
+          return commands.updateAttributes(this.name, { caption: value });
         },
     };
   },

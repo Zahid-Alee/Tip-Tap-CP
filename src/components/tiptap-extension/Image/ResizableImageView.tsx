@@ -100,23 +100,6 @@ export function ResizableImageView(props: any) {
 
   function selectImage() {
     const { editor, getPos } = props;
-
-    {
-      props?.editor.view.editable && (props?.selected || caption) && (
-        <div className="image-view__caption-wrapper">
-          <input
-            type="text"
-            placeholder="Add caption"
-            className="image-view__caption-input"
-            value={caption || ""}
-            onChange={(e) =>
-              props.updateAttributes({ caption: e.target.value })
-            }
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      );
-    }
     editor.commands.setNodeSelection(getPos());
   }
 
@@ -282,6 +265,33 @@ export function ResizableImageView(props: any) {
                 onMouseDown={(e) => onMouseDown(e, direction)}
               />
             ))}
+          </div>
+        )}
+
+        {props?.editor.view.editable && (
+          <div
+            className="image-view__caption-wrapper"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="image-view__caption-input"
+              contentEditable
+              suppressContentEditableWarning
+              data-placeholder="Add caption"
+              onBlur={(e) =>
+                props.updateAttributes({
+                  caption: e.currentTarget.textContent || null,
+                })
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  (e.target as HTMLElement).blur();
+                }
+              }}
+            >
+              {caption}
+            </div>
           </div>
         )}
       </div>

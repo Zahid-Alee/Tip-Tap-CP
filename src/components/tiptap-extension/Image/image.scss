@@ -112,8 +112,28 @@
   text-align: center;
 }
 
+.image-view__caption-input:empty:before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
 .image-view__caption-input:focus {
   border-color: #3b82f6;
   background: #f0f9ff;
   border-radius: 4px;
+}
+
+figure.tiptap-image-figure {
+  margin: 0;
+  display: inline-block;
+  text-align: inherit;
+}
+
+figure.tiptap-image-figure figcaption.tiptap-image-caption {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #4b5563;
+  text-align: center;
+  font-style: italic;
 }
