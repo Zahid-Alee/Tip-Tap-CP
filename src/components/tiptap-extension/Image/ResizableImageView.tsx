@@ -268,7 +268,7 @@ export function ResizableImageView(props: any) {
           </div>
         )}
 
-        {props?.editor.view.editable && (
+        {props?.editor.view.editable ? (
           <div
             className="image-view__caption-wrapper"
             onClick={(e) => e.stopPropagation()}
@@ -293,6 +293,8 @@ export function ResizableImageView(props: any) {
               {caption}
             </div>
           </div>
+        ) : (
+          <p>{caption}</p>
         )}
       </div>
     </NodeViewWrapper>
