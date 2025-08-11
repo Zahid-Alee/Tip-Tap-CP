@@ -446,7 +446,8 @@ export function EditorHeader({
           }
 
           if (docJSON) {
-            editor.commands.setContent(docJSON, false);
+            // emitUpdate so dependent UI picks up new content
+            editor.commands.setContent(docJSON);
           } else {
             console.warn(
               "[IMPORT:JSON] Unrecognized JSON shape, skipping",
@@ -473,10 +474,11 @@ export function EditorHeader({
             return;
           }
           console.log("[IMPORT:HTML] length=", html.length);
-          editor.commands.setContent(html, false);
+          // Let Tiptap parse the HTML and emit update
+          editor.commands.setContent(html);
         } else if (importType === "markdown") {
           const html = simpleMarkdownToHTML(text);
-          editor.commands.setContent(html, false);
+          editor.commands.setContent(html);
         }
       } catch (err) {
         console.error("Import failed", err);
