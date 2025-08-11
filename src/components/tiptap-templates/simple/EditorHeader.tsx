@@ -454,7 +454,26 @@ export function EditorHeader({
             );
           }
         } else if (importType === "html") {
-          editor.commands.setContent(text, false);
+          // Extract <body> if full HTML document provided
+          let html = text.replace(/^[\uFEFF\u200B]+/, ""); // trim BOM/zero-width
+          const hasHtmlTag = /<html[\s\S]*?>/i.test(html);
+          if (hasHtmlTag) {
+            const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+            if (bodyMatch) {
+              html = bodyMatch[1];
+            }
+          }
+          // Remove doctype & head
+          html = html
+            .replace(/<!DOCTYPE[\s\S]*?>/gi, "")
+            .replace(/<head[\s\S]*?<\/head>/gi, "")
+            .trim();
+          if (!html) {
+            console.warn("[IMPORT:HTML] Empty after extraction");
+            return;
+          }
+          console.log("[IMPORT:HTML] length=", html.length);
+          editor.commands.setContent(html, false);
         } else if (importType === "markdown") {
           const html = simpleMarkdownToHTML(text);
           editor.commands.setContent(html, false);
