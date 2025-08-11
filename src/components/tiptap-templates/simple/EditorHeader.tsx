@@ -106,6 +106,7 @@ export function EditorHeader({
         "Content-Type": "application/json",
         ...(headers || {}),
       };
+      console.log("here is the content for saving ", content);
       const response = await fetch(saveUrl, {
         method: "POST",
         headers: requestHeaders,
