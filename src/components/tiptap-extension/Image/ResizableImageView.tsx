@@ -31,23 +31,10 @@ export function ResizableImageView(props: any) {
     width: IMAGE_MAX_SIZE,
     height: IMAGE_MAX_SIZE,
   });
-
-  const [originalSize, setOriginalSize] = useState({
-    width: 0,
-    height: 0,
-  });
-
-  const [resizeDirections] = useState<string[]>([
-    ResizeDirection.TOP_LEFT,
-    ResizeDirection.TOP_RIGHT,
-    ResizeDirection.BOTTOM_LEFT,
-    ResizeDirection.BOTTOM_RIGHT,
-  ]);
-
-  const [resizing, setResizing] = useState<boolean>(false);
+  const [originalSize, setOriginalSize] = useState({ width: 0, height: 0 });
+  const [resizing, setResizing] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastUpdate = useRef<number>(0);
-
   const [resizerState, setResizerState] = useState({
     x: 0,
     y: 0,
@@ -56,21 +43,25 @@ export function ResizableImageView(props: any) {
     dir: "",
   });
 
+  const resizeDirections: string[] = [
+    ResizeDirection.TOP_LEFT,
+    ResizeDirection.TOP_RIGHT,
+    ResizeDirection.BOTTOM_LEFT,
+    ResizeDirection.BOTTOM_RIGHT,
+  ];
+
   const { align, inline } = props?.node?.attrs;
   const caption: string | null = props?.node?.attrs?.caption || null;
+  const isEditable = !!props?.editor?.view?.editable;
 
   const imgAttrs = useMemo(() => {
     const { src, alt, width: w, height: h, flipX, flipY } = props?.node?.attrs;
-    console.log("Image attributes:", props?.node?.attrs);
-
     const width = isNumber(w) ? `${w}px` : w;
     const height = isNumber(h) ? `${h}px` : h;
     const transformStyles: string[] = [];
-
     if (flipX) transformStyles.push("rotateX(180deg)");
     if (flipY) transformStyles.push("rotateY(180deg)");
     const transform = transformStyles.join(" ");
-
     return {
       src: src || undefined,
       alt: alt || undefined,
@@ -85,8 +76,7 @@ export function ResizableImageView(props: any) {
   const imageMaxStyle = useMemo(() => {
     const {
       style: { width },
-    } = imgAttrs;
-
+    } = imgAttrs as any;
     return { width: width === "100%" ? width : undefined };
   }, [imgAttrs]);
 
@@ -99,6 +89,7 @@ export function ResizableImageView(props: any) {
   }
 
   function selectImage() {
+    if (!isEditable) return; // prevent selection in read-only mode
     const { editor, getPos } = props;
     editor.commands.setNodeSelection(getPos());
   }
@@ -106,24 +97,19 @@ export function ResizableImageView(props: any) {
   const getMaxSize = useCallback(() => {
     const { editor } = props;
     const { width } = getComputedStyle(editor.view.dom);
-    setMaxSize((prev) => ({
-      ...prev,
-      width: Number.parseInt(width, 10),
-    }));
+    setMaxSize((prev) => ({ ...prev, width: Number.parseInt(width, 10) }));
   }, [props?.editor]);
 
   function onMouseDown(e: React.MouseEvent, dir: string) {
+    if (!isEditable) return;
     e.preventDefault();
     e.stopPropagation();
-
     const originalWidth = originalSize.width;
     const originalHeight = originalSize.height;
     const aspectRatio = originalWidth / originalHeight;
-
     let width = Number(props.node.attrs.width);
     let height = Number(props.node.attrs.height);
     const maxWidth = maxSize.width;
-
     if (width && !height) {
       width = width > maxWidth ? maxWidth : width;
       height = Math.round(width / aspectRatio);
@@ -136,71 +122,41 @@ export function ResizableImageView(props: any) {
     } else {
       width = width > maxWidth ? maxWidth : width;
     }
-
     setResizing(true);
-
-    setResizerState({
-      x: e.clientX,
-      y: e.clientY,
-      w: width,
-      h: height,
-      dir,
-    });
+    setResizerState({ x: e.clientX, y: e.clientY, w: width, h: height, dir });
   }
 
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!resizing) return;
-
       e.preventDefault();
       e.stopPropagation();
-
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(() => {
         const now = Date.now();
         if (now - lastUpdate.current < IMAGE_THROTTLE_WAIT_TIME) return;
-
         lastUpdate.current = now;
-
         const { x, w, dir } = resizerState;
         const dx = (e.clientX - x) * (/l/.test(dir) ? -1 : 1);
         const width = clamp(w + dx, IMAGE_MIN_SIZE, maxSize.width);
-
-        props.updateAttributes({
-          width,
-          height: null,
-        });
+        props.updateAttributes({ width, height: null });
       });
     },
-    [resizing, resizerState, maxSize, props.updateAttributes]
+    [resizing, resizerState, maxSize.width, props]
   );
 
   const onMouseUp = useCallback(
     (e: MouseEvent) => {
+      if (!resizing) return;
       e.preventDefault();
       e.stopPropagation();
-      if (!resizing) return;
-
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-
-      setResizerState({
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0,
-        dir: "",
-      });
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      setResizerState({ x: 0, y: 0, w: 0, h: 0, dir: "" });
       setResizing(false);
       selectImage();
     },
-    [resizing, selectImage]
+    [resizing]
   );
-  console.log("ResizableImageView props:", props);
 
   useEffect(() => {
     if (resizing) {
@@ -210,24 +166,18 @@ export function ResizableImageView(props: any) {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     }
-
     return () => {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, [resizing, onMouseMove, onMouseUp]);
 
-  const resizeOb = useMemo(() => {
-    return new ResizeObserver(getMaxSize);
-  }, [getMaxSize]);
-
   useEffect(() => {
+    const resizeOb = new ResizeObserver(getMaxSize);
     resizeOb.observe(props.editor.view.dom);
     return () => resizeOb.disconnect();
-  }, [props.editor.view.dom, resizeOb]);
+  }, [getMaxSize, props.editor.view.dom]);
 
   return (
     <NodeViewWrapper
@@ -240,8 +190,8 @@ export function ResizableImageView(props: any) {
       }}
     >
       <div
-        data-drag-handle
-        draggable="true"
+        data-drag-handle={isEditable ? true : undefined}
+        draggable={isEditable ? "true" : undefined}
         style={imageMaxStyle}
         className={`image-view__body ${
           props?.selected ? "image-view__body--focused" : ""
@@ -257,15 +207,15 @@ export function ResizableImageView(props: any) {
           style={imgAttrs.style}
         />
 
-        {!props?.editor.view.editable && !props?.selected && (
-          <p className="text-xs text-gray-400 text-center mt-[-10px]">
+        {!isEditable && caption && (
+          <p className="text-xs text-gray-500 text-center mt-1 italic">
             {caption}
           </p>
         )}
 
-        {props?.editor.view.editable && (props?.selected || resizing) && (
+        {isEditable && (props?.selected || resizing) && (
           <div className="image-resizer">
-            {resizeDirections?.map((direction) => (
+            {resizeDirections.map((direction) => (
               <span
                 className={`image-resizer__handler image-resizer__handler--${direction}`}
                 key={`image-dir-${direction}`}
@@ -275,7 +225,7 @@ export function ResizableImageView(props: any) {
           </div>
         )}
 
-        {props?.editor.view.editable && (
+        {isEditable && (
           <div
             className="image-view__caption-wrapper"
             onClick={(e) => e.stopPropagation()}
@@ -287,7 +237,7 @@ export function ResizableImageView(props: any) {
               data-placeholder="Add caption"
               onBlur={(e) =>
                 props.updateAttributes({
-                  caption: e.currentTarget.textContent || null,
+                  caption: (e.currentTarget.textContent || "").trim() || null,
                 })
               }
               onKeyDown={(e) => {
