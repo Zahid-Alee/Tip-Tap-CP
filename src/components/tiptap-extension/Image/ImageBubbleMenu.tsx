@@ -10,6 +10,7 @@ import {
   Check,
   X,
   Edit,
+  Type,
 } from "lucide-react";
 
 interface ImageBubbleMenuProps {
@@ -26,6 +27,11 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
 
   const currentAttributes = editor.getAttributes("resizableImage");
   const hasLink = !!currentAttributes.href;
+  const hasCaption = !!currentAttributes.caption;
+  const [showCaptionInput, setShowCaptionInput] = useState(false);
+  const [tempCaption, setTempCaption] = useState(
+    currentAttributes.caption || ""
+  );
 
   const handleAlignment = (align: "left" | "center" | "right") => {
     editor.chain().focus().setImageAlign(align).run();
@@ -93,6 +99,47 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
         return editor.isActive("resizableImage");
       }}
     >
+      {showCaptionInput ? (
+        <div className="flex items-center gap-2 p-2">
+          <input
+            type="text"
+            value={tempCaption}
+            onChange={(e) => setTempCaption(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                editor.chain().focus().setImageCaption(tempCaption).run();
+                setShowCaptionInput(false);
+              } else if (e.key === "Escape") {
+                setShowCaptionInput(false);
+                setTempCaption(currentAttributes.caption || "");
+              }
+            }}
+            placeholder="Enter caption..."
+            className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            autoFocus
+          />
+          <button
+            onClick={() => {
+              editor.chain().focus().setImageCaption(tempCaption).run();
+              setShowCaptionInput(false);
+            }}
+            className="p-1 rounded hover:bg-green-100 text-green-600 transition-colors"
+            title="Apply caption"
+          >
+            <Check size={14} />
+          </button>
+          <button
+            onClick={() => {
+              setShowCaptionInput(false);
+              setTempCaption(currentAttributes.caption || "");
+            }}
+            className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+            title="Cancel"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ) : null}
       {isLinkDialogOpen ? (
         <div className="flex items-center gap-2 p-2">
           <input
@@ -162,6 +209,24 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
           <div className="w-px h-6 bg-gray-300 mx-1" />
 
           <div className="flex items-center gap-1">
+            <button
+              onClick={() => {
+                if (!hasCaption) {
+                  setShowCaptionInput(true);
+                } else {
+                  // If caption exists, open editor
+                  setTempCaption(currentAttributes.caption || "");
+                  setShowCaptionInput(true);
+                }
+              }}
+              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                hasCaption ? "text-blue-600" : "text-gray-600"
+              }`}
+              title={hasCaption ? "Edit caption" : "Add caption"}
+            >
+              <Type size={16} />
+            </button>
+
             {hasLink ? (
               <>
                 <button

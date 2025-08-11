@@ -94,3 +94,26 @@
 .image-resizer__handler--bl:hover {
   cursor: ne-resize;
 }
+
+/* Caption styles */
+.image-view__caption-wrapper {
+  margin-top: 4px;
+  text-align: center;
+}
+
+.image-view__caption-input {
+  width: 100%;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #374151;
+  outline: none;
+  text-align: center;
+}
+
+.image-view__caption-input:focus {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+  border-radius: 4px;
+}

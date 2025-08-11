@@ -45,7 +45,7 @@ export function ResizableImageView(props: any) {
   ]);
 
   const [resizing, setResizing] = useState<boolean>(false);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | null>(null);
   const lastUpdate = useRef<number>(0);
 
   const [resizerState, setResizerState] = useState({
@@ -57,6 +57,7 @@ export function ResizableImageView(props: any) {
   });
 
   const { align, inline } = props?.node?.attrs;
+  const caption: string | null = props?.node?.attrs?.caption || null;
 
   const imgAttrs = useMemo(() => {
     const { src, alt, width: w, height: h, flipX, flipY } = props?.node?.attrs;
@@ -99,6 +100,23 @@ export function ResizableImageView(props: any) {
 
   function selectImage() {
     const { editor, getPos } = props;
+
+    {
+      props?.editor.view.editable && (props?.selected || caption) && (
+        <div className="image-view__caption-wrapper">
+          <input
+            type="text"
+            placeholder="Add caption"
+            className="image-view__caption-input"
+            value={caption || ""}
+            onChange={(e) =>
+              props.updateAttributes({ caption: e.target.value })
+            }
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      );
+    }
     editor.commands.setNodeSelection(getPos());
   }
 

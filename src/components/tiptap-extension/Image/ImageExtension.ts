@@ -24,11 +24,13 @@ declare module "@tiptap/core" {
         flipX?: boolean;
         flipY?: boolean;
         href?: string;
+        caption?: string;
       }) => ReturnType;
 
       setImageAlign: (align: "left" | "center" | "right") => ReturnType;
       setImageLink: (href: string) => ReturnType;
       removeImageLink: () => ReturnType;
+      setImageCaption: (caption: string) => ReturnType;
     };
   }
 }
@@ -81,6 +83,9 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         default: false,
       },
       href: {
+        default: null,
+      },
+      caption: {
         default: null,
       },
     };
@@ -137,7 +142,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
   renderHTML({ HTMLAttributes }) {
     const { align, flipX, flipY, href, ...attrs } = HTMLAttributes;
 
-    const imgElement = [
+    const imgElement: any = [
       "img",
       mergeAttributes(this.options.HTMLAttributes, attrs, {
         "data-align": align,
@@ -146,19 +151,31 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
       }),
     ];
 
-    if (href) {
+    // Wrap in figure if caption exists for semantic HTML output.
+    const caption = HTMLAttributes.caption;
+
+    const imageWithOptionalLink: any = href
+      ? ([
+          "a",
+          {
+            href: href,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          },
+          imgElement,
+        ] as any)
+      : imgElement;
+
+    if (caption) {
       return [
-        "a",
-        {
-          href: href,
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        imgElement,
-      ];
+        "figure",
+        { class: "tiptap-image-figure", "data-align": align },
+        imageWithOptionalLink,
+        ["figcaption", { class: "tiptap-image-caption" }, 0, caption],
+      ] as any;
     }
 
-    return imgElement;
+    return imageWithOptionalLink as any;
   },
 
   addCommands() {
@@ -185,6 +202,11 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         () =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, { href: null });
+        },
+      setImageCaption:
+        (caption) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { caption });
         },
     };
   },
