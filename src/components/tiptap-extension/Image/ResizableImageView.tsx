@@ -256,9 +256,12 @@ export function ResizableImageView(props: any) {
           style={imgAttrs.style}
         />
 
-        {!props?.editor.view.editable && (
-          <p className="text-sm text-gray-400 text-center">{caption}</p>
-        )}
+        {!props?.editor.view.editable &&
+          !props?.selected(
+            <p className="text-xs text-gray-400 text-center mt-[-10px]">
+              {caption}
+            </p>
+          )}
 
         {props?.editor.view.editable && (props?.selected || resizing) && (
           <div className="image-resizer">
