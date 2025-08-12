@@ -230,7 +230,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     Selection,
     ResizableImage,
     ImageUploadNode.configure({
-      accept: "image/*",
+      accept: "image/*,image/gif",
       maxSize: MAX_FILE_SIZE,
       limit: 3,
       upload: (file: File) =>
