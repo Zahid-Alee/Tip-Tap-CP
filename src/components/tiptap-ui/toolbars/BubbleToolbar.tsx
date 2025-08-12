@@ -3,6 +3,7 @@ import { BubbleMenu, Editor } from "@tiptap/react";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { NodeButton } from "@/components/tiptap-ui/node-button";
 import { HighlightPopover } from "@/components/tiptap-ui/highlight-popover";
+import { LinkButton, LinkPopover } from "@/components/tiptap-ui/link-popover";
 import TextColorPopover from "../font/TextColorPopover";
 import "./toolbar.scss";
 import BoldButton from "../bold-button";
@@ -58,6 +59,9 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
 
       <div className="flex items-center gap-1">
         <NodeButton type="codeBlock" size="sm" />
+      </div>
+      <div className="flex items-center ml-[-2px] gap-1">
+        <LinkPopover />
       </div>
     </BubbleMenu>
   );
