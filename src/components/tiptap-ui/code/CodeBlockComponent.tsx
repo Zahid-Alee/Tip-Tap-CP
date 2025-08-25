@@ -15,10 +15,11 @@ const CodeBlockComponent = ({
   const readOnlyValue = extension.options.readOnlyValue;
   const [copied, setCopied] = useState(false);
   const codeRef = useRef(null);
+  const contentRef = useRef(null);
 
   const handleCopy = () => {
     if (codeRef.current) {
-      const codeContent = codeRef.current.textContent || "";
+      const codeContent = (codeRef.current as HTMLElement).textContent || "";
       navigator.clipboard
         .writeText(codeContent)
         .then(() => {
@@ -30,6 +31,35 @@ const CodeBlockComponent = ({
         });
     } else {
       console.warn("Code content not found for copying.");
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Tab" && !readOnlyValue) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      // Insert tab character using document.execCommand for better compatibility
+      try {
+        if (document.queryCommandSupported("insertText")) {
+          document.execCommand("insertText", false, "    "); // 4 spaces
+        } else {
+          // Fallback method
+          const selection = window.getSelection();
+          if (selection && selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const tabNode = document.createTextNode("    ");
+            range.deleteContents();
+            range.insertNode(tabNode);
+            range.setStartAfter(tabNode);
+            range.setEndAfter(tabNode);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to insert tab: ", err);
+      }
     }
   };
 
@@ -89,7 +119,7 @@ const CodeBlockComponent = ({
 
       <pre className="code-block-pre relative">
         <code ref={codeRef} className="code-block-content">
-          <NodeViewContent as="div" />
+          <NodeViewContent as="div" onKeyDown={handleKeyDown} />
         </code>
       </pre>
     </NodeViewWrapper>

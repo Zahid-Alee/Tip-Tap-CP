@@ -85,6 +85,7 @@ import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-me
 import SelectAllExtension from "../../tiptap-extension/select-all/select-all-extension";
 import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
 import { ClipboardPaste } from "../../tiptap-extension/clipboard-paste-extension";
+import CodeBlockTabExtension from "../../tiptap-extension/code-block-tab-extension";
 
 const lowlight = createLowlight(all);
 
@@ -199,6 +200,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     }),
     ExtendedListExtension,
     SelectAllExtension,
+    CodeBlockTabExtension,
     StarterKit.configure({
       codeBlock: false,
       bold: false,
