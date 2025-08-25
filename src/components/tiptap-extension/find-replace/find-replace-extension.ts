@@ -3,6 +3,23 @@ import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    findReplace: {
+      setSearchTerm: (searchTerm: string) => ReturnType;
+      setReplaceTerm: (replaceTerm: string) => ReturnType;
+      setCaseSensitive: (caseSensitive: boolean) => ReturnType;
+      setWholeWord: (wholeWord: boolean) => ReturnType;
+      updateFindResults: () => ReturnType;
+      findNext: () => ReturnType;
+      findPrevious: () => ReturnType;
+      replaceCurrent: () => ReturnType;
+      replaceAll: () => ReturnType;
+      clearSearch: () => ReturnType;
+    };
+  }
+}
+
 export interface FindReplaceOptions {
   searchTerm: string;
   replaceTerm: string;
@@ -51,9 +68,9 @@ export const FindReplace = Extension.create<
     return {
       setSearchTerm:
         (searchTerm: string) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch, commands }) => {
           this.storage.searchTerm = searchTerm;
-          return this.editor.commands.updateFindResults();
+          return commands.updateFindResults();
         },
       setReplaceTerm:
         (replaceTerm: string) =>
@@ -63,15 +80,15 @@ export const FindReplace = Extension.create<
         },
       setCaseSensitive:
         (caseSensitive: boolean) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch, commands }) => {
           this.storage.caseSensitive = caseSensitive;
-          return this.editor.commands.updateFindResults();
+          return commands.updateFindResults();
         },
       setWholeWord:
         (wholeWord: boolean) =>
-        ({ tr, dispatch }) => {
+        ({ tr, dispatch, commands }) => {
           this.storage.wholeWord = wholeWord;
-          return this.editor.commands.updateFindResults();
+          return commands.updateFindResults();
         },
       updateFindResults:
         () =>
@@ -203,7 +220,7 @@ export const FindReplace = Extension.create<
 
       replaceCurrent:
         () =>
-        ({ tr, dispatch, state }) => {
+        ({ tr, dispatch, state, commands }) => {
           const { results, currentIndex, replaceTerm } = this.storage;
           if (results.length === 0 || currentIndex === -1) return false;
 
@@ -218,7 +235,7 @@ export const FindReplace = Extension.create<
 
           // Update results after replacement
           setTimeout(() => {
-            this.editor.commands.updateFindResults();
+            commands.updateFindResults();
           }, 0);
 
           return true;
@@ -295,6 +312,84 @@ export const FindReplace = Extension.create<
               );
 
               return DecorationSet.create(tr.doc, decorations);
+            }
+
+            // Check if the document has changed and we have an active search
+            if (tr.docChanged && extension.storage.searchTerm) {
+              // Defer the update to avoid conflicts with the current transaction
+              setTimeout(() => {
+                // Manually trigger an update by re-running the search logic
+                const { searchTerm, caseSensitive, wholeWord } =
+                  extension.storage;
+
+                if (!searchTerm) {
+                  extension.storage.results = [];
+                  extension.storage.currentIndex = -1;
+                  return;
+                }
+
+                const results: Array<{
+                  from: number;
+                  to: number;
+                  text: string;
+                }> = [];
+                const doc = extension.editor.state.doc;
+
+                let flags = "g";
+                if (!caseSensitive) flags += "i";
+
+                let pattern = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+                if (wholeWord) {
+                  pattern = `\\b${pattern}\\b`;
+                }
+
+                try {
+                  const regex = new RegExp(pattern, flags);
+
+                  doc.descendants((node, pos) => {
+                    if (node.isText && node.text) {
+                      const matches = [...node.text.matchAll(regex)];
+                      matches.forEach((match) => {
+                        if (match.index !== undefined) {
+                          const from = pos + match.index;
+                          const to = from + match[0].length;
+                          results.push({ from, to, text: match[0] });
+                        }
+                      });
+                    }
+                  });
+                } catch (error) {
+                  console.error("Invalid regex pattern:", error);
+                }
+
+                extension.storage.results = results;
+                extension.storage.currentIndex =
+                  results.length > 0
+                    ? Math.min(
+                        extension.storage.currentIndex,
+                        results.length - 1
+                      )
+                    : -1;
+
+                // Ensure currentIndex is valid
+                if (extension.storage.currentIndex >= results.length) {
+                  extension.storage.currentIndex = results.length > 0 ? 0 : -1;
+                }
+                if (extension.storage.currentIndex < -1) {
+                  extension.storage.currentIndex = -1;
+                }
+
+                // Dispatch the update to refresh decorations
+                const newTr = extension.editor.state.tr.setMeta(
+                  findReplacePluginKey,
+                  {
+                    type: "update",
+                    results: results,
+                    currentIndex: extension.storage.currentIndex,
+                  }
+                );
+                extension.editor.view.dispatch(newTr);
+              }, 0);
             }
 
             return decorationSet.map(tr.mapping, tr.doc);

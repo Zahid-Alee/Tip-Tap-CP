@@ -42,11 +42,22 @@ export const FindReplacePanel: React.FC<FindReplacePanelProps> = ({
         }
       };
 
-      // Check immediately and set up interval for updates
+      // Check immediately
       checkStorage();
-      const interval = setInterval(checkStorage, 100);
 
-      return () => clearInterval(interval);
+      // Set up a listener for editor updates instead of polling
+      const handleUpdate = () => {
+        checkStorage();
+      };
+
+      // Listen for editor updates
+      editor.on("update", handleUpdate);
+      editor.on("transaction", handleUpdate);
+
+      return () => {
+        editor.off("update", handleUpdate);
+        editor.off("transaction", handleUpdate);
+      };
     }
   }, [editor, isOpen]);
   // Update search when options change
