@@ -459,7 +459,6 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
           { type: "IFRAME_HEIGHT", height: height + 60, editorId },
           "*"
         );
-        // console.log("[AutoResizer] Sent new height:", height);
       }
     };
 
@@ -547,7 +546,6 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     },
     ref
   ) {
-    console.log("here is the simple content ", initialContent);
     const isMobile = useMobile();
     const windowSize = useWindowSize();
     const [state, setState] = useEditorState(readOnlyValue, translations);
