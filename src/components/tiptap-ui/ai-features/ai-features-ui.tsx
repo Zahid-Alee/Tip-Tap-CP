@@ -98,7 +98,7 @@ async function callOpenAI(
       break;
   }
 
-  const response = await fetch("/api/generate/text-lecture", {
+  const response = await fetch("/api/generate/text-lecture/gemini", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
