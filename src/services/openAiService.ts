@@ -32,11 +32,11 @@ const API_CONFIG = {
     }),
   },
   gemini: {
-    apiKey: "AIzaSyDLo4I-1UPOpsas6UGlwhUF6N1PWXDQVcw",
+    apiKey: "",
     endpoint: (key) =>
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
     temperature: 0.7,
-    headers: () => ({ "Content-Type": "application/json" }),
+    headers: () => ({ "Cowntent-Type": "application/json" }),
   },
   deepseek: {
     // apiKey: 'sk-6b276ef8cd6d497a8e5555235da9198a',
@@ -690,7 +690,7 @@ export const generateAiContent = async (formData) => {
     let response: Response | undefined;
     let rawContent: string = "";
 
-    if (model === "openai") {
+    if (model === "openai" || model === "gemini") {
       const systemPrompt = createSystemPrompt(
         sectionCount,
         model,
