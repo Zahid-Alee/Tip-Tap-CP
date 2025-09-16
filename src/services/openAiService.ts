@@ -702,7 +702,7 @@ export const generateAiContent = async (formData) => {
       console.log("system prompt", systemPrompt);
       console.log("lecturePrompt", lecturePrompt);
 
-      response = await fetch("/api/generate/text-lecture", {
+      response = await fetch(`/api/generate/text-lecture/${model}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
