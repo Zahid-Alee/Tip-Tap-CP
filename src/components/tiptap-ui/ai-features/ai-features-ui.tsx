@@ -80,7 +80,7 @@ async function callOpenAI(
 ): Promise<string> {
   // const model = "gpt-4o-mini";
   let maxTokens = 1500;
-  let temperature = 0.6;
+  let temperature = 0.6; // Default temperature for AI assistant features
 
   switch (action) {
     case "expand":
@@ -159,7 +159,6 @@ export const AIFeaturesButton: React.FC<AIFeaturesButtonProps> = ({
       setError(null);
     }
   }, [popoverOpen]);
-
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
 

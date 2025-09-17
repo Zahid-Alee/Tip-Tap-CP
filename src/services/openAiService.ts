@@ -645,6 +645,7 @@ export const generateAiContent = async (formData) => {
     includeFooter = false,
     includeEmojis = false,
     additionalInstructions = "",
+    temperature = 0.7, // Extract temperature from formData
     ...contentParams
   } = formData;
 
@@ -677,7 +678,7 @@ export const generateAiContent = async (formData) => {
       model,
       lecturePrompt,
       totalTokens,
-      modelConfig.temperature,
+      temperature, // Use user-provided temperature instead of modelConfig.temperature
       sectionCount,
       includeHeader,
       includeFooter,
@@ -712,7 +713,7 @@ export const generateAiContent = async (formData) => {
           systemPrompt,
           userPrompt: lecturePrompt,
           totalTokens,
-          temperature: modelConfig?.temperature,
+          temperature: temperature, // Use user-provided temperature
         }),
       });
 

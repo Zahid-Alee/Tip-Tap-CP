@@ -35,6 +35,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     language: "english",
     replaceExisting: false,
     additionalInstructions: "",
+    temperature: 0.7,
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -491,6 +492,39 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
                   ))}
                 </div>
               </div>
+
+              {/* Temperature Control */}
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-2">
+                  Temperature:{" "}
+                  <span className="text-blue-600 font-semibold">
+                    {formData.temperature.toFixed(1)}
+                  </span>
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="1.0"
+                    step="0.1"
+                    className="w-full h-2 bg-gray-100 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600"
+                    value={formData.temperature}
+                    onChange={(e) =>
+                      handleChange("temperature", parseFloat(e.target.value))
+                    }
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Focused (0.1)</span>
+                    <span>Balanced (0.5)</span>
+                    <span>Creative (1.0)</span>
+                  </div>
+                  {/* <p className="text-xs text-gray-600 mt-1">
+                    Higher values create more creative and varied content, lower
+                    values produce more focused and consistent results.
+                  </p> */}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-800 mb-2">
                   Options
