@@ -204,6 +204,7 @@ export const ClipboardPaste = Extension.create<ClipboardPasteOptions>({
                     maxSize: options.maxSize,
                     isFromClipboard: true,
                     clipboardFile: imageFile, // Pass the file directly
+                    uploadId: crypto.randomUUID(), // Add unique identifier for this upload
                   };
 
                   const uploadNode =

@@ -334,7 +334,7 @@ const DropZoneContent: React.FC<{ maxSize: number }> = ({ maxSize }) => (
 );
 
 export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
-  const { accept, limit, maxSize, isFromClipboard, clipboardFile } =
+  const { accept, limit, maxSize, isFromClipboard, clipboardFile, uploadId } =
     props.node.attrs;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const extension = props.extension;
@@ -366,24 +366,45 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     handleUpload(Array.from(files));
   };
 
+  const findNodeByUploadId = (uploadId: string) => {
+    const { state } = props.editor;
+    let foundPos: number | null = null;
+
+    state.doc.descendants((node, pos) => {
+      if (
+        node.type.name === "imageUpload" &&
+        node.attrs.uploadId === uploadId
+      ) {
+        foundPos = pos;
+        return false; // Stop searching
+      }
+      return true;
+    });
+
+    return foundPos;
+  };
+
   const handleUpload = async (files: File[]) => {
     const url = await uploadFiles(files);
 
-    if (url) {
-      const pos = props.getPos();
+    if (url && uploadId) {
+      // Find the node by its unique upload ID
+      const pos = findNodeByUploadId(uploadId);
       const filename = files[0]?.name.replace(/\.[^/.]+$/, "") || "unknown";
 
-      props.editor
-        .chain()
-        .focus()
-        .deleteRange({ from: pos, to: pos + 1 })
-        .insertContentAt(pos, [
-          {
-            type: "resizableImage",
-            attrs: { src: url, alt: filename, title: filename },
-          },
-        ])
-        .run();
+      if (pos !== null) {
+        props.editor
+          .chain()
+          .focus()
+          .deleteRange({ from: pos, to: pos + 1 })
+          .insertContentAt(pos, [
+            {
+              type: "resizableImage",
+              attrs: { src: url, alt: filename, title: filename },
+            },
+          ])
+          .run();
+      }
     }
   };
 
