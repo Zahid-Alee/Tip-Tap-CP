@@ -4,14 +4,16 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import "@/components/tiptap-node/image-upload-node/image-upload-node.scss";
 import { Loader2 } from "lucide-react";
+import { uploadQueue } from "../../../lib/upload-queue";
 
 export interface FileItem {
   id: string;
   file: File;
   progress: number;
-  status: "uploading" | "success" | "error";
+  status: "waiting" | "uploading" | "success" | "error";
   url?: string;
-  abortController?: AbortController;
+  queuePosition?: number;
+  uploadTaskId?: string;
 }
 
 interface UploadOptions {
@@ -39,14 +41,11 @@ function useFileUpload(options: UploadOptions) {
       return null;
     }
 
-    const abortController = new AbortController();
-
     const newFileItem: FileItem = {
       id: crypto.randomUUID(),
       file,
       progress: 0,
-      status: "uploading",
-      abortController,
+      status: "waiting",
     };
 
     setFileItem(newFileItem);
@@ -56,51 +55,86 @@ function useFileUpload(options: UploadOptions) {
         throw new Error("Upload function is not defined");
       }
 
-      const url = await options.upload(
-        file,
-        (event: { progress: number }) => {
-          setFileItem((prev) => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              progress: event.progress,
-            };
-          });
-        },
-        abortController.signal
-      );
-
-      if (!url) throw new Error("Upload failed: No URL returned");
-
-      if (!abortController.signal.aborted) {
-        setFileItem((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            status: "success",
-            url,
-            progress: 100,
-          };
-        });
-        options.onSuccess?.(url);
-        return url;
-      }
-
-      return null;
-    } catch (error) {
-      if (!abortController.signal.aborted) {
-        setFileItem((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            status: "error",
-            progress: 0,
-          };
-        });
-        options.onError?.(
-          error instanceof Error ? error : new Error("Upload failed")
+      // Return a promise that resolves when upload completes
+      return new Promise<string | null>((resolve, reject) => {
+        // Add to upload queue instead of uploading immediately
+        const taskId = uploadQueue.addToQueue(
+          file,
+          options.upload!,
+          (event: { progress: number }) => {
+            setFileItem((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                progress: event.progress,
+                status: "uploading",
+              };
+            });
+          },
+          (url: string) => {
+            setFileItem((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                status: "success",
+                url,
+                progress: 100,
+              };
+            });
+            options.onSuccess?.(url);
+            resolve(url);
+          },
+          (error: Error) => {
+            setFileItem((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                status: "error",
+                progress: 0,
+              };
+            });
+            options.onError?.(error);
+            resolve(null);
+          }
         );
-      }
+
+        // Store the task ID for potential cancellation
+        setFileItem((prev) => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            uploadTaskId: taskId,
+          };
+        });
+
+        // Update queue position periodically
+        const positionInterval = setInterval(() => {
+          const position = uploadQueue.getTaskPosition(taskId);
+          if (position >= 0) {
+            setFileItem((prev) => {
+              if (!prev) return null;
+              return {
+                ...prev,
+                queuePosition: position,
+              };
+            });
+          } else {
+            clearInterval(positionInterval);
+          }
+        }, 500);
+      });
+    } catch (error) {
+      setFileItem((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          status: "error",
+          progress: 0,
+        };
+      });
+      options.onError?.(
+        error instanceof Error ? error : new Error("Upload failed")
+      );
       return null;
     }
   };
@@ -134,9 +168,11 @@ function useFileUpload(options: UploadOptions) {
   const clearFileItem = () => {
     if (!fileItem) return;
 
-    if (fileItem.abortController) {
-      fileItem.abortController.abort();
+    // Cancel the upload if it's still in queue or uploading
+    if (fileItem.uploadTaskId) {
+      uploadQueue.cancelUpload(fileItem.uploadTaskId);
     }
+
     if (fileItem.url) {
       URL.revokeObjectURL(fileItem.url);
     }
@@ -252,7 +288,8 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
 interface ImageUploadPreviewProps {
   file: File;
   progress: number;
-  status: "uploading" | "success" | "error";
+  status: "waiting" | "uploading" | "success" | "error";
+  queuePosition?: number;
   onRemove: () => void;
 }
 
@@ -260,6 +297,7 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
   file,
   progress,
   status,
+  queuePosition,
   onRemove,
 }) => {
   const formatFileSize = (bytes: number) => {
@@ -270,12 +308,32 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
+  const getStatusText = () => {
+    switch (status) {
+      case "waiting":
+        return queuePosition !== undefined && queuePosition > 0
+          ? `Queued (${queuePosition} in line)`
+          : "Queued...";
+      case "uploading":
+        return `Uploading... ${progress}%`;
+      case "success":
+        return "Upload complete";
+      case "error":
+        return "Upload failed";
+      default:
+        return "";
+    }
+  };
+
   return (
     <div className="tiptap-image-upload-preview">
-      {status === "uploading" && (
+      {(status === "uploading" || status === "waiting") && (
         <div
           className="tiptap-image-upload-progress"
-          style={{ width: `${progress}%` }}
+          style={{
+            width: status === "waiting" ? "0%" : `${progress}%`,
+            backgroundColor: status === "waiting" ? "#f0f0f0" : undefined,
+          }}
         />
       )}
 
@@ -292,9 +350,17 @@ const ImageUploadPreview: React.FC<ImageUploadPreviewProps> = ({
           </div>
         </div>
         <div className="tiptap-image-upload-actions">
-          {status === "uploading" && (
-            <span className="tiptap-image-upload-progress-text">
+          {(status === "uploading" || status === "waiting") && (
+            <span
+              className="tiptap-image-upload-progress-text"
+              title={getStatusText()}
+            >
               <Loader2 className="animate-spin" />
+              {status === "waiting" &&
+                queuePosition !== undefined &&
+                queuePosition > 0 && (
+                  <span className="ml-1 text-xs">#{queuePosition}</span>
+                )}
             </span>
           )}
           <button
@@ -452,6 +518,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
           file={fileItem.file}
           progress={fileItem.progress}
           status={fileItem.status}
+          queuePosition={fileItem.queuePosition}
           onRemove={clearFileItem}
         />
       )}
