@@ -86,6 +86,7 @@ import SelectAllExtension from "../../tiptap-extension/select-all/select-all-ext
 import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
 import { ClipboardPaste } from "../../tiptap-extension/clipboard-paste-extension";
 import CodeBlockTabExtension from "../../tiptap-extension/code-block-tab-extension";
+import { UploadStatusIndicator } from "../../tiptap-ui/upload-status-indicator/upload-status-indicator";
 
 const lowlight = createLowlight(all);
 
@@ -881,6 +882,9 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
             editor={editor}
             isReadOnly={state.isReadOnly}
           />
+
+          {/* Upload Status Indicator */}
+          <UploadStatusIndicator position="top-right" showProgress={true} />
         </div>
 
         <AIModal

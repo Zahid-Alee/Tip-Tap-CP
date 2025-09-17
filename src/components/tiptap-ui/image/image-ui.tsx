@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/tiptap-ui-primitive/dropdown-menu";
 import { Button } from "@/components/tiptap-ui-primitive/button";
+import { useUploadState } from "../../../hooks/use-upload-manager";
 
 import "./image.scss";
 
@@ -36,12 +37,21 @@ export const ImageButton: React.FC<ImageButtonProps> = ({ editor }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [imageUrl, setImageUrl] = React.useState<string>("");
   const [showUrlInput, setShowUrlInput] = React.useState<boolean>(false);
+  const { hasActiveUpload } = useUploadState();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     // console.log("selectin file");
     const file = event.target.files?.[0];
     // console.log("file", file);
     if (!file) return;
+
+    // Check if there's already an active upload
+    if (hasActiveUpload) {
+      alert(
+        "Another image is currently uploading. Please wait for it to complete before uploading another image."
+      );
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = (e) => {

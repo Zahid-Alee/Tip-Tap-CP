@@ -4,6 +4,7 @@ import { NodeViewWrapper } from "@tiptap/react";
 import { CloseIcon } from "@/components/tiptap-icons/close-icon";
 import "@/components/tiptap-node/image-upload-node/image-upload-node.scss";
 import { Loader2 } from "lucide-react";
+import { useUploadManager } from "../../../hooks/use-upload-manager";
 
 export interface FileItem {
   id: string;
@@ -25,10 +26,13 @@ interface UploadOptions {
   ) => Promise<string>;
   onSuccess?: (url: string) => void;
   onError?: (error: Error) => void;
+  uploadType?: "clipboard" | "drag-drop" | "button";
 }
 
 function useFileUpload(options: UploadOptions) {
   const [fileItem, setFileItem] = React.useState<FileItem | null>(null);
+  const { startUpload, updateUpload, removeUpload } = useUploadManager();
+  const uploadManagerIdRef = React.useRef<string | null>(null);
 
   const uploadFile = async (file: File): Promise<string | null> => {
     if (file.size > options.maxSize) {
@@ -39,19 +43,28 @@ function useFileUpload(options: UploadOptions) {
       return null;
     }
 
-    const abortController = new AbortController();
-
-    const newFileItem: FileItem = {
-      id: crypto.randomUUID(),
-      file,
-      progress: 0,
-      status: "uploading",
-      abortController,
-    };
-
-    setFileItem(newFileItem);
-
     try {
+      // Register upload with the manager
+      const uploadManagerId = startUpload({
+        type: options.uploadType || "button",
+        fileName: file.name,
+        progress: 0,
+        status: "uploading",
+      });
+      uploadManagerIdRef.current = uploadManagerId;
+
+      const abortController = new AbortController();
+
+      const newFileItem: FileItem = {
+        id: crypto.randomUUID(),
+        file,
+        progress: 0,
+        status: "uploading",
+        abortController,
+      };
+
+      setFileItem(newFileItem);
+
       if (!options.upload) {
         throw new Error("Upload function is not defined");
       }
@@ -59,6 +72,7 @@ function useFileUpload(options: UploadOptions) {
       const url = await options.upload(
         file,
         (event: { progress: number }) => {
+          // Update both local state and global upload manager
           setFileItem((prev) => {
             if (!prev) return null;
             return {
@@ -66,6 +80,12 @@ function useFileUpload(options: UploadOptions) {
               progress: event.progress,
             };
           });
+
+          if (uploadManagerIdRef.current) {
+            updateUpload(uploadManagerIdRef.current, {
+              progress: event.progress,
+            });
+          }
         },
         abortController.signal
       );
@@ -82,25 +102,38 @@ function useFileUpload(options: UploadOptions) {
             progress: 100,
           };
         });
+
+        if (uploadManagerIdRef.current) {
+          updateUpload(uploadManagerIdRef.current, {
+            status: "success",
+            progress: 100,
+          });
+        }
+
         options.onSuccess?.(url);
         return url;
       }
 
       return null;
     } catch (error) {
-      if (!abortController.signal.aborted) {
-        setFileItem((prev) => {
-          if (!prev) return null;
-          return {
-            ...prev,
-            status: "error",
-            progress: 0,
-          };
+      if (uploadManagerIdRef.current) {
+        updateUpload(uploadManagerIdRef.current, {
+          status: "error",
         });
-        options.onError?.(
-          error instanceof Error ? error : new Error("Upload failed")
-        );
       }
+
+      setFileItem((prev) => {
+        if (!prev) return null;
+        return {
+          ...prev,
+          status: "error",
+          progress: 0,
+        };
+      });
+
+      options.onError?.(
+        error instanceof Error ? error : new Error("Upload failed")
+      );
       return null;
     }
   };
@@ -128,7 +161,20 @@ function useFileUpload(options: UploadOptions) {
       return null;
     }
 
-    return uploadFile(file);
+    // Check if there's already an active upload
+    try {
+      return uploadFile(file);
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.includes("currently uploading")
+      ) {
+        // This error is thrown by the upload manager when trying to start a new upload
+        options.onError?.(error);
+        return null;
+      }
+      throw error;
+    }
   };
 
   const clearFileItem = () => {
@@ -140,6 +186,13 @@ function useFileUpload(options: UploadOptions) {
     if (fileItem.url) {
       URL.revokeObjectURL(fileItem.url);
     }
+
+    // Clean up upload manager state
+    if (uploadManagerIdRef.current) {
+      removeUpload(uploadManagerIdRef.current);
+      uploadManagerIdRef.current = null;
+    }
+
     setFileItem(null);
   };
 
@@ -215,11 +268,21 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
   children,
 }) => {
   const [dragover, setDragover] = React.useState(false);
+  const { hasActiveUpload } = useUploadManager();
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     setDragover(false);
     e.preventDefault();
     e.stopPropagation();
+
+    // Check if there's already an active upload
+    if (hasActiveUpload) {
+      // You might want to show a toast or error message here
+      console.warn(
+        "Another image is currently uploading. Please wait for it to complete."
+      );
+      return;
+    }
 
     const files = Array.from(e.dataTransfer.files);
     onFile(files);
@@ -356,6 +419,10 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     props.node.attrs;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const extension = props.extension;
+  const { hasActiveUpload } = useUploadManager();
+
+  // Set the default upload type based on how the node was created
+  const defaultUploadType = isFromClipboard ? "clipboard" : "button";
 
   const uploadOptions: UploadOptions = {
     maxSize,
@@ -364,6 +431,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     upload: extension.options.upload,
     onSuccess: extension.options.onSuccess,
     onError: extension.options.onError,
+    uploadType: defaultUploadType,
   };
 
   const { fileItem, uploadFiles, clearFileItem } = useFileUpload(uploadOptions);
@@ -371,7 +439,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
   // Handle clipboard file upload on mount
   React.useEffect(() => {
     if (isFromClipboard && clipboardFile && !fileItem) {
-      handleUpload([clipboardFile]);
+      handleUpload([clipboardFile], "clipboard");
     }
   }, [isFromClipboard, clipboardFile]);
 
@@ -381,7 +449,18 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       extension.options.onError?.(new Error("No file selected"));
       return;
     }
-    handleUpload(Array.from(files));
+
+    // Check if there's already an active upload before proceeding
+    if (hasActiveUpload) {
+      extension.options.onError?.(
+        new Error(
+          "Another image is currently uploading. Please wait for it to complete."
+        )
+      );
+      return;
+    }
+
+    handleUpload(Array.from(files), "button");
   };
 
   // Find this specific upload node by its unique key
@@ -400,7 +479,21 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     return foundPos;
   };
 
-  const handleUpload = async (files: File[]) => {
+  const createUploadHandler = (
+    uploadType: "clipboard" | "drag-drop" | "button"
+  ) => {
+    const options: UploadOptions = {
+      ...uploadOptions,
+      uploadType,
+    };
+
+    return useFileUpload(options);
+  };
+
+  const handleUpload = async (
+    files: File[],
+    uploadType: "clipboard" | "drag-drop" | "button" = "button"
+  ) => {
     const url = await uploadFiles(files);
 
     if (url) {
@@ -446,6 +539,16 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       return;
     }
 
+    // Check if there's already an active upload before allowing click
+    if (hasActiveUpload) {
+      extension.options.onError?.(
+        new Error(
+          "Another image is currently uploading. Please wait for it to complete."
+        )
+      );
+      return;
+    }
+
     if (inputRef.current && !fileItem) {
       inputRef.current.value = "";
       inputRef.current.click();
@@ -460,7 +563,9 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       contentEditable={false}
     >
       {!fileItem && !isFromClipboard && (
-        <ImageUploadDragArea onFile={handleUpload}>
+        <ImageUploadDragArea
+          onFile={(files) => handleUpload(files, "drag-drop")}
+        >
           <DropZoneContent maxSize={maxSize} />
         </ImageUploadDragArea>
       )}

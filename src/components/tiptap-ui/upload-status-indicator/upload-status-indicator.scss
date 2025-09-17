@@ -1,0 +1,186 @@
+.upload-status-indicator {
+  position: fixed;
+  z-index: 1000;
+  max-width: 300px;
+  pointer-events: auto;
+
+  &--top-right {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  &--top-left {
+    top: 1rem;
+    left: 1rem;
+  }
+
+  &--bottom-right {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  &--bottom-left {
+    bottom: 1rem;
+    left: 1rem;
+  }
+}
+
+.upload-status-item {
+  margin-bottom: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  &--uploading {
+    border-left: 4px solid #3b82f6;
+  }
+
+  &--success {
+    border-left: 4px solid #10b981;
+  }
+
+  &--error {
+    border-left: 4px solid #ef4444;
+  }
+}
+
+.upload-status-content {
+  display: flex;
+  align-items: flex-start;
+  padding: 0.75rem;
+  gap: 0.75rem;
+}
+
+.upload-status-icon {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.upload-status-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.upload-status-filename {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.upload-status-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-status-progress-bar {
+  flex: 1;
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.upload-status-progress-fill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.upload-status-progress-text {
+  font-size: 0.75rem;
+  color: #6b7280;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.upload-status-error,
+.upload-status-success {
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.upload-status-error {
+  color: #ef4444;
+}
+
+.upload-status-success {
+  color: #10b981;
+}
+
+.upload-status-cancel {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  color: #6b7280;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* Animation for new items */
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.upload-status-item {
+  animation: slideInFromRight 0.3s ease-out;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .upload-status-item {
+    background: #1f2937;
+    color: #f9fafb;
+  }
+
+  .upload-status-filename {
+    color: #f9fafb;
+  }
+
+  .upload-status-progress-bar {
+    background: #374151;
+  }
+
+  .upload-status-cancel:hover {
+    background: #374151;
+    color: #d1d5db;
+  }
+}

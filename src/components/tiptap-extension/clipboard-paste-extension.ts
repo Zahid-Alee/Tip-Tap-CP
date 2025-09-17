@@ -1,6 +1,7 @@
 import { Extension } from "@tiptap/core";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { handleImageUpload } from "../../lib/tiptap-utils";
+import uploadManager from "../../hooks/use-upload-manager";
 
 export interface ClipboardPasteOptions {
   /**
@@ -175,6 +176,17 @@ export const ClipboardPaste = Extension.create<ClipboardPasteOptions>({
             // Check if clipboard contains image data
             if (!hasImageInClipboard(clipboardData)) {
               return false;
+            }
+
+            // Check if there's already an active upload
+            if (uploadManager.hasActiveUpload()) {
+              event.preventDefault();
+              options.onError?.(
+                new Error(
+                  "Another image is currently uploading. Please wait for it to complete before pasting another image."
+                )
+              );
+              return true;
             }
 
             // Prevent default paste behavior for images
