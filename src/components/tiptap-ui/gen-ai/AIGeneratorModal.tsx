@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { X, Loader2, ChevronDown, Bot, Sparkles, Clock, RotateCcw, Trash2 } from "lucide-react";
+import {
+  X,
+  Loader2,
+  ChevronDown,
+  Bot,
+  Sparkles,
+  Clock,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 
 const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -31,7 +40,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Local storage key for topic history
-  const TOPIC_HISTORY_KEY = 'ai_generator_topic_history';
+  const TOPIC_HISTORY_KEY = "ai_generator_topic_history";
 
   // Load topic history from localStorage on component mount
   useEffect(() => {
@@ -41,9 +50,9 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   // Auto-fill with last used topic when modal opens
   useEffect(() => {
     if (isOpen && topicHistory.length > 0) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        topic: topicHistory[0].topic
+        topic: topicHistory[0].topic,
       }));
     }
   }, [isOpen, topicHistory]);
@@ -57,7 +66,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
         setTopicHistory(parsedHistory);
       }
     } catch (error) {
-      console.error('Error loading topic history from localStorage:', error);
+      console.error("Error loading topic history from localStorage:", error);
       setTopicHistory([]);
     }
   };
@@ -67,7 +76,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     try {
       localStorage.setItem(TOPIC_HISTORY_KEY, JSON.stringify(history));
     } catch (error) {
-      console.error('Error saving topic history to localStorage:', error);
+      console.error("Error saving topic history to localStorage:", error);
     }
   };
 
@@ -77,13 +86,13 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     if (!formData.topic.trim()) {
       return; // Don't submit if topic is empty
     }
-    
+
     setIsLoading(true);
 
     try {
       // Save current topic to history before generating
       saveTopicToHistory(formData.topic);
-      
+
       await onGenerate(formData);
       onClose();
     } catch (error) {
@@ -95,24 +104,24 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
 
   const saveTopicToHistory = (topic) => {
     if (!topic.trim()) return;
-    
+
     const newEntry = {
       id: Date.now().toString(),
       topic: topic.trim(),
       timestamp: new Date().toISOString(),
-      formData: { ...formData }
+      formData: { ...formData },
     };
 
-    setTopicHistory(prev => {
+    setTopicHistory((prev) => {
       // Remove duplicates and add to front
-      const filtered = prev.filter(entry => entry.topic !== topic.trim());
+      const filtered = prev.filter((entry) => entry.topic !== topic.trim());
       const updated = [newEntry, ...filtered];
       // Keep only last 20 entries
       const limited = updated.slice(0, 20);
-      
+
       // Save to localStorage
       saveTopicHistoryToStorage(limited);
-      
+
       return limited;
     });
   };
@@ -122,11 +131,11 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   };
 
   const handleTopicSelect = (historyEntry) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       topic: historyEntry.topic,
       // Optionally restore other form settings
-      ...historyEntry.formData
+      ...historyEntry.formData,
     }));
     setShowHistory(false);
   };
@@ -137,7 +146,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     try {
       localStorage.removeItem(TOPIC_HISTORY_KEY);
     } catch (error) {
-      console.error('Error clearing topic history from localStorage:', error);
+      console.error("Error clearing topic history from localStorage:", error);
     }
     setShowHistory(false);
   };
@@ -145,9 +154,9 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   // Clear single topic from history
   const clearSingleTopic = (topicId, event) => {
     event.stopPropagation(); // Prevent triggering the topic selection
-    
-    setTopicHistory(prev => {
-      const updated = prev.filter(entry => entry.id !== topicId);
+
+    setTopicHistory((prev) => {
+      const updated = prev.filter((entry) => entry.id !== topicId);
       // Save updated history to localStorage
       saveTopicHistoryToStorage(updated);
       return updated;
@@ -255,10 +264,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
                 </div>
                 <div className="space-y-2">
                   {topicHistory.map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="relative group"
-                    >
+                    <div key={entry.id} className="relative group">
                       <button
                         type="button"
                         onClick={() => handleTopicSelect(entry)}
@@ -594,7 +600,8 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
               <textarea
                 id="instructions"
                 className="block w-full px-4 py-3 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 placeholder-gray-400"
-                placeholder="Add any specific instructions for content generation..."
+                placeholder="Add any specific instructions for content generation...
+Examples: Include examples, Use simple language, Add relevant statistics, Keep sentences short and clear, etc."
                 value={formData.additionalInstructions}
                 onChange={(e) =>
                   handleChange("additionalInstructions", e.target.value)
