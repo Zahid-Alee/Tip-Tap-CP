@@ -198,13 +198,16 @@ export const ClipboardPaste = Extension.create<ClipboardPasteOptions>({
                   const position = selection.$head.pos;
 
                   // Insert upload node with clipboard file and flag
+                  const uploadKey = `clipboard_${Date.now()}_${Math.random()
+                    .toString(36)
+                    .substr(2, 9)}`;
                   const tempAttrs = {
                     accept: "image/*",
                     limit: 1,
                     maxSize: options.maxSize,
                     isFromClipboard: true,
                     clipboardFile: imageFile, // Pass the file directly
-                    uploadId: crypto.randomUUID(), // Add unique identifier for this upload
+                    uploadKey: uploadKey,
                   };
 
                   const uploadNode =

@@ -89,7 +89,7 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
       clipboardFile: {
         default: null,
       },
-      uploadId: {
+      uploadKey: {
         default: null,
       },
     };
@@ -116,11 +116,13 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
         (options = {}) =>
         ({ commands }) => {
           console.log("Setting ImageUploadNode with options:", options);
-          // Add a unique upload ID to track this specific upload
-          const uploadId = crypto.randomUUID();
+          // Generate a unique key for tracking this upload
+          const uploadKey = `upload_${Date.now()}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}`;
           return commands.insertContent({
             type: this.name,
-            attrs: { ...options, uploadId },
+            attrs: { ...options, uploadKey },
           });
         },
     };

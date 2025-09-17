@@ -334,7 +334,7 @@ const DropZoneContent: React.FC<{ maxSize: number }> = ({ maxSize }) => (
 );
 
 export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
-  const { accept, limit, maxSize, isFromClipboard, clipboardFile, uploadId } =
+  const { accept, limit, maxSize, isFromClipboard, clipboardFile, uploadKey } =
     props.node.attrs;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const extension = props.extension;
@@ -366,19 +366,17 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     handleUpload(Array.from(files));
   };
 
-  const findNodeByUploadId = (uploadId: string) => {
+  // Find this specific upload node by its unique key
+  const findUploadNodeByKey = (key: string) => {
     const { state } = props.editor;
     let foundPos: number | null = null;
 
     state.doc.descendants((node, pos) => {
-      if (
-        node.type.name === "imageUpload" &&
-        node.attrs.uploadId === uploadId
-      ) {
+      if (node.type.name === "imageUpload" && node.attrs.uploadKey === key) {
         foundPos = pos;
         return false; // Stop searching
       }
-      return true;
+      return true; // Continue searching
     });
 
     return foundPos;
@@ -387,12 +385,28 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
   const handleUpload = async (files: File[]) => {
     const url = await uploadFiles(files);
 
-    if (url && uploadId) {
-      // Find the node by its unique upload ID
-      const pos = findNodeByUploadId(uploadId);
+    if (url) {
       const filename = files[0]?.name.replace(/\.[^/.]+$/, "") || "unknown";
 
-      if (pos !== null) {
+      if (uploadKey) {
+        // Find the node by its unique upload key
+        const pos = findUploadNodeByKey(uploadKey);
+        if (pos !== null) {
+          props.editor
+            .chain()
+            .focus()
+            .deleteRange({ from: pos, to: pos + 1 })
+            .insertContentAt(pos, [
+              {
+                type: "resizableImage",
+                attrs: { src: url, alt: filename, title: filename },
+              },
+            ])
+            .run();
+        }
+      } else {
+        // Fallback to original method if no uploadKey
+        const pos = props.getPos();
         props.editor
           .chain()
           .focus()
