@@ -74,7 +74,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         default: null,
       },
       align: {
-        default: "left",
+        default: "center",
       },
       flipX: {
         default: false,
@@ -118,7 +118,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
             align:
               img.getAttribute("data-align") ||
               figure.getAttribute("data-align") ||
-              "left",
+              "center",
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: anchor?.getAttribute("href") || null,
@@ -141,7 +141,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
             height: img.getAttribute("height")
               ? parseInt(img.getAttribute("height")!, 10)
               : null,
-            align: img.getAttribute("data-align") || "left",
+            align: img.getAttribute("data-align") || "center",
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: anchor?.getAttribute("href"),
@@ -162,7 +162,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
             height: img.getAttribute("height")
               ? parseInt(img.getAttribute("height")!, 10)
               : null,
-            align: img.getAttribute("data-align") || "left",
+            align: img.getAttribute("data-align") || "center",
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: null, // No href for standalone images
