@@ -59,7 +59,7 @@
     .hljs-section {
       color: #fed46b;
     }
-    
+
     .function_ {
       color: #62b4e3;
     }
@@ -83,7 +83,7 @@
   position: relative;
   margin: 1rem 0 !important;
   background-color: #292a36;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   border: 1px solid var(--tt-codeblock-border);
   border-radius: 10px;
@@ -192,6 +192,31 @@
 
   #code-block-copy {
     display: none;
+  }
+
+  .sticky-copy-button {
+    position: sticky;
+    top: -10px;
+    right: 0;
+    float: right;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--tiptap-code-block-copy-bg, rgba(41, 42, 54, 0.9));
+    color: var(--tiptap-code-block-copy-text-dark, #9ca3af);
+    border: 1px solid var(--tiptap-code-block-copy-border-dark, #4b5563);
+    border-radius: 0.25rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background-color: var(--tiptap-code-block-copy-hover-bg-dark, #2d2d3a);
+      color: var(--tiptap-code-block-copy-hover-text-dark, #e5e7eb);
+    }
   }
 }
 

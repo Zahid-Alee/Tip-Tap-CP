@@ -70,7 +70,7 @@ const CodeBlockComponent = ({
   };
 
   return (
-    <NodeViewWrapper className="code-block">
+    <NodeViewWrapper className="code-block relative">
       <div className={`code-block-header ${readOnlyValue ? "!border-0" : ""}`}>
         {!readOnlyValue ? (
           <select
@@ -98,7 +98,7 @@ const CodeBlockComponent = ({
         <div className="flex gap-2">
           {!readOnlyValue && (
             <button
-              className="code-block-copy"
+              className="code-block-copy mr-5"
               onClick={handleDelete}
               aria-label="Delete code block"
               title="Delete code block"
@@ -106,16 +106,33 @@ const CodeBlockComponent = ({
               <Trash size={18} />
             </button>
           )}
-          <button
-            className="code-block-copy"
-            onClick={handleCopy}
-            aria-label={copied ? "Copied!" : "Copy code"}
-            title={copied ? "Copied!" : "Copy code"}
-          >
-            {copied ? <Check size={18} /> : <Copy size={18} />}
-          </button>
+          {/* Copy button moved outside for sticky positioning */}
         </div>
       </div>
+
+      {/* Sticky copy button for readOnly view */}
+      {readOnlyValue && (
+        <button
+          className="code-block-copy left-[95%] mr-3 top-0 mt-[-32px]   sticky  z-10 bg-white"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? <Check size={18} /> : <Copy size={18} />}
+        </button>
+      )}
+
+      {/* Copy button in normal position for edit mode */}
+      {!readOnlyValue && (
+        <button
+          className="code-block-copy absolute top-2.5 right-2"
+          onClick={handleCopy}
+          aria-label={copied ? "Copied!" : "Copy code"}
+          title={copied ? "Copied!" : "Copy code"}
+        >
+          {copied ? <Check size={18} /> : <Copy size={18} />}
+        </button>
+      )}
 
       <pre className="code-block-pre relative">
         <code ref={codeRef} className="code-block-content">
