@@ -287,21 +287,12 @@ const ImageUploadDragArea: React.FC<ImageUploadDragAreaProps> = ({
   children,
 }) => {
   const [dragover, setDragover] = React.useState(false);
-  const { hasActiveUpload } = useUploadManager();
+  // Allow dropping files even if another upload is active
 
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
     setDragover(false);
     e.preventDefault();
     e.stopPropagation();
-
-    // Check if there's already an active upload
-    if (hasActiveUpload) {
-      // You might want to show a toast or error message here
-      console.warn(
-        "Another image is currently uploading. Please wait for it to complete."
-      );
-      return;
-    }
 
     const files = Array.from(e.dataTransfer.files);
     onFile(files);
@@ -438,7 +429,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     props.node.attrs;
   const inputRef = React.useRef<HTMLInputElement>(null);
   const extension = props.extension;
-  const { hasActiveUpload } = useUploadManager();
+  // No gating by active uploads; concurrent uploads are allowed
 
   // Set the default upload type based on how the node was created
   const defaultUploadType = isFromClipboard ? "clipboard" : "button";
@@ -466,16 +457,6 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
       extension.options.onError?.(new Error("No file selected"));
-      return;
-    }
-
-    // Check if there's already an active upload before proceeding
-    if (hasActiveUpload) {
-      extension.options.onError?.(
-        new Error(
-          "Another image is currently uploading. Please wait for it to complete."
-        )
-      );
       return;
     }
 
@@ -551,16 +532,6 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
   const handleClick = () => {
     // Don't allow manual clicks if this is from clipboard and already uploading
     if (isFromClipboard && fileItem) {
-      return;
-    }
-
-    // Check if there's already an active upload before allowing click
-    if (hasActiveUpload) {
-      extension.options.onError?.(
-        new Error(
-          "Another image is currently uploading. Please wait for it to complete."
-        )
-      );
       return;
     }
 

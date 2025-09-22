@@ -50,15 +50,6 @@ export function useImageUploadButton(
 
   const handleInsertImage = React.useCallback(() => {
     if (disabled) return false;
-
-    // Check if there's already an active upload
-    if (hasActiveUpload) {
-      console.warn(
-        "Another image is currently uploading. Please wait for it to complete before adding another image."
-      );
-      return false;
-    }
-
     return insertImage(editor, extensionName);
   }, [editor, extensionName, disabled, hasActiveUpload]);
 
@@ -86,11 +77,10 @@ export const ImageUploadButton = React.forwardRef<
     ref
   ) => {
     const editor = useTiptapEditor(providedEditor);
-    const { hasActiveUpload } = useUploadState();
     const { isActive, handleInsertImage } = useImageUploadButton(
       editor,
       extensionName,
-      disabled || hasActiveUpload
+      disabled
     );
 
     const handleClick = React.useCallback(

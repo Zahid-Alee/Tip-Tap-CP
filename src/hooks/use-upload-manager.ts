@@ -35,13 +35,7 @@ class UploadManager {
   }
 
   startUpload(upload: Omit<ActiveUpload, "id" | "startTime">): string {
-    // Check if there's already an active upload
-    if (this.hasActiveUpload()) {
-      throw new Error(
-        "Another image is currently uploading. Please wait for it to complete."
-      );
-    }
-
+    // Allow multiple concurrent uploads
     const id = `upload_${Date.now()}_${Math.random()
       .toString(36)
       .substr(2, 9)}`;
