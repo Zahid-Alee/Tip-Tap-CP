@@ -16,7 +16,8 @@ export interface ImageUploadNodeOptions {
   accept?: string;
   /**
    * Maximum number of files that can be uploaded.
-   * @default 1
+   * 0 means unlimited
+   * @default 0
    */
   limit?: number;
   /**
@@ -64,7 +65,7 @@ export const ImageUploadNode = Node.create<ImageUploadNodeOptions>({
   addOptions() {
     return {
       accept: "image/*",
-      limit: 1,
+      limit: 0,
       maxSize: 0,
       upload: undefined,
       onError: undefined,

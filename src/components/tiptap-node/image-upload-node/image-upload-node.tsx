@@ -35,7 +35,8 @@ function useFileUpload(options: UploadOptions) {
   const uploadManagerIdRef = React.useRef<string | null>(null);
 
   const uploadFile = async (file: File): Promise<string | null> => {
-    if (file.size > options.maxSize) {
+    // If maxSize is 0 treat it as unlimited
+    if (options.maxSize > 0 && file.size > options.maxSize) {
       const error = new Error(
         `File size exceeds maximum allowed (${options.maxSize / 1024 / 1024}MB)`
       );
@@ -108,18 +109,30 @@ function useFileUpload(options: UploadOptions) {
             status: "success",
             progress: 100,
           });
+          // Remove this upload entry now that it's completed so a subsequent
+          // sequential upload can start without being blocked by the manager.
+          removeUpload(uploadManagerIdRef.current);
+          uploadManagerIdRef.current = null;
         }
 
         options.onSuccess?.(url);
         return url;
       }
 
+      // If aborted, ensure removal from manager
+      if (uploadManagerIdRef.current) {
+        removeUpload(uploadManagerIdRef.current);
+        uploadManagerIdRef.current = null;
+      }
       return null;
     } catch (error) {
       if (uploadManagerIdRef.current) {
         updateUpload(uploadManagerIdRef.current, {
           status: "error",
         });
+        // Clean up the manager entry on error to allow subsequent uploads
+        removeUpload(uploadManagerIdRef.current);
+        uploadManagerIdRef.current = null;
       }
 
       setFileItem((prev) => {
@@ -138,43 +151,49 @@ function useFileUpload(options: UploadOptions) {
     }
   };
 
-  const uploadFiles = async (files: File[]): Promise<string | null> => {
+  const uploadFiles = async (
+    files: File[]
+  ): Promise<Array<{ url: string; file: File }> | null> => {
     if (!files || files.length === 0) {
       options.onError?.(new Error("No files to upload"));
       return null;
     }
 
+    let filesToUpload = files;
     if (options.limit && files.length > options.limit) {
+      // Trim to limit but also notify
       options.onError?.(
         new Error(
-          `Maximum ${options.limit} file${
-            options.limit === 1 ? "" : "s"
-          } allowed`
+          `Selected ${files.length} files. Only the first ${options.limit} will be uploaded.`
         )
       );
-      return null;
+      filesToUpload = files.slice(0, options.limit);
     }
 
-    const file = files[0];
-    if (!file) {
-      options.onError?.(new Error("File is undefined"));
-      return null;
-    }
+    const results: Array<{ url: string; file: File }> = [];
 
-    // Check if there's already an active upload
-    try {
-      return uploadFile(file);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message.includes("currently uploading")
-      ) {
-        // This error is thrown by the upload manager when trying to start a new upload
-        options.onError?.(error);
-        return null;
+    for (const f of filesToUpload) {
+      try {
+        const url = await uploadFile(f);
+        if (url) {
+          results.push({ url, file: f });
+        }
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.includes("currently uploading")
+        ) {
+          // This error is thrown by the upload manager when trying to start a new upload
+          options.onError?.(error);
+          // Stop further uploads if manager blocks us
+          break;
+        }
+        // Re-throw unexpected errors
+        throw error;
       }
-      throw error;
     }
+
+    return results.length ? results : null;
   };
 
   const clearFileItem = () => {
@@ -494,10 +513,16 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
     files: File[],
     uploadType: "clipboard" | "drag-drop" | "button" = "button"
   ) => {
-    const url = await uploadFiles(files);
+    const uploaded = await uploadFiles(files);
 
-    if (url) {
-      const filename = files[0]?.name.replace(/\.[^/.]+$/, "") || "unknown";
+    if (uploaded && uploaded.length > 0) {
+      const nodes = uploaded.map(({ url, file }) => {
+        const name = file?.name?.replace(/\.[^/.]+$/, "") || "unknown";
+        return {
+          type: "resizableImage",
+          attrs: { src: url, alt: name, title: name },
+        } as const;
+      });
 
       if (uploadKey) {
         // Find the node by its unique upload key
@@ -507,12 +532,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
             .chain()
             .focus()
             .deleteRange({ from: pos, to: pos + 1 })
-            .insertContentAt(pos, [
-              {
-                type: "resizableImage",
-                attrs: { src: url, alt: filename, title: filename },
-              },
-            ])
+            .insertContentAt(pos, nodes as any)
             .run();
         }
       } else {
@@ -522,12 +542,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
           .chain()
           .focus()
           .deleteRange({ from: pos, to: pos + 1 })
-          .insertContentAt(pos, [
-            {
-              type: "resizableImage",
-              attrs: { src: url, alt: filename, title: filename },
-            },
-          ])
+          .insertContentAt(pos, nodes as any)
           .run();
       }
     }
@@ -584,6 +599,7 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
         name="file"
         accept={accept}
         type="file"
+        multiple
         onChange={handleChange}
         onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
         style={{ display: "none" }}
