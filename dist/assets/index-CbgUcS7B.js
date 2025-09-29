@@ -1227,6 +1227,7 @@ You must leverage the following custom blocks when it improves clarity or UX. Us
 
 1. Output Block (terminal / program output / captured result – NOT source code)
 Purpose: Show the RESULT of executing code, CLI session excerpts, logs, JSON responses, evaluation outputs.
+Exception: If output is code then use CodeBlock otherwise don't use code block for showing output.
 Markup:
 <pre data-type="output-block" data-language="text" class="output-block"><code>[Exact output text with preserved line breaks]</code></pre>
 Rules:
@@ -1326,6 +1327,7 @@ HTML FORMATTING & CUSTOM COMPONENT GUIDELINES:
 - Cards: place AFTER the concept introduction paragraph OR near section end for summaries
 - Output Blocks: immediately AFTER the code example or description whose result they demonstrate
 - Never place an output block before explaining its source context
+- IF output is code then use output block, Other wise don't use code block for output
 
 CONTENT QUALITY:
 - Engaging hooks at each section's start
