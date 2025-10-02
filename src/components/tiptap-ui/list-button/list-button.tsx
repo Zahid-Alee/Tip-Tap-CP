@@ -30,8 +30,6 @@ export type ListType =
   | "taskList"
   | "alphabetList"
   | "romanList"
-  | "squareList"
-  | "circleList"
   | "upperAlphabetList"
   | "lowerRomanList"
   | "upperRomanList";
@@ -114,28 +112,6 @@ const DashIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-const SquareIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-  >
-    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" strokeWidth="2" />
-  </svg>
-);
-
-const CircleIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className}
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-  >
-    <circle cx="12" cy="12" r="9" strokeWidth="2" />
-  </svg>
-);
-
 const CheckIcon = ({ className }: { className?: string }) => (
   <svg
     className={className}
@@ -207,24 +183,6 @@ export const listOptions: ListOption[] = [
     category: "numbered",
     cssListStyleType: "upper-roman",
   },
-
-  // Symbol lists
-  {
-    label: "Square List",
-    type: "squareList",
-    icon: SquareIcon,
-    style: "square",
-    category: "symbols",
-    cssListStyleType: "square",
-  },
-  {
-    label: "Circle List",
-    type: "circleList",
-    icon: CircleIcon,
-    style: "circle",
-    category: "symbols",
-    cssListStyleType: "circle",
-  },
 ];
 
 export const extendedListShortcutKeys: Record<ListType, string> = {
@@ -233,8 +191,6 @@ export const extendedListShortcutKeys: Record<ListType, string> = {
   taskList: "Ctrl-Shift-9",
   alphabetList: "Ctrl-Shift-A",
   romanList: "Ctrl-Shift-R",
-  squareList: "Ctrl-Shift-S",
-  circleList: "Ctrl-Shift-O",
   upperAlphabetList: "Ctrl-Alt-A",
   lowerRomanList: "Ctrl-Alt-R",
   upperRomanList: "Ctrl-Alt-Shift-R",
@@ -255,7 +211,6 @@ export function canToggleList(editor: Editor | null, type: ListType): boolean {
     case "lowerRomanList":
     case "upperRomanList":
       return editor.can().toggleOrderedList();
-
     default:
       return false;
   }
@@ -264,7 +219,17 @@ export function canToggleList(editor: Editor | null, type: ListType): boolean {
 export function isListActive(editor: Editor | null, type: ListType): boolean {
   if (!editor) return false;
 
-  // Check if the list type is active by looking at the current list style
+  // Basic checks first
+  switch (type) {
+    case "bulletList":
+      return editor.isActive("bulletList") && !editor.isActive("taskList");
+    case "orderedList":
+      return editor.isActive("orderedList");
+    case "taskList":
+      return editor.isActive("taskList");
+  }
+
+  // Check for custom styled lists
   const { selection } = editor.state;
   const { $from } = selection;
 
@@ -284,24 +249,14 @@ export function isListActive(editor: Editor | null, type: ListType): boolean {
   if (!listNode) return false;
 
   // Check the list style attribute
-  const listStyle = listNode.attrs?.listStyleType || listNode.attrs?.style;
+  const listStyle = listNode.attrs?.listStyleType;
   const option = listOptions.find((opt) => opt.type === type);
 
-  if (option) {
-    return listStyle === option.cssListStyleType || listStyle === option.style;
+  if (option && listStyle) {
+    return listStyle === option.cssListStyleType;
   }
 
-  // Fallback to basic active checks
-  switch (type) {
-    case "bulletList":
-      return editor.isActive("bulletList");
-    case "orderedList":
-      return editor.isActive("orderedList");
-    case "taskList":
-      return editor.isActive("taskList");
-    default:
-      return false;
-  }
+  return false;
 }
 export function toggleExtendedList(
   editor: Editor | null,
@@ -349,67 +304,58 @@ export function toggleExtendedList(
     return;
   }
 
-  // Check if any other list type is active
-  const isAnyListActive =
-    editor.isActive("bulletList") ||
-    editor.isActive("orderedList") ||
-    editor.isActive("taskList");
+  // Check what type of list is currently active
+  const isInBulletList =
+    editor.isActive("bulletList") && !editor.isActive("taskList");
+  const isInOrderedList = editor.isActive("orderedList");
+  const isInTaskList = editor.isActive("taskList");
 
   switch (type) {
     case "bulletList":
-      if (isAnyListActive) {
-        // Convert existing list to bullet list
-        if (editor.isActive("orderedList")) {
-          editor.chain().focus().toggleOrderedList().toggleBulletList().run();
-        } else if (editor.isActive("taskList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleList("taskList", "taskItem")
-            .toggleBulletList()
-            .run();
-        }
+      if (isInOrderedList) {
+        editor.chain().focus().toggleOrderedList().toggleBulletList().run();
+      } else if (isInTaskList) {
+        editor
+          .chain()
+          .focus()
+          .toggleList("taskList", "taskItem")
+          .toggleBulletList()
+          .run();
       } else {
         editor.chain().focus().toggleBulletList().run();
       }
       break;
 
     case "orderedList":
-      if (isAnyListActive) {
-        // Convert existing list to ordered list
-        if (editor.isActive("bulletList")) {
-          editor.chain().focus().toggleBulletList().toggleOrderedList().run();
-        } else if (editor.isActive("taskList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleList("taskList", "taskItem")
-            .toggleOrderedList()
-            .run();
-        }
+      if (isInBulletList) {
+        editor.chain().focus().toggleBulletList().toggleOrderedList().run();
+      } else if (isInTaskList) {
+        editor
+          .chain()
+          .focus()
+          .toggleList("taskList", "taskItem")
+          .toggleOrderedList()
+          .run();
       } else {
         editor.chain().focus().toggleOrderedList().run();
       }
       break;
 
     case "taskList":
-      if (isAnyListActive) {
-        // Convert existing list to task list
-        if (editor.isActive("bulletList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleBulletList()
-            .toggleList("taskList", "taskItem")
-            .run();
-        } else if (editor.isActive("orderedList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleOrderedList()
-            .toggleList("taskList", "taskItem")
-            .run();
-        }
+      if (isInBulletList) {
+        editor
+          .chain()
+          .focus()
+          .toggleBulletList()
+          .toggleList("taskList", "taskItem")
+          .run();
+      } else if (isInOrderedList) {
+        editor
+          .chain()
+          .focus()
+          .toggleOrderedList()
+          .toggleList("taskList", "taskItem")
+          .run();
       } else {
         editor.chain().focus().toggleList("taskList", "taskItem").run();
       }
@@ -419,97 +365,46 @@ export function toggleExtendedList(
     case "upperAlphabetList":
     case "lowerRomanList":
     case "upperRomanList":
-      if (isAnyListActive) {
-        // Convert existing list to ordered list with custom styling
-        if (editor.isActive("bulletList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleBulletList()
-            .toggleOrderedList()
-            .updateAttributes("orderedList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        } else if (editor.isActive("taskList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleList("taskList", "taskItem")
-            .toggleOrderedList()
-            .updateAttributes("orderedList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        } else {
-          // Already an ordered list, just update attributes
-          editor
-            .chain()
-            .focus()
-            .updateAttributes("orderedList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        }
-      } else {
+      // Convert to ordered list with custom styling
+      if (isInBulletList) {
         editor
           .chain()
           .focus()
+          .toggleBulletList()
           .toggleOrderedList()
           .updateAttributes("orderedList", {
             listStyleType: option.cssListStyleType,
             style: `list-style-type: ${option.cssListStyleType};`,
           })
           .run();
-      }
-      break;
-
-    case "squareList":
-    case "circleList":
-      if (isAnyListActive) {
-        // Convert existing list to bullet list with custom styling
-        if (editor.isActive("orderedList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleOrderedList()
-            .toggleBulletList()
-            .updateAttributes("bulletList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        } else if (editor.isActive("taskList")) {
-          editor
-            .chain()
-            .focus()
-            .toggleList("taskList", "taskItem")
-            .toggleBulletList()
-            .updateAttributes("bulletList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        } else {
-          // Already a bullet list, just update attributes
-          editor
-            .chain()
-            .focus()
-            .updateAttributes("bulletList", {
-              listStyleType: option.cssListStyleType,
-              style: `list-style-type: ${option.cssListStyleType};`,
-            })
-            .run();
-        }
-      } else {
+      } else if (isInTaskList) {
         editor
           .chain()
           .focus()
-          .toggleBulletList()
-          .updateAttributes("bulletList", {
+          .toggleList("taskList", "taskItem")
+          .toggleOrderedList()
+          .updateAttributes("orderedList", {
+            listStyleType: option.cssListStyleType,
+            style: `list-style-type: ${option.cssListStyleType};`,
+          })
+          .run();
+      } else if (isInOrderedList) {
+        // Already an ordered list, just update attributes
+        editor
+          .chain()
+          .focus()
+          .updateAttributes("orderedList", {
+            listStyleType: option.cssListStyleType,
+            style: `list-style-type: ${option.cssListStyleType};`,
+          })
+          .run();
+      } else {
+        // Create new ordered list with styling
+        editor
+          .chain()
+          .focus()
+          .toggleOrderedList()
+          .updateAttributes("orderedList", {
             listStyleType: option.cssListStyleType,
             style: `list-style-type: ${option.cssListStyleType};`,
           })
@@ -553,7 +448,7 @@ export const ListButton = React.forwardRef<HTMLButtonElement, ListButtonProps>(
     const editor = useTiptapEditor(providedEditor);
     const listOption = getExtendedListOption(type);
     const isActive = isListActive(editor, type);
-    const shortcutKey = extendedListShortcutKeys[type];
+    const shortcutKey = extendedListShortcutKeys[type as ListType];
 
     const Icon = listOption?.icon || ListIcon;
 
@@ -620,8 +515,6 @@ export function ListDropdownMenu({
     "upperAlphabetList",
     "lowerRomanList",
     "upperRomanList",
-    "squareList",
-    "circleList",
   ],
   hideWhenUnavailable = false,
   onOpenChange,

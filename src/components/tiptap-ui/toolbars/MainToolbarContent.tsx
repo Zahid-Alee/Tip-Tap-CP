@@ -115,12 +115,8 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
             "upperAlphabetList",
             "lowerRomanList",
             "upperRomanList",
-            "arrowList",
-            "starList",
-            "dashList",
             "squareList",
             "circleList",
-            "checkList",
           ]}
         />
         <BlockquoteColorPopover editor={editor} />
