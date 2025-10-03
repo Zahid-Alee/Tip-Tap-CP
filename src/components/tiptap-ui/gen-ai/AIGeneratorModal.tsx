@@ -107,7 +107,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
 
     try {
       // Save current topic to history before generating
-      saveTopicToHistory(formData.topic);
+      // saveTopicToHistory(formData.topic);
 
       await onGenerate(formData);
       onClose();
@@ -315,20 +315,20 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
               >
                 Topic*
               </label>
-              {topicHistory.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setShowHistory(!showHistory)}
-                  className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
-                >
-                  <Clock className="h-4 w-4" />
-                  History ({topicHistory.length})
-                </button>
-              )}
+              {/* {topicHistory.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowHistory(!showHistory)}
+                    className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    <Clock className="h-4 w-4" />
+                    History ({topicHistory.length})
+                  </button>
+                )} */}
             </div>
 
             {/* Topic History Dropdown */}
-            {showHistory && topicHistory.length > 0 && (
+            {/* {showHistory && topicHistory.length > 0 && (
               <div className="mb-3 bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium text-gray-700">
@@ -370,7 +370,7 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
 
             <div className="relative">
               <textarea
