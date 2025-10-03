@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   X,
   Loader2,
@@ -39,13 +40,27 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [presets, setPresets] = useState([]);
+  const [selectedPresetId, setSelectedPresetId] = useState(null);
 
   // Local storage key for topic history
   const TOPIC_HISTORY_KEY = "ai_generator_topic_history";
 
-  // Load topic history from localStorage on component mount
+  const getPreset = async () => {
+    try {
+      const response = await axios.get(`/api/get-prompt-setting/text_lecture`);
+      if (response.data && response.data?.success) {
+        const data = response.data.data;
+        setPresets(data);
+      }
+    } catch (error) {
+      console.log("Error fetching preset:", error);
+    }
+  };
+
   useEffect(() => {
-    loadTopicHistory();
+    // loadTopicHistory();
+    getPreset();
   }, []);
 
   // Auto-fill with last used topic when modal opens
@@ -140,7 +155,6 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
     }));
     setShowHistory(false);
   };
-
   // Clear all history
   const clearAllHistory = () => {
     setTopicHistory([]);
@@ -227,6 +241,72 @@ const AIGeneratorModal = ({ isOpen, onClose, onGenerate }) => {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Presets Dropdown */}
+          {presets && presets.length > 0 && (
+            <div>
+              <label
+                htmlFor="presets"
+                className="block text-sm font-medium text-gray-800 mb-2"
+              >
+                Presets
+              </label>
+              <select
+                id="presets"
+                className="block w-full px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                value={selectedPresetId || ""}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    const selectedPreset = presets.find(
+                      (preset) => preset.id == e.target.value
+                    );
+                    if (selectedPreset) {
+                      const metaData = JSON.parse(selectedPreset.metadata);
+
+                      const sectionTypes = Object.keys(
+                        metaData.sectionType
+                      ).filter((key) => metaData.sectionType[key]);
+
+                      setFormData((prev) => {
+                        return {
+                          ...prev,
+                          topic: selectedPreset?.description || "",
+                          sectionCount: metaData?.sections || 3,
+                          sectionTypes: sectionTypes || [
+                            "paragraph",
+                            "bulletList",
+                            "codeBlock",
+                            "heading",
+                          ],
+                          sectionLength: metaData?.length || "medium",
+                          tone: metaData?.tone || "professional",
+                          includeHeader: metaData?.options?.header,
+                          includeFooter: metaData.options?.footer,
+                          includeEmojis: metaData.options?.emojis,
+                          replaceExisting: metaData.options?.replaceExsisting,
+                          targetAudience: metaData?.audience || "students",
+                          model: metaData?.model || "openai",
+                          language: metaData?.language || "english",
+                          temperature: metaData?.temperature || 0.7,
+                        };
+                      });
+                      setSelectedPresetId(selectedPreset.id);
+                    }
+                  }
+                }}
+              >
+                <option value="">Select a preset...</option>
+                {presets.map((preset) => (
+                  <option key={preset.id} value={preset.id}>
+                    {preset.title || `Preset ${preset.id}`}
+                  </option>
+                ))}
+              </select>
+              {/* <p className="text-xs text-gray-500 mt-1">
+                Choose a preset to auto-fill form settings
+              </p> */}
+            </div>
+          )}
+
           <div>
             <div className="flex items-center justify-between mb-2">
               <label
