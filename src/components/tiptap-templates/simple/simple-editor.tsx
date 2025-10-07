@@ -24,6 +24,7 @@ import { Link } from "@/components/tiptap-extension/link-extension";
 import { Selection } from "@/components/tiptap-extension/selection-extension";
 import { TrailingNode } from "@/components/tiptap-extension/trailing-node-extension";
 import { EnhancedBlockquote } from "@/components/tiptap-extension/blockquote-extension";
+import { CustomHeading } from "@/components/tiptap-extension/heading-extension";
 import { all, createLowlight } from "lowlight";
 
 // --- Table Extensions ---
@@ -206,7 +207,9 @@ const useEditorExtensions = ({ readOnlyValue }) => {
       codeBlock: false,
       bold: false,
       blockquote: false,
+      heading: false, // Disable default heading to use our custom one
     }),
+    CustomHeading, // Add our custom heading extension with typography
     OutputBlock,
 
     CodeBlockLowlight.extend({

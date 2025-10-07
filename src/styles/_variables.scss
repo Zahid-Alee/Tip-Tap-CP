@@ -127,8 +127,7 @@
     ******************/
 
   /* Shadows Light */
-  --tt-shadow-elevated-md:
-    0px 16px 48px 0px rgba(17, 24, 39, 0.04),
+  --tt-shadow-elevated-md: 0px 16px 48px 0px rgba(17, 24, 39, 0.04),
     0px 12px 24px 0px rgba(17, 24, 39, 0.04),
     0px 6px 8px 0px rgba(17, 24, 39, 0.02),
     0px 2px 3px 0px rgba(17, 24, 39, 0.02);
@@ -178,10 +177,9 @@
 /* Shadows Dark */
 @media (prefers-color-scheme: dark) {
   :root {
-    --tt-shadow-elevated-md:
-      0px 16px 48px 0px rgba(0, 0, 0, 0.5),
-      0px 12px 24px 0px rgba(0, 0, 0, 0.24),
-      0px 6px 8px 0px rgba(0, 0, 0, 0.22), 0px 2px 3px 0px rgba(0, 0, 0, 0.12);
+    --tt-shadow-elevated-md: 0px 16px 48px 0px rgba(0, 0, 0, 0.5),
+      0px 12px 24px 0px rgba(0, 0, 0, 0.24), 0px 6px 8px 0px rgba(0, 0, 0, 0.22),
+      0px 2px 3px 0px rgba(0, 0, 0, 0.12);
   }
 }
 
@@ -200,6 +198,34 @@
   --tt-selection-color: rgba(157, 138, 255, 0.2);
   --tt-card-bg-color: var(--white);
   --tt-card-border-color: var(--tt-gray-light-a-100);
+
+  /************************************************** 
+        Typography System
+    **************************************************/
+
+  /* Font Family */
+  --tt-font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+
+  /* Type Scale */
+  --text-size-80: 0.694rem; /* Smallest */
+  --text-size-90: 0.833rem; /* Small */
+  --text-size-100: 1rem; /* Base */
+  --text-size-200: 1.2rem;
+  --text-size-300: 1.44rem;
+  --text-size-400: 1.728rem;
+  --text-size-500: 2.074rem;
+  --text-size-600: 2.488rem;
+  --text-size-700: 2.986rem; /* Largest */
+
+  /* Font Weights */
+  --font-weight-light: 200;
+  --font-weight-regular: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 }
 
 /* Global colors - Dark mode */
