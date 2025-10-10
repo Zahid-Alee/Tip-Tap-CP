@@ -230,9 +230,8 @@ export function EditorHeader({
 
   // --- AI Modal ---
   const handleOpenAIModal = () => setIsAIModalOpen?.(true);
-  console.log("here is translation history ", translationHistory);
 
-  if (readOnlyValue && translationHistory?.length == 0) return;
+  if (readOnlyValue && translationHistory?.length <= 1) return;
 
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
