@@ -356,7 +356,9 @@ export const TranslationModule = ({
   const hasTranslations = translationHistory.length > 0;
 
   const removeTranslation = (index: number) => {
+    console.log("here is translation history", translationHistory, index);
     const updatedHistory = translationHistory.filter((_, i) => i !== index);
+    console.log("updatedHistory", updatedHistory);
     setTranslationHistory(updatedHistory);
   };
 
@@ -636,7 +638,7 @@ export const TranslationModule = ({
                                 onClick={() => removeTranslation(index)}
                                 title="Remove this translation"
                               >
-                                <Trash2 />
+                                <Trash2 size={13} />
                               </button>
                             </div>
                           </div>
