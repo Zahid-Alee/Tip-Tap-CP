@@ -460,7 +460,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       if (height !== lastHeightRef.current) {
         lastHeightRef.current = height;
         window.parent.postMessage(
-          { type: "IFRAME_HEIGHT", height: height + 60, editorId },
+          { type: "IFRAME_HEIGHT", height: height + 0, editorId },
           "*"
         );
       }
