@@ -358,47 +358,6 @@ export const TranslationModule = ({
   const removeTranslation = (index: number) => {
     const updatedHistory = translationHistory.filter((_, i) => i !== index);
     setTranslationHistory(updatedHistory);
-
-    // If we're removing the currently active translation
-    if (index === currentTranslationIndex) {
-      // Check if there's an English translation (original content)
-      const englishIndex = updatedHistory.findIndex(
-        (item) =>
-          item.targetLanguage === "English" || item.targetLanguage === "EN"
-      );
-
-      if (englishIndex >= 0) {
-        // Restore to English translation
-        editor.commands.setContent(updatedHistory[englishIndex].text, false);
-        setCurrentTranslationIndex(englishIndex);
-        setCurrentLanguage(updatedHistory[englishIndex].targetLanguage);
-      } else if (originalContent) {
-        // Fallback to original content if no English translation exists
-        editor.commands.setContent(originalContent, false);
-        setCurrentTranslationIndex(-1);
-        setCurrentLanguage(null);
-        setIsTranslated(false);
-      }
-    } else if (index < currentTranslationIndex) {
-      // Adjust the current index if a translation before it was removed
-      setCurrentTranslationIndex(currentTranslationIndex - 1);
-    }
-
-    // Stop any playing audio from the removed translation
-    if (playingAudio === index) {
-      const audio = audioRefs[index];
-      if (audio && !audio.paused) {
-        audio.pause();
-        audio.currentTime = 0;
-      }
-      setPlayingAudio(null);
-
-      // Clean up audio ref
-      setAudioRefs((prev) => {
-        const { [index]: removed, ...rest } = prev;
-        return rest;
-      });
-    }
   };
 
   return (
