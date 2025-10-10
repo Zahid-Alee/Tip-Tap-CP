@@ -356,9 +356,7 @@ export const TranslationModule = ({
   const hasTranslations = translationHistory.length > 0;
 
   const removeTranslation = (index: number) => {
-    console.log("here is translation history", translationHistory, index);
     const updatedHistory = translationHistory.filter((_, i) => i !== index);
-    console.log("updatedHistory", updatedHistory);
     setTranslationHistory(updatedHistory);
   };
 
@@ -491,14 +489,22 @@ export const TranslationModule = ({
                         className="max-w-xs w-full !rounded-md"
                         align="start"
                       >
-                        <div className="px-3 py-2 border-b border-gray-200">
+                        <div
+                          className="px-3 py-2 border-b border-gray-200"
+                          onKeyDown={(e) => e.stopPropagation()}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <div className="relative">
                             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                             <input
+                              type="text"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
+                              onKeyDown={(e) => e.stopPropagation()}
                               placeholder="Search languages..."
-                              className="w-full pl-9 py-1 text-sm"
+                              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                              autoComplete="off"
                             />
                           </div>
                         </div>
