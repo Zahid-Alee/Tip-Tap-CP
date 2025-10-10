@@ -234,12 +234,12 @@ export function EditorHeader({
   if (readOnlyValue && translationHistory?.length <= 1) return;
 
   return (
-    <div className="flex justify-between items-center p-3 border-b bg-inherit">
-      <div className="editor-title flex items-center gap-4">
+    <div className="flex justify-between items-start p-3 gap-10 border-b bg-inherit">
+      <div className="editor-title flex  max-w-3xl  items-start gap-4">
         {!readOnlyValue && (
           <div className="w-full">
             {isEditTitle && !readOnlyValue ? (
-              <div className="bg-gray-50 flex w-full max-w-xl items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
+              <div className="bg-gray-50 flex   items-center gap-2 border border-gray-300 text-gray-900 px-2 rounded-lg overflow-hidden transition-all duration-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 hover:border-gray-400">
                 <input
                   type="text"
                   id="first_name"
@@ -250,7 +250,10 @@ export function EditorHeader({
                       setIsEditTitle(false);
                     }
                   }}
-                  className="block py-2 w-full bg-transparent outline-none focus:outline-none"
+                  style={{
+                    width: `${Math.max(titleValue.length * 8 + 20, 150)}px`,
+                  }}
+                  className=" py-2   outline-none focus:outline-none"
                   placeholder="Enter title here"
                   required
                   autoFocus
@@ -264,7 +267,7 @@ export function EditorHeader({
                 </button>
               </div>
             ) : (
-              <h2 className="text-lg font-medium m-0">{titleValue}</h2>
+              <h2 className="text-base font-medium m-0">{titleValue}</h2>
             )}
           </div>
         )}
@@ -286,14 +289,14 @@ export function EditorHeader({
             <div className="flex items-center gap-2">
               <Button
                 onClick={handleExportHtml}
-                className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
+                className="flex items-center text-nowrap  px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
                 tooltip="Export HTML"
               >
                 <Upload className="h-4 w-4 mr-2" /> Export HTML
               </Button>
               <Button
                 onClick={startImport}
-                className="flex items-center px-3 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
+                className="flex items-center px-3 py-2 text-nowrap bg-gray-50 hover:bg-gray-100 text-gray-700 font-medium rounded-md transition-colors"
                 tooltip="Import HTML"
               >
                 <Download className="h-4 w-4 mr-2" /> Import HTML

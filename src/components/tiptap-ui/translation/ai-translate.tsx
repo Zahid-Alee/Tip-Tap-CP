@@ -10,6 +10,7 @@ import {
   Play,
   Pause,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 
 import {
@@ -201,14 +202,11 @@ export const TranslationModule = ({
         throw new Error("No text content found for audio generation.");
       }
 
-      const response = await axios.post(
-        "/api/gen/text-to-speech",
-        {
-          text: textContent,
-          voice: "alloy",
-          path: "/app/course/1000/narrations",
-        }
-      );
+      const response = await axios.post("/api/gen/text-to-speech", {
+        text: textContent,
+        voice: "alloy",
+        path: "/app/course/1000/narrations",
+      });
 
       if (!response.data.success) {
         throw new Error(`Audio generation failed`);
@@ -357,6 +355,11 @@ export const TranslationModule = ({
 
   const hasTranslations = translationHistory.length > 0;
 
+  const removeTranslation = (index: number) => {
+    const updatedHistory = translationHistory.filter((_, i) => i !== index);
+    setTranslationHistory(updatedHistory);
+  };
+
   return (
     <div className="relative">
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
@@ -383,7 +386,9 @@ export const TranslationModule = ({
           className="w-96 !p-0 flex flex-col rounded-lg shadow-lg border border-gray-200"
         >
           <div className="flex items-center w-full justify-between p-3 border-b border-gray-200 rounded-t-lg">
-            <h3 className="font-medium text-purple-600">Translation & Audio</h3>
+            <h3 className="font-medium text-purple-600">
+              Translation & Narrations
+            </h3>
           </div>
 
           {/* Tabs */}
@@ -604,7 +609,7 @@ export const TranslationModule = ({
                 ) : (
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium text-gray-700">
-                      Translation History
+                      Generated Translations
                     </h4>
                     <div className="max-h-64 overflow-y-auto space-y-2">
                       {translationHistory?.map((translation, index) => (
@@ -616,9 +621,24 @@ export const TranslationModule = ({
                             <span className="text-sm font-medium text-gray-700">
                               {translation?.title?.split("to")[1]}
                             </span>
-                            <span className="text-xs text-gray-500">
-                              {translation.service}
-                            </span>
+                            <div className="flex gap-2 items-center">
+                              {translation.audio ? (
+                                <span className="text-xs text-gray-500">
+                                  Narration
+                                </span>
+                              ) : (
+                                <span className="text-xs text-gray-500">
+                                  {translation.service}
+                                </span>
+                              )}
+                              <button
+                                className=" text-red-500 text-xs text-red-500"
+                                onClick={() => removeTranslation(index)}
+                                title="Remove this translation"
+                              >
+                                <Trash2 />
+                              </button>
+                            </div>
                           </div>
 
                           <div className="flex items-center gap-2">
