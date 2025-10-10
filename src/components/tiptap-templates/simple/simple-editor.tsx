@@ -134,6 +134,7 @@ interface EditorState {
   isUpdatingFromTranslation: boolean;
   isFindReplaceOpen?: boolean;
   findReplaceMode?: "find" | "replace";
+  selectedTranslation: string | null;
 }
 
 interface EditorToolbarProps {
@@ -291,6 +292,7 @@ const useEditorState = (
     isUpdatingFromTranslation: false,
     isFindReplaceOpen: false,
     findReplaceMode: "find",
+    selectedTranslation: null,
   });
 
   return [state, setState];
@@ -818,6 +820,8 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
       }
     }, [translations, editor, initialContent]);
 
+    // Translation
+
     // ===== RENDER =====
     if (state.isEditorLoading) {
       return <EditorLoader />;
@@ -850,6 +854,13 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
                 isUpdatingFromTranslation: isUpdating,
               }))
             }
+            setSelectedTranslation={(language) =>
+              setState((prev) => ({
+                ...prev,
+                selectedTranslation: language,
+              }))
+            }
+            selectedTranslation={state.selectedTranslation}
           />
 
           <FindReplacePanel

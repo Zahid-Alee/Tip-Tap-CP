@@ -639,13 +639,15 @@ export const TranslationModule = ({
                                   {translation.service}
                                 </span>
                               )}
-                              <button
-                                className=" text-red-500 text-xs text-red-500"
-                                onClick={() => removeTranslation(index)}
-                                title="Remove this translation"
-                              >
-                                <Trash2 size={13} />
-                              </button>
+                              {!translation?.language && (
+                                <button
+                                  className=" text-red-500 text-xs text-red-500"
+                                  onClick={() => removeTranslation(index)}
+                                  title="Remove this translation"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
                             </div>
                           </div>
 

@@ -46,6 +46,8 @@ interface EditorHeaderProps {
   currentTranslationIndex?: number;
   onTranslationChange?: (index: number) => void;
   setIsUpdatingFromTranslation?: (updating: boolean) => void;
+  setSelectedTranslation?: (id: string | null) => void;
+  selectedTranslation: string | null;
 }
 
 const SaveIcon = () => (
@@ -83,6 +85,8 @@ export function EditorHeader({
   currentTranslationIndex = -1,
   onTranslationChange,
   setIsUpdatingFromTranslation,
+  setSelectedTranslation,
+  selectedTranslation,
 }: EditorHeaderProps) {
   const [isSaving, setIsSaving] = React.useState(false);
   const [isTranslationDropdownOpen, setIsTranslationDropdownOpen] =
@@ -90,6 +94,8 @@ export function EditorHeader({
   const [titleValue, setTitleValue] = React.useState(title);
   const [isEditTitle, setIsEditTitle] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  console.log("Here is selected Translation ", selectedTranslation);
 
   // --- Utilities ---
   const triggerDownload = React.useCallback(
@@ -115,6 +121,7 @@ export function EditorHeader({
   const handleExportHtml = () => {
     if (!editor) return;
     const html = editor.getHTML();
+
     triggerDownload(
       `${titleValue || "document"}.html`,
       html,
@@ -164,9 +171,16 @@ export function EditorHeader({
   };
 
   // --- Translation handling ---
-  const handleApplyTranslation = (index: number) => {
+  const handleApplyTranslation = (data, index: number) => {
     if (!editor) return;
     if (index < 0 || index >= translationHistory.length) return;
+
+    if (data?.language) {
+      setSelectedTranslation(data.language);
+    } else {
+      setSelectedTranslation(data?.targetLanguage || null);
+    }
+
     const translation = translationHistory[index] as TranslationItem;
     setIsUpdatingFromTranslation?.(true);
     onTranslationChange?.(index);
@@ -178,29 +192,67 @@ export function EditorHeader({
   const handleSave = async () => {
     if (!editor || !saveUrl) return;
     setIsSaving(true);
-    const html = editor.getHTML();
 
-    // Ensure default English translation exists/updated
-    const hasEnglish = translationHistory.some((t: TranslationItem) =>
-      /english/i.test(t.title || "")
-    );
-    let updatedTranslations: TranslationItem[] = [...translationHistory];
-    if (hasEnglish) {
-      updatedTranslations = updatedTranslations.map((t: TranslationItem) =>
-        /english/i.test(t.title || "")
-          ? { ...t, text: html, lastModified: new Date().toISOString() }
-          : t
-      );
-    } else {
-      updatedTranslations = [
+    const html = editor.getHTML();
+    let translations = translationHistory || [];
+
+    if (translations.length === 0) {
+      translations = [
         {
           title: "Translate to English",
           text: html,
+          language: "es",
           lastModified: new Date().toISOString(),
         },
-        ...updatedTranslations,
       ];
+    } else if (selectedTranslation == null) {
+      translations = translations.map((t) => {
+        if (t.language) {
+          return {
+            ...t,
+            text: html,
+            lastModified: new Date().toISOString(),
+          };
+        }
+        return t;
+      });
+    } else {
+      translations = translations.map((t) => {
+        const lang = t.language || t.targetLanguage;
+        if (lang == selectedTranslation) {
+          return {
+            ...t,
+            text: html,
+            lastModified: new Date().toISOString(),
+          };
+        }
+        return t;
+      });
     }
+    console.log(translations);
+
+    // Ensure default English translation exists/updated
+    // const hasEnglish = translationHistory.some((t: TranslationItem) =>
+    //   /english/i.test(t.title || "")
+    // );
+
+    // let updatedTranslations: TranslationItem[] = [...translationHistory];
+    // if (hasEnglish) {
+    //   updatedTranslations = updatedTranslations.map((t: TranslationItem) =>
+    //     /english/i.test(t.title || "")
+    //       ? { ...t, text: html, lastModified: new Date().toISOString() }
+    //       : t
+    //   );
+    // } else {
+    //   updatedTranslations = [
+    //     {
+    //       title: "Translate to English",
+    //       text: html,
+    //       lastModified: new Date().toISOString(),
+    //     },
+    //     ...updatedTranslations,
+    //   ];
+    // }
 
     try {
       const res = await fetch(saveUrl, {
@@ -212,7 +264,7 @@ export function EditorHeader({
         body: JSON.stringify({
           title: titleValue,
           content: html,
-          translations: updatedTranslations,
+          translations: translations,
         }),
       });
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
@@ -346,7 +398,9 @@ export function EditorHeader({
                                     ? "bg-blue-50 border border-blue-200"
                                     : ""
                                 }`}
-                                onSelect={() => handleApplyTranslation(index)}
+                                onSelect={() =>
+                                  handleApplyTranslation(translation, index)
+                                }
                               >
                                 <div className="flex w-full justify-between items-center">
                                   <div className="flex items-center gap-2">
