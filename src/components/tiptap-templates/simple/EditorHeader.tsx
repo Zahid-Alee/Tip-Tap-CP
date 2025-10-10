@@ -231,6 +231,8 @@ export function EditorHeader({
   // --- AI Modal ---
   const handleOpenAIModal = () => setIsAIModalOpen?.(true);
 
+  if (readOnlyValue && translationHistory?.length == 0) return;
+
   return (
     <div className="flex justify-between items-center p-3 border-b bg-inherit">
       <div className="editor-title flex items-center gap-4">
