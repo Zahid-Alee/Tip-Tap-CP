@@ -95,8 +95,6 @@ export function EditorHeader({
   const [isEditTitle, setIsEditTitle] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
-  console.log("Here is selected Translation ", selectedTranslation);
-
   // --- Utilities ---
   const triggerDownload = React.useCallback(
     (filename: string, data: string, mime: string) => {
@@ -229,30 +227,6 @@ export function EditorHeader({
         return t;
       });
     }
-    console.log(translations);
-
-    // Ensure default English translation exists/updated
-    // const hasEnglish = translationHistory.some((t: TranslationItem) =>
-    //   /english/i.test(t.title || "")
-    // );
-
-    // let updatedTranslations: TranslationItem[] = [...translationHistory];
-    // if (hasEnglish) {
-    //   updatedTranslations = updatedTranslations.map((t: TranslationItem) =>
-    //     /english/i.test(t.title || "")
-    //       ? { ...t, text: html, lastModified: new Date().toISOString() }
-    //       : t
-    //   );
-    // } else {
-    //   updatedTranslations = [
-    //     {
-    //       title: "Translate to English",
-    //       text: html,
-    //       lastModified: new Date().toISOString(),
-    //     },
-    //     ...updatedTranslations,
-    //   ];
-    // }
 
     try {
       const res = await fetch(saveUrl, {

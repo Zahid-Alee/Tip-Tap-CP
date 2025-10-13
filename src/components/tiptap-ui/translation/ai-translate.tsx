@@ -355,7 +355,16 @@ export const TranslationModule = ({
 
   const hasTranslations = translationHistory.length > 0;
 
-  const removeTranslation = (index: number) => {
+  const removeTranslation = async (index: number) => {
+    if (!editor) return;
+
+    const englishLanguage = translationHistory[0];
+    console.log("Here is english language ", englishLanguage);
+
+    if (!englishLanguage) return;
+
+    await editor.commands.setContent(englishLanguage.text || "");
+
     const updatedHistory = translationHistory.filter((_, i) => i !== index);
     setTranslationHistory(updatedHistory);
   };
