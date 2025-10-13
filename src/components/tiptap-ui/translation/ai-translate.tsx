@@ -32,6 +32,7 @@ export const TranslationModule = ({
   editor,
   setTranslationHistory,
   translationHistory,
+  handleFallbackTranslation,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
@@ -356,14 +357,7 @@ export const TranslationModule = ({
   const hasTranslations = translationHistory.length > 0;
 
   const removeTranslation = async (index: number) => {
-    if (!editor) return;
-
-    const englishLanguage = translationHistory[0];
-    console.log("Here is english language ", englishLanguage);
-
-    if (!englishLanguage) return;
-
-    await editor.commands.setContent(englishLanguage.text || "");
+    await handleFallbackTranslation();
 
     const updatedHistory = translationHistory.filter((_, i) => i !== index);
     setTranslationHistory(updatedHistory);

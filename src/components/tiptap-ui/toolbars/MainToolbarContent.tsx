@@ -79,6 +79,7 @@ interface MainToolbarContentProps {
   isAIModalOpen?: boolean;
   translationHistory: object;
   setTranslationHistory: Function;
+  handleFallbackTranslation: () => void;
 }
 
 const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
@@ -89,6 +90,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
   editor,
   translationHistory,
   setTranslationHistory,
+  handleFallbackTranslation,
 }) => {
   if (!showToolBar) return null;
   if (!editor) return null;
@@ -194,6 +196,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
           translationHistory={translationHistory}
           setTranslationHistory={setTranslationHistory}
           editor={editor}
+          handleFallbackTranslation={handleFallbackTranslation}
         />
       </div>
     </>

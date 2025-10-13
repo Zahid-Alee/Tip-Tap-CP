@@ -150,6 +150,7 @@ interface EditorToolbarProps {
   setMobileView: (view: string) => void;
   onFind: () => void;
   onReplace: () => void;
+  handleFallbackTranslation: () => void;
 }
 
 interface EditorMenusProps {
@@ -385,6 +386,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
   setMobileView,
   onFind,
   onReplace,
+  handleFallbackTranslation,
 }) => {
   return (
     <Toolbar
@@ -414,6 +416,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
             isAIModalOpen={isAIModalOpen}
             translationHistory={translationHistory}
             setTranslationHistory={setTranslationHistory}
+            handleFallbackTranslation={handleFallbackTranslation}
           />
         </>
       ) : (
@@ -822,6 +825,30 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
     // Translation
 
+    const handleFallbackTranslation = () => {
+      if (!editor) return;
+
+      const englishTranslation = translations[0];
+
+      if (!englishTranslation) return;
+
+      setState((prev) => ({
+        ...prev,
+        isUpdatingFromTranslation: true,
+      }));
+
+      handleTranslationChange?.(0);
+      editor.commands.setContent(englishTranslation.text || "");
+      setTimeout(
+        () =>
+          setState((prev) => ({
+            ...prev,
+            isUpdatingFromTranslation: false,
+          })),
+        100
+      );
+    };
+
     // ===== RENDER =====
     if (state.isEditorLoading) {
       return <EditorLoader />;
@@ -887,6 +914,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
             }
             onFind={handleOpenFind}
             onReplace={handleOpenReplace}
+            handleFallbackTranslation={handleFallbackTranslation}
           />
 
           <EditorMenus editor={editor} readOnlyValue={readOnlyValue} />
