@@ -144,7 +144,7 @@ export const CardNode = Node.create<CardNodeOptions>({
       width: {
         default: "600px",
         parseHTML: (element) => {
-          const width = element.style.width;
+          const width = element.style.maxWidth || element.style.width;
           if (width) {
             // Preserve the width value as is (px, %, etc.)
             return width;
@@ -299,7 +299,10 @@ export const CardNode = Node.create<CardNodeOptions>({
     if (borderColor) styles.push(`border-color: ${borderColor}`);
     if (textColor) styles.push(`color: ${textColor}`);
     if (borderRadius) styles.push(`border-radius: ${borderRadius}`);
-    if (width) styles.push(`width: ${width}`);
+    if (width) {
+      styles.push(`max-width: ${width}`);
+      styles.push(`width: 100%`); // Allow card to shrink on smaller screens
+    }
     if (height) styles.push(`height: ${height}px`);
     if (backgroundImage) {
       styles.push(`background-image: url('${backgroundImage}')`);
