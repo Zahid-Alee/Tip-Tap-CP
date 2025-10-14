@@ -51,6 +51,7 @@ export function ResizableImageView(props: any) {
   ];
 
   const { align, inline } = props?.node?.attrs;
+  const float = props?.node?.attrs?.float || null;
   const caption: string | null = props?.node?.attrs?.caption || null;
   const isEditable = !!props?.editor?.view?.editable;
 
@@ -185,8 +186,12 @@ export function ResizableImageView(props: any) {
       className="image-view"
       style={{
         ...imageMaxStyle,
-        textAlign: align,
+        textAlign: float ? undefined : align,
         display: inline ? "inline" : "block",
+        float: float || undefined,
+        marginRight: float === "left" ? "1rem" : undefined,
+        marginLeft: float === "right" ? "1rem" : undefined,
+        marginBottom: float ? "0.5rem" : undefined,
       }}
     >
       <div

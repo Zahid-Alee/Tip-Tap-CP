@@ -54,6 +54,25 @@ body {
   font-weight: var(--font-weight-regular);
   line-height: 1.6;
 
+  /* Float support for images */
+  .image-view {
+    &[style*="float: left"] {
+      float: left;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+      clear: left;
+      max-width: 50%;
+    }
+
+    &[style*="float: right"] {
+      float: right;
+      margin-left: 1rem;
+      margin-bottom: 0.5rem;
+      clear: right;
+      max-width: 50%;
+    }
+  }
+
   /* Paragraph styles with Poppins */
   p {
     font-family: var(--tt-font-family);

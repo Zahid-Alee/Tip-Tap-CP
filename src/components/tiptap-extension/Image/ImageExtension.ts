@@ -21,6 +21,7 @@ declare module "@tiptap/core" {
         width?: number;
         height?: number;
         align?: "left" | "center" | "right";
+        float?: "left" | "right" | null;
         flipX?: boolean;
         flipY?: boolean;
         href?: string;
@@ -28,6 +29,7 @@ declare module "@tiptap/core" {
       }) => ReturnType;
 
       setImageAlign: (align: "left" | "center" | "right") => ReturnType;
+      setImageFloat: (float: "left" | "right" | null) => ReturnType;
       setImageLink: (href: string) => ReturnType;
       removeImageLink: () => ReturnType;
       setImageCaption: (caption: string) => ReturnType;
@@ -76,6 +78,9 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
       align: {
         default: "center",
       },
+      float: {
+        default: null,
+      },
       flipX: {
         default: false,
       },
@@ -119,6 +124,10 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
               img.getAttribute("data-align") ||
               figure.getAttribute("data-align") ||
               "center",
+            float:
+              img.getAttribute("data-float") ||
+              figure.getAttribute("data-float") ||
+              null,
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: anchor?.getAttribute("href") || null,
@@ -142,6 +151,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
               ? parseInt(img.getAttribute("height")!, 10)
               : null,
             align: img.getAttribute("data-align") || "center",
+            float: img.getAttribute("data-float") || null,
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: anchor?.getAttribute("href"),
@@ -163,6 +173,7 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
               ? parseInt(img.getAttribute("height")!, 10)
               : null,
             align: img.getAttribute("data-align") || "center",
+            float: img.getAttribute("data-float") || null,
             flipX: img.getAttribute("data-flip-x") === "true",
             flipY: img.getAttribute("data-flip-y") === "true",
             href: null, // No href for standalone images
@@ -173,12 +184,13 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { align, flipX, flipY, href, ...attrs } = HTMLAttributes;
+    const { align, float, flipX, flipY, href, ...attrs } = HTMLAttributes;
 
     const imgElement: any = [
       "img",
       mergeAttributes(this.options.HTMLAttributes, attrs, {
         "data-align": align,
+        "data-float": float,
         "data-flip-x": flipX,
         "data-flip-y": flipY,
       }),
@@ -202,7 +214,11 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
     if (caption) {
       return [
         "figure",
-        { class: "tiptap-image-figure", "data-align": align },
+        {
+          class: "tiptap-image-figure",
+          "data-align": align,
+          "data-float": float,
+        },
         imageWithOptionalLink,
         ["figcaption", { class: "tiptap-image-caption" }, caption],
       ] as any;
@@ -225,6 +241,11 @@ export const ResizableImage = Node.create<ResizableImageOptions>({
         (align) =>
         ({ commands }) => {
           return commands.updateAttributes(this.name, { align });
+        },
+      setImageFloat:
+        (float) =>
+        ({ commands }) => {
+          return commands.updateAttributes(this.name, { float });
         },
       setImageLink:
         (href) =>

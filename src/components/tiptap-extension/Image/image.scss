@@ -2,6 +2,19 @@
   position: relative;
   display: inline-block;
   transition: all 0.2s ease;
+
+  // Float support
+  &[style*="float: left"] {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    clear: left;
+  }
+
+  &[style*="float: right"] {
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+    clear: right;
+  }
 }
 
 .image-view__body {
@@ -128,6 +141,21 @@ figure.tiptap-image-figure {
   margin: 0;
   display: inline-block;
   text-align: inherit;
+
+  // Float support for figures
+  &[data-float="left"] {
+    float: left;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    clear: left;
+  }
+
+  &[data-float="right"] {
+    float: right;
+    margin-left: 1rem;
+    margin-bottom: 0.5rem;
+    clear: right;
+  }
 }
 
 figure.tiptap-image-figure figcaption.tiptap-image-caption {

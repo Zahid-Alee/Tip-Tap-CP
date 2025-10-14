@@ -11,6 +11,8 @@ import {
   X,
   Edit,
   Type,
+  WrapText,
+  BoxSelect,
 } from "lucide-react";
 
 interface ImageBubbleMenuProps {
@@ -35,6 +37,10 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
 
   const handleAlignment = (align: "left" | "center" | "right") => {
     editor.chain().focus().setImageAlign(align).run();
+  };
+
+  const handleFloat = (float: "left" | "right" | null) => {
+    editor.chain().focus().setImageFloat(float).run();
   };
 
   const handleDelete = () => {
@@ -203,6 +209,46 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
               title="Align right"
             >
               <AlignRight size={16} />
+            </button>
+          </div>
+
+          <div className="w-px h-6 bg-gray-300 mx-1" />
+
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => handleFloat("left")}
+              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                currentAttributes.float === "left"
+                  ? "bg-blue-100 text-blue-600"
+                  : "text-gray-600"
+              }`}
+              title="Float left (text wraps right)"
+            >
+              <WrapText size={16} className="transform scale-x-[-1]" />
+            </button>
+
+            <button
+              onClick={() => handleFloat(null)}
+              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                !currentAttributes.float
+                  ? "bg-blue-100 text-blue-600"
+                  : "text-gray-600"
+              }`}
+              title="No float (block layout)"
+            >
+              <BoxSelect size={16} />
+            </button>
+
+            <button
+              onClick={() => handleFloat("right")}
+              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                currentAttributes.float === "right"
+                  ? "bg-blue-100 text-blue-600"
+                  : "text-gray-600"
+              }`}
+              title="Float right (text wraps left)"
+            >
+              <WrapText size={16} />
             </button>
           </div>
 
