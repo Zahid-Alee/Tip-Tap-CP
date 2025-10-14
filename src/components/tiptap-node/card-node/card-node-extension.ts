@@ -142,19 +142,14 @@ export const CardNode = Node.create<CardNodeOptions>({
         },
       },
       width: {
-        default: "50%",
+        default: "600px",
         parseHTML: (element) => {
           const width = element.style.width;
           if (width) {
-            // If it's a percentage, return as is
-            if (width.includes("%")) {
-              return width;
-            }
-            // Convert pixels to percentage (assuming parent container width)
-            // Default to 50% for responsive behavior
-            return "50%";
+            // Preserve the width value as is (px, %, etc.)
+            return width;
           }
-          return "50%";
+          return "600px";
         },
         renderHTML: (attributes) => {
           return {};
@@ -401,7 +396,7 @@ export const CardNode = Node.create<CardNodeOptions>({
         ({ commands }) => {
           return commands.insertContent({
             type: this.name,
-            attrs: { variant, width: "50%" },
+            attrs: { variant, width: "600px" },
             content: [
               {
                 type: "paragraph",
