@@ -66,13 +66,13 @@ declare module "@tiptap/core" {
         alignment: "top" | "center" | "bottom"
       ) => ReturnType;
       /**
-       * Set card width (in percentage)
+       * Set card width (max-width)
        */
       setCardWidth: (width: string) => ReturnType;
       /**
-       * Set card height (in pixels)
+       * Set card height (min-height)
        */
-      setCardHeight: (height: number) => ReturnType;
+      setCardHeight: (height: string | number) => ReturnType;
       /**
        * Reset card to default variant styles
        */
@@ -156,10 +156,13 @@ export const CardNode = Node.create<CardNodeOptions>({
         },
       },
       height: {
-        default: 200,
+        default: "auto",
         parseHTML: (element) => {
-          const height = element.style.height;
-          return height ? parseInt(height) : 200;
+          const height = element.style.minHeight || element.style.height;
+          if (height) {
+            return height;
+          }
+          return "auto";
         },
         renderHTML: (attributes) => {
           return {};
@@ -303,7 +306,16 @@ export const CardNode = Node.create<CardNodeOptions>({
       styles.push(`max-width: ${width}`);
       styles.push(`width: 100%`); // Allow card to shrink on smaller screens
     }
-    if (height) styles.push(`height: ${height}px`);
+    if (height && height !== "auto") {
+      // Only apply min-height if a specific height is set
+      if (typeof height === "number") {
+        styles.push(`min-height: ${height}px`);
+      } else {
+        styles.push(`min-height: ${height}`);
+      }
+    }
+    // For responsive behavior on small screens
+    styles.push(`height: auto`);
     if (backgroundImage) {
       styles.push(`background-image: url('${backgroundImage}')`);
       styles.push(`background-size: cover`);

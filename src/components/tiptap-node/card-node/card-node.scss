@@ -16,7 +16,8 @@
 
   // Apply custom width and height if provided
   width: var(--card-width, auto);
-  height: var(--card-height, auto);
+  height: auto; // Always auto to allow content to grow
+  min-height: var(--card-min-height, 60px); // Use min-height for constraints
 
   // Add a selection border area
   &::before {
