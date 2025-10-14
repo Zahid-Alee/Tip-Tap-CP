@@ -208,7 +208,10 @@ export function ResizableImageView(props: any) {
         />
 
         {!isEditable && caption && (
-          <p className="text-xs text-gray-500 text-center !mt-[0px] italic">
+          <p
+            style={imgAttrs.style}
+            className="text-xs  text-gray-500 text-center !mt-[0px] italic"
+          >
             {caption}
           </p>
         )}
@@ -229,6 +232,7 @@ export function ResizableImageView(props: any) {
           <div
             className="image-view__caption-wrapper"
             // onClick={(e) => e.stopPropagation()}
+            style={imgAttrs.style}
           >
             <p className="text-xs text-gray-500 text-center !mt-[0px] italic">
               {caption}
