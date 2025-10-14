@@ -1,0 +1,122 @@
+.math-formula-wrapper {
+  display: inline-block;
+  padding: 2px 6px;
+  margin: 0 2px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+
+  &.editable:hover {
+    background-color: #e9ecef;
+    border-color: #7c3aed;
+  }
+
+  &.read-only {
+    cursor: default;
+    background-color: transparent;
+    border-color: transparent;
+    padding: 2px 0;
+
+    &:hover {
+      background-color: transparent;
+      border-color: transparent;
+    }
+  }
+
+  &.math-block {
+    display: block;
+    text-align: center;
+    padding: 16px;
+    margin: 16px 0;
+    background-color: #fafbfc;
+
+    &.read-only {
+      background-color: transparent;
+      padding: 16px 0;
+    }
+
+    .katex-display {
+      margin: 0;
+    }
+  }
+
+  .katex {
+    font-size: 1.1em;
+  }
+
+  .math-error {
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-style: italic;
+  }
+}
+
+.math-formula-editor {
+  position: relative;
+  display: inline-block;
+  padding: 4px;
+
+  &.math-block {
+    display: block;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .math-input {
+    font-family: "Courier New", Courier, monospace;
+    font-size: 0.875rem;
+    padding: 6px 10px;
+    border: 2px solid #7c3aed;
+    border-radius: 4px;
+    outline: none;
+    min-width: 200px;
+    background-color: white;
+
+    &::placeholder {
+      color: #9ca3af;
+    }
+  }
+
+  .math-error-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    background-color: #dc2626;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    z-index: 10;
+
+    &::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 10px;
+      border: 4px solid transparent;
+      border-top-color: #dc2626;
+    }
+  }
+}
+
+// KaTeX overrides
+.ProseMirror {
+  .katex-display {
+    margin: 0.5em 0;
+    text-align: center;
+  }
+
+  .katex-html {
+    display: inline-block;
+  }
+
+  // Make math nodes selectable
+  .math-formula-wrapper {
+    user-select: none;
+  }
+}

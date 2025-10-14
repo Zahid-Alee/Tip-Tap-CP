@@ -28,6 +28,7 @@ import BlockquoteColorPopover from "../blockquote-color/BlockquoteColorPopover";
 import { TableButton } from "@/components/tiptap-ui/table/table-ui";
 import { AIFeaturesButton } from "../ai-features/ai-features-ui";
 import { TranslationModule } from "../translation/ai-translate";
+import { MathFormulaButton } from "../math-formula/math-formula-button";
 import HorizontalRuleButton from "../horizental-rule-button";
 import OutputBlockButton from "../output-block/OutputBlockButton";
 import BoldDropdownMenu from "../bold-dropdown-menu";
@@ -143,6 +144,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         <MarkButton type="code" />
         <NodeButton type="codeBlock" />
         <OutputBlockButton editor={editor} />
+        <MathFormulaButton editor={editor} />
       </ToolbarGroup>
 
       <ToolbarSeparator />

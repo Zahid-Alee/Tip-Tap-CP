@@ -1,6 +1,9 @@
 @use "./styles/keyframe-animations";
 @use "./styles/variables";
 
+// Import KaTeX CSS for math formula rendering
+@import "katex/dist/katex.min.css";
+
 /*
 ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com
 */

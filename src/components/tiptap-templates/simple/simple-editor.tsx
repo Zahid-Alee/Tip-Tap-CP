@@ -40,11 +40,13 @@ import { Toolbar } from "@/components/tiptap-ui-primitive/toolbar";
 // --- Tiptap Node ---
 import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import { CardNode } from "@/components/tiptap-node/card-node/card-node-extension";
+import { MathNode } from "@/components/tiptap-node/math-node/math-node-extension";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/image-node/image-node.scss";
 import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 import "@/components/tiptap-node/card-node/card-node.scss";
+import "@/components/tiptap-node/math-node/math-node.scss";
 import "@/components/tiptap-ui/output-block/styles.scss";
 
 // --- Hooks ---
@@ -238,6 +240,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     Subscript,
     Selection,
     ResizableImage,
+    MathNode,
     ImageUploadNode.configure({
       accept: "image/*,image/gif",
       maxSize: MAX_FILE_SIZE,
