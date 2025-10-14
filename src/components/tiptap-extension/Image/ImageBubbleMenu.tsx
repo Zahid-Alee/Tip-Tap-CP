@@ -14,6 +14,11 @@ import {
   WrapText,
   BoxSelect,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/tiptap-ui-primitive/tooltip";
 
 interface ImageBubbleMenuProps {
   editor: Editor | null;
@@ -92,6 +97,7 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
     <BubbleMenu
       editor={editor}
       tippyOptions={{
+        maxWidth: 400,
         duration: 100,
         placement: "top",
         interactive: true,
@@ -124,26 +130,34 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
             className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             autoFocus
           />
-          <button
-            onClick={() => {
-              editor.chain().focus().setImageCaption(tempCaption).run();
-              setShowCaptionInput(false);
-            }}
-            className="p-1 rounded hover:bg-green-100 text-green-600 transition-colors"
-            title="Apply caption"
-          >
-            <Check size={14} />
-          </button>
-          <button
-            onClick={() => {
-              setShowCaptionInput(false);
-              setTempCaption(currentAttributes.caption || "");
-            }}
-            className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
-            title="Cancel"
-          >
-            <X size={14} />
-          </button>
+          <Tooltip delay={300}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  editor.chain().focus().setImageCaption(tempCaption).run();
+                  setShowCaptionInput(false);
+                }}
+                className="p-1 rounded hover:bg-green-100 text-green-600 transition-colors"
+              >
+                <Check size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Apply caption</TooltipContent>
+          </Tooltip>
+          <Tooltip delay={300}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => {
+                  setShowCaptionInput(false);
+                  setTempCaption(currentAttributes.caption || "");
+                }}
+                className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Cancel</TooltipContent>
+          </Tooltip>
         </div>
       ) : null}
       {isLinkDialogOpen ? (
@@ -157,160 +171,214 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
             className="px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             autoFocus
           />
-          <button
-            onClick={handleLinkSubmit}
-            className="p-1 rounded hover:bg-green-100 text-green-600 transition-colors"
-            title="Apply link"
-          >
-            <Check size={14} />
-          </button>
-          <button
-            onClick={handleLinkCancel}
-            className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
-            title="Cancel"
-          >
-            <X size={14} />
-          </button>
+          <Tooltip delay={300}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleLinkSubmit}
+                className="p-1 rounded hover:bg-green-100 text-green-600 transition-colors"
+              >
+                <Check size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Apply link</TooltipContent>
+          </Tooltip>
+          <Tooltip delay={300}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={handleLinkCancel}
+                className="p-1 rounded hover:bg-red-100 text-red-600 transition-colors"
+              >
+                <X size={14} />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Cancel</TooltipContent>
+          </Tooltip>
         </div>
       ) : (
         <div className="flex gap-2">
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => handleAlignment("left")}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                currentAttributes.align === "left"
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="Align left"
-            >
-              <AlignLeft size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleAlignment("left")}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    currentAttributes.align === "left"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <AlignLeft size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Align left</TooltipContent>
+            </Tooltip>
 
-            <button
-              onClick={() => handleAlignment("center")}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                currentAttributes.align === "center"
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="Align center"
-            >
-              <AlignCenter size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleAlignment("center")}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    currentAttributes.align === "center"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <AlignCenter size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Align center</TooltipContent>
+            </Tooltip>
 
-            <button
-              onClick={() => handleAlignment("right")}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                currentAttributes.align === "right"
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="Align right"
-            >
-              <AlignRight size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleAlignment("right")}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    currentAttributes.align === "right"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <AlignRight size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Align right</TooltipContent>
+            </Tooltip>
           </div>
 
           <div className="w-px h-6 bg-gray-300 mx-1" />
 
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => handleFloat("left")}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                currentAttributes.float === "left"
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="Float left (text wraps right)"
-            >
-              <WrapText size={16} className="transform scale-x-[-1]" />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleFloat("left")}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    currentAttributes.float === "left"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <WrapText size={16} className="transform scale-x-[-1]" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Float left - text wraps on right</TooltipContent>
+            </Tooltip>
 
-            <button
-              onClick={() => handleFloat(null)}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                !currentAttributes.float
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="No float (block layout)"
-            >
-              <BoxSelect size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleFloat(null)}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    !currentAttributes.float
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <BoxSelect size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>No float - block layout</TooltipContent>
+            </Tooltip>
 
-            <button
-              onClick={() => handleFloat("right")}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                currentAttributes.float === "right"
-                  ? "bg-blue-100 text-blue-600"
-                  : "text-gray-600"
-              }`}
-              title="Float right (text wraps left)"
-            >
-              <WrapText size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => handleFloat("right")}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    currentAttributes.float === "right"
+                      ? "bg-blue-100 text-blue-600"
+                      : "text-gray-600"
+                  }`}
+                >
+                  <WrapText size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Float right - text wraps on left</TooltipContent>
+            </Tooltip>
           </div>
 
           <div className="w-px h-6 bg-gray-300 mx-1" />
 
           <div className="flex items-center gap-1">
-            <button
-              onClick={() => {
-                if (!hasCaption) {
-                  setShowCaptionInput(true);
-                } else {
-                  // If caption exists, open editor
-                  setTempCaption(currentAttributes.caption || "");
-                  setShowCaptionInput(true);
-                }
-              }}
-              className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-                hasCaption ? "text-blue-600" : "text-gray-600"
-              }`}
-              title={hasCaption ? "Edit caption" : "Add caption"}
-            >
-              <Type size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => {
+                    if (!hasCaption) {
+                      setShowCaptionInput(true);
+                    } else {
+                      // If caption exists, open editor
+                      setTempCaption(currentAttributes.caption || "");
+                      setShowCaptionInput(true);
+                    }
+                  }}
+                  className={`p-2 rounded hover:bg-gray-100 transition-colors ${
+                    hasCaption ? "text-blue-600" : "text-gray-600"
+                  }`}
+                >
+                  <Type size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                {hasCaption ? "Edit caption" : "Add caption"}
+              </TooltipContent>
+            </Tooltip>
 
             {hasLink ? (
               <>
-                <button
-                  onClick={handleEditLink}
-                  className="p-2 rounded hover:bg-gray-100 text-blue-600 transition-colors"
-                  title="Edit link"
-                >
-                  <Edit size={16} />
-                </button>
-                <button
-                  onClick={handleRemoveLink}
-                  className="p-2 rounded hover:bg-gray-100 text-orange-600 transition-colors"
-                  title="Remove link"
-                >
-                  <Unlink size={16} />
-                </button>
+                <Tooltip delay={300}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleEditLink}
+                      className="p-2 rounded hover:bg-gray-100 text-blue-600 transition-colors"
+                    >
+                      <Edit size={16} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Edit link</TooltipContent>
+                </Tooltip>
+                <Tooltip delay={300}>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={handleRemoveLink}
+                      className="p-2 rounded hover:bg-gray-100 text-orange-600 transition-colors"
+                    >
+                      <Unlink size={16} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Remove link</TooltipContent>
+                </Tooltip>
               </>
             ) : (
-              <button
-                onClick={handleAddLink}
-                className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
-                title="Add link"
-              >
-                <LinkIcon size={16} />
-              </button>
+              <Tooltip delay={300}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={handleAddLink}
+                    className="p-2 rounded hover:bg-gray-100 text-gray-600 transition-colors"
+                  >
+                    <LinkIcon size={16} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Add link</TooltipContent>
+              </Tooltip>
             )}
           </div>
 
           <div className="w-px h-6 bg-gray-300 mx-1" />
 
           <div className="flex items-center">
-            <button
-              onClick={handleDelete}
-              className="p-2 rounded hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
-              title="Delete image"
-            >
-              <Trash2 size={16} />
-            </button>
+            <Tooltip delay={300}>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={handleDelete}
+                  className="p-2 rounded hover:bg-red-50 text-red-500 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Delete image</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       )}
