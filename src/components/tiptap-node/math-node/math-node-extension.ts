@@ -70,7 +70,6 @@ export const MathNode = Node.create<MathNodeOptions>({
     return [
       "span",
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes),
-      0,
     ];
   },
 
