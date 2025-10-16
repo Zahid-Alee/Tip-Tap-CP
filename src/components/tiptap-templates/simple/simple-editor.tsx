@@ -26,6 +26,7 @@ import { TrailingNode } from "@/components/tiptap-extension/trailing-node-extens
 import { LeadingNode } from "@/components/tiptap-extension/leading-node-extension";
 import { EnhancedBlockquote } from "@/components/tiptap-extension/blockquote-extension";
 import { CustomHeading } from "@/components/tiptap-extension/heading-extension";
+import { HoverWord } from "@/components/tiptap-extension/hover-word-extension";
 import { all, createLowlight } from "lowlight";
 
 // --- Table Extensions ---
@@ -48,6 +49,7 @@ import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 import "@/components/tiptap-node/card-node/card-node.scss";
 import "@/components/tiptap-node/math-node/math-node.scss";
 import "@/components/tiptap-ui/output-block/styles.scss";
+import "@/components/tiptap-extension/hover-word/hover-word.scss";
 
 // --- Hooks ---
 import { useMobile } from "@/hooks/use-mobile";
@@ -91,6 +93,7 @@ import { CardBubbleMenu } from "../../tiptap-node/card-node/card-bubble-menu";
 import { ClipboardPaste } from "../../tiptap-extension/clipboard-paste-extension";
 import CodeBlockTabExtension from "../../tiptap-extension/code-block-tab-extension";
 import { UploadStatusIndicator } from "../../tiptap-ui/upload-status-indicator/upload-status-indicator";
+import { HoverWordProvider } from "../../tiptap-extension/hover-word/hover-word-provider";
 
 const lowlight = createLowlight(all);
 
@@ -253,6 +256,7 @@ const useEditorExtensions = ({ readOnlyValue }) => {
     LeadingNode,
     Link.configure({ openOnClick: false }),
     CardNode,
+    HoverWord,
     ...TableExtensions,
     ...ColumnExtensions,
     FindReplace,
@@ -932,6 +936,9 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           {/* Upload Status Indicator */}
           <UploadStatusIndicator position="top-right" showProgress={true} />
+
+          {/* Hover Word Provider */}
+          <HoverWordProvider editor={editor} />
         </div>
 
         <AIModal

@@ -35,6 +35,7 @@ import BoldDropdownMenu from "../bold-dropdown-menu";
 import TextSettingsDropdownMenu from "../text-settings-dropdown";
 import { ColumnButton } from "../../tiptap-extension/column/column-ui";
 import CardButton from "../card-button/card-button";
+import { HoverWordButton } from "../hover-word/hover-word-button";
 
 const EXTENDED_HIGHLIGHT_COLORS = [
   ...DEFAULT_HIGHLIGHT_COLORS,
@@ -145,6 +146,7 @@ const MainToolbarContent: React.FC<MainToolbarContentProps> = ({
         <NodeButton type="codeBlock" />
         <OutputBlockButton editor={editor} />
         <MathFormulaButton editor={editor} />
+        <HoverWordButton editor={editor} />
       </ToolbarGroup>
 
       <ToolbarSeparator />
