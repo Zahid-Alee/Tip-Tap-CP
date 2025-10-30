@@ -132,13 +132,25 @@ export const EditorContextMenu: React.FC<ContextMenuProps> = ({
     onClose();
   };
 
-  const menuItems: (MenuItem | "divider")[] = [
-    // Clipboard operations
+  // Clipboard operations
+  const clipboardActions = [
     {
       label: "Cut",
       icon: <Scissors size={16} />,
-      action: () => {
-        document.execCommand("cut");
+      action: async () => {
+        try {
+          const { from, to } = editor.state.selection;
+          const text = editor.state.doc.textBetween(from, to);
+
+          if (text) {
+            await navigator.clipboard.writeText(text);
+            editor.chain().focus().deleteSelection().run();
+          }
+        } catch (err) {
+          console.error("Failed to cut:", err);
+          // Fallback to execCommand
+          document.execCommand("cut");
+        }
         onClose();
       },
       disabled: editor.state.selection.empty,
@@ -146,8 +158,19 @@ export const EditorContextMenu: React.FC<ContextMenuProps> = ({
     {
       label: "Copy",
       icon: <Copy size={16} />,
-      action: () => {
-        document.execCommand("copy");
+      action: async () => {
+        try {
+          const { from, to } = editor.state.selection;
+          const text = editor.state.doc.textBetween(from, to);
+
+          if (text) {
+            await navigator.clipboard.writeText(text);
+          }
+        } catch (err) {
+          console.error("Failed to copy:", err);
+          // Fallback to execCommand
+          document.execCommand("copy");
+        }
         onClose();
       },
       disabled: editor.state.selection.empty,
@@ -155,21 +178,24 @@ export const EditorContextMenu: React.FC<ContextMenuProps> = ({
     {
       label: "Paste",
       icon: <Clipboard size={16} />,
-      action: () => {
-        document.execCommand("paste");
+      action: async () => {
+        try {
+          // Use Clipboard API for paste
+          const text = await navigator.clipboard.readText();
+          if (text) {
+            editor.chain().focus().insertContent(text).run();
+          }
+        } catch (err) {
+          console.error("Failed to paste:", err);
+          // Show a user-friendly message
+          alert("Please use Ctrl+V (or Cmd+V on Mac) to paste content.");
+        }
         onClose();
       },
     },
-    "divider",
-    // Formatting
-    {
-      label: "Highlight",
-      icon: <Highlighter size={16} />,
-      action: () => {
-        editor.chain().focus().toggleHighlight({ color: "#fef08a" }).run();
-        onClose();
-      },
-    },
+  ];
+
+  const menuItems: (MenuItem | "divider")[] = [
     {
       label: "Add Link",
       icon: <Link size={16} />,
@@ -280,32 +306,6 @@ export const EditorContextMenu: React.FC<ContextMenuProps> = ({
         onClose();
       },
     },
-    "divider",
-    // Alignment
-    {
-      label: "Align Left",
-      icon: <AlignLeft size={16} />,
-      action: () => {
-        editor.chain().focus().setTextAlign("left").run();
-        onClose();
-      },
-    },
-    {
-      label: "Align Center",
-      icon: <AlignCenter size={16} />,
-      action: () => {
-        editor.chain().focus().setTextAlign("center").run();
-        onClose();
-      },
-    },
-    {
-      label: "Align Right",
-      icon: <AlignRight size={16} />,
-      action: () => {
-        editor.chain().focus().setTextAlign("right").run();
-        onClose();
-      },
-    },
   ];
 
   return (
@@ -317,6 +317,26 @@ export const EditorContextMenu: React.FC<ContextMenuProps> = ({
         top: `${adjustedPosition?.y || 0}px`,
       }}
     >
+      {/* Clipboard Actions Row */}
+      <div className="context-menu-clipboard-row">
+        {clipboardActions.map((item, index) => (
+          <button
+            key={`clipboard-${index}`}
+            className={`context-menu-icon-button ${
+              item.disabled ? "disabled" : ""
+            }`}
+            onClick={item.action}
+            disabled={item.disabled}
+            title={item.label}
+          >
+            {item.icon}
+          </button>
+        ))}
+      </div>
+
+      <div className="context-menu-divider" />
+
+      {/* Other Menu Items */}
       {menuItems.map((item, index) => {
         if (item === "divider") {
           return (

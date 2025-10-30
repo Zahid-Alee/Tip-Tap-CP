@@ -171,6 +171,7 @@ interface EditorContentWrapperProps {
   editor: any;
   isReadOnly: boolean;
   editorId?: string;
+  onContextMenu?: (event: React.MouseEvent) => void;
 }
 
 interface AIModalProps {
@@ -464,6 +465,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
   editor,
   isReadOnly,
   editorId,
+  onContextMenu,
 }) => {
   const contentWrapperRef = React.useRef<HTMLDivElement>(null);
   const lastHeightRef = React.useRef<number>(0);
@@ -530,6 +532,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
     <div
       ref={contentWrapperRef}
       className={`content-wrapper ${isReadOnly ? "" : "p-2"}`}
+      onContextMenu={onContextMenu}
     >
       <EditorContent
         editor={editor}
@@ -948,15 +951,12 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           <EditorMenus editor={editor} readOnlyValue={readOnlyValue} />
 
-          <div
+          <EditorContentWrapper
+            editorId={editorId}
+            editor={editor}
+            isReadOnly={state.isReadOnly}
             onContextMenu={!state.isReadOnly ? handleContextMenu : undefined}
-          >
-            <EditorContentWrapper
-              editorId={editorId}
-              editor={editor}
-              isReadOnly={state.isReadOnly}
-            />
-          </div>
+          />
 
           {/* Context Menu */}
           {!state.isReadOnly && (

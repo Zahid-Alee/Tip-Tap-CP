@@ -40,12 +40,14 @@ body {
 .content-wrapper {
   flex: 1;
   overflow-y: auto;
+  position: relative; // Add positioning context
   // padding: 1rem;
 }
 
 .simple-editor-content {
   min-height: 100%;
   outline: none;
+  will-change: auto; // Prevent unnecessary GPU acceleration that can cause jitter
 }
 
 .tiptap.ProseMirror {
@@ -53,6 +55,10 @@ body {
   font-size: var(--text-size-100);
   font-weight: var(--font-weight-regular);
   line-height: 1.6;
+  position: relative; // Establish stacking context
+  transform: translateZ(0); // Force GPU acceleration but keep stable
+  backface-visibility: hidden; // Prevent flickering
+  -webkit-font-smoothing: antialiased; // Smooth font rendering
 
   /* Float support for images */
   .image-view {

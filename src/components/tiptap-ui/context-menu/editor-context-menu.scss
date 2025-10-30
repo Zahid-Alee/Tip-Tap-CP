@@ -10,6 +10,7 @@
   min-width: 200px;
   max-width: 280px;
   animation: contextMenuFadeIn 0.15s ease-out;
+  pointer-events: auto; // Ensure it captures clicks
 
   @keyframes contextMenuFadeIn {
     from {
@@ -20,6 +21,52 @@
       opacity: 1;
       transform: scale(1) translateY(0);
     }
+  }
+}
+
+.context-menu-clipboard-row {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #f9fafb;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+
+.context-menu-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 8px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: #6b7280;
+
+  &:hover:not(.disabled) {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    color: #374151;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(.disabled) {
+    background: #e5e7eb;
+    transform: translateY(0);
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f9fafb;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -83,6 +130,20 @@
   .editor-context-menu {
     min-width: 180px;
     max-width: calc(100vw - 40px);
+  }
+
+  .context-menu-clipboard-row {
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .context-menu-icon-button {
+    padding: 10px;
+
+    svg {
+      width: 18px;
+      height: 18px;
+    }
   }
 
   .context-menu-item {
