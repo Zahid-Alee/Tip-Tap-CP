@@ -85,6 +85,7 @@ import {
 } from "../../tiptap-extension/find-replace/FindReplacePanel";
 import Button from "../../tiptap-ui-primitive/button/button";
 import { OutputBlock } from "../../tiptap-ui/output-block/OutputBlock";
+import { EditorContextMenu } from "../../tiptap-ui/context-menu/EditorContextMenu";
 import { Bold } from "../../tiptap-extension/spacing/text-spacing-extension";
 import { ColumnExtensions } from "../../tiptap-extension/column/column-extension";
 import { ColumnBubbleMenu } from "../../tiptap-extension/column/column-bubble-menu";
@@ -116,6 +117,7 @@ interface SimpleEditorProps {
   readOnlyValue?: boolean;
   onReady?: () => void;
   translations: any[];
+  editorId?: string;
 }
 
 interface AIFormData {
@@ -141,6 +143,7 @@ interface EditorState {
   isFindReplaceOpen?: boolean;
   findReplaceMode?: "find" | "replace";
   selectedTranslation: string | null;
+  contextMenuPosition: { x: number; y: number } | null;
 }
 
 interface EditorToolbarProps {
@@ -303,6 +306,7 @@ const useEditorState = (
     isFindReplaceOpen: false,
     findReplaceMode: "find",
     selectedTranslation: null,
+    contextMenuPosition: null,
   });
 
   return [state, setState];
@@ -520,7 +524,7 @@ const EditorContentWrapper: React.FC<EditorContentWrapperProps> = ({
       if (timeout) clearTimeout(timeout);
       if (stopTimeout) clearTimeout(stopTimeout);
     };
-  }, [isReadOnly]);
+  }, [isReadOnly, editorId]);
 
   return (
     <div
@@ -687,9 +691,25 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
     useFindReplaceShortcuts(
       handleOpenFind,
       handleOpenReplace,
-      state.isFindReplaceOpen,
+      state.isFindReplaceOpen || false,
       handleCloseFindReplace
     );
+
+    // ===== CONTEXT MENU HANDLERS =====
+    const handleContextMenu = React.useCallback((event: React.MouseEvent) => {
+      event.preventDefault();
+      setState((prev) => ({
+        ...prev,
+        contextMenuPosition: { x: event.clientX, y: event.clientY },
+      }));
+    }, []);
+
+    const handleCloseContextMenu = React.useCallback(() => {
+      setState((prev) => ({
+        ...prev,
+        contextMenuPosition: null,
+      }));
+    }, []);
 
     // ===== EDITOR CONFIGURATION =====
     const editor = useEditor({
@@ -901,7 +921,7 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           <FindReplacePanel
             editor={editor}
-            isOpen={state.isFindReplaceOpen}
+            isOpen={state.isFindReplaceOpen || false}
             onClose={handleCloseFindReplace}
             initialShowReplace={state.findReplaceMode === "replace"}
           />
@@ -928,11 +948,24 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
 
           <EditorMenus editor={editor} readOnlyValue={readOnlyValue} />
 
-          <EditorContentWrapper
-            editorId={editorId}
-            editor={editor}
-            isReadOnly={state.isReadOnly}
-          />
+          <div
+            onContextMenu={!state.isReadOnly ? handleContextMenu : undefined}
+          >
+            <EditorContentWrapper
+              editorId={editorId}
+              editor={editor}
+              isReadOnly={state.isReadOnly}
+            />
+          </div>
+
+          {/* Context Menu */}
+          {!state.isReadOnly && (
+            <EditorContextMenu
+              editor={editor}
+              position={state.contextMenuPosition}
+              onClose={handleCloseContextMenu}
+            />
+          )}
 
           {/* Upload Status Indicator */}
           <UploadStatusIndicator position="top-right" showProgress={true} />
