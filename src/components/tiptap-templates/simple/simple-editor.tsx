@@ -95,6 +95,11 @@ import { ClipboardPaste } from "../../tiptap-extension/clipboard-paste-extension
 import CodeBlockTabExtension from "../../tiptap-extension/code-block-tab-extension";
 import { UploadStatusIndicator } from "../../tiptap-ui/upload-status-indicator/upload-status-indicator";
 import { HoverWordProvider } from "../../tiptap-extension/hover-word/hover-word-provider";
+import {
+  convertMarkdownToHtml,
+  convertMarkdownInSelection,
+  getConversionSummary,
+} from "../../../lib/markdown-scanner-utils";
 
 const lowlight = createLowlight(all);
 
@@ -797,6 +802,98 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
         rect: document.body.getBoundingClientRect(),
       }));
     }, []);
+
+    // ===== KEYBOARD SHORTCUTS =====
+    React.useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Ctrl+Shift+M for Scan & Render Markdown
+        if (e.ctrlKey && e.shiftKey && e.key === "M") {
+          e.preventDefault();
+          if (editor && !readOnlyValue) {
+            handleScanMarkdown();
+          }
+        }
+      };
+
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [editor, readOnlyValue]);
+
+    // ===== SCAN MARKDOWN HANDLER =====
+    const handleScanMarkdown = React.useCallback(() => {
+      if (!editor) return;
+
+      try {
+        const { from, to } = editor.state.selection;
+        const hasSelection = from !== to;
+
+        let result;
+        if (hasSelection) {
+          // Convert only selected text
+          const fullText = editor.getText();
+          const beforeSelection = editor.state.doc.textBetween(0, from, "\n");
+          const selectionText = editor.state.doc.textBetween(from, to, "\n");
+
+          result = convertMarkdownInSelection(
+            fullText,
+            beforeSelection.length,
+            beforeSelection.length + selectionText.length
+          );
+
+          if (result.success && result.conversions.length > 0) {
+            // Store cursor position
+            const savedSelection = { from, to };
+
+            // Update content
+            editor.commands.setContent(result.convertedHtml);
+
+            // Restore selection (approximately)
+            setTimeout(() => {
+              try {
+                editor.commands.setTextSelection(savedSelection);
+              } catch (e) {
+                // If selection restore fails, just focus
+                editor.commands.focus();
+              }
+            }, 10);
+          }
+        } else {
+          // Convert entire document
+          const currentText = editor.getText();
+          result = convertMarkdownToHtml(currentText);
+
+          if (result.success && result.conversions.length > 0) {
+            // Store cursor position
+            const { from } = editor.state.selection;
+
+            // Update content
+            editor.commands.setContent(result.convertedHtml);
+
+            // Restore cursor position (approximately)
+            setTimeout(() => {
+              try {
+                const docSize = editor.state.doc.content.size;
+                const newPos = Math.min(from, docSize - 1);
+                editor.commands.setTextSelection(newPos);
+              } catch (e) {
+                // If cursor restore fails, just focus
+                editor.commands.focus();
+              }
+            }, 10);
+          }
+        }
+
+        // Show notification (this would be handled by EditorHeader in practice)
+        if (result && result.success && result.conversions.length > 0) {
+          const summary = getConversionSummary(result);
+          console.log(summary);
+        } else if (result) {
+          console.log("No markdown patterns found to convert.");
+        }
+      } catch (error) {
+        console.error("Markdown scan error:", error);
+      }
+    }, [editor, readOnlyValue]);
 
     React.useEffect(() => {
       if (editor && state.editorInitialized) {
