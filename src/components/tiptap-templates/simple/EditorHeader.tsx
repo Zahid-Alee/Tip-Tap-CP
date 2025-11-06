@@ -450,7 +450,7 @@ export function EditorHeader({
                 >
                   <Download className="h-4 w-4 mr-2" /> Import HTML
                 </Button>
-                <Button
+                {/* <Button
                   onClick={handleScanAndRender}
                   className={`flex items-center px-3 py-2 text-nowrap bg-green-50 hover:bg-green-100 text-green-700 font-medium rounded-md transition-colors ${
                     isScanning ? "animate-pulse bg-green-100" : ""
@@ -466,7 +466,7 @@ export function EditorHeader({
                       <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
                     </span>
                   )}
-                </Button>
+                </Button> */}
                 <input
                   ref={fileInputRef}
                   type="file"
