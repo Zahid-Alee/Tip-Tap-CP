@@ -1,5 +1,6 @@
 import React from "react";
-import { BubbleMenu, Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { Editor } from "@tiptap/react";
 import "./card-bubble-menu.scss";
 import {
   Popover,
@@ -1395,9 +1396,8 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
       shouldShow={({ editor }) => {
         return editor.isActive("cardNode");
       }}
-      tippyOptions={{
+      options={{
         placement: "top",
-        animation: "fade",
       }}
       className="card-bubble-menu w-[410px]"
     >

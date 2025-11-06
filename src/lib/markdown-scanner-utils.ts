@@ -458,6 +458,120 @@ export function convertMarkdownInSelection(
 }
 
 /**
+ * Smart markdown detection - only detects markdown in plain text nodes
+ * This prevents re-converting already formatted HTML content
+ */
+export function detectMarkdownInText(text: string): boolean {
+  // Quick check - if text contains HTML tags, skip it
+  if (/<[^>]+>/.test(text)) {
+    return false;
+  }
+
+  // Check for common markdown patterns
+  const quickPatterns = [
+    /\*\*[^\*\n]+?\*\*/, // Bold
+    /\*[^\*\n]+?\*/, // Italic
+    /`[^`\n]+?`/, // Inline code
+    /^#{1,6}\s+/m, // Headings
+    /^[-*+]\s+/m, // Lists
+    /^\d+\.\s+/m, // Ordered lists
+    /^>\s+/m, // Blockquotes
+    /\[([^\]]+)\]\(([^)]+)\)/, // Links
+  ];
+
+  return quickPatterns.some((pattern) => pattern.test(text));
+}
+
+/**
+ * Converts only text nodes containing markdown in the editor
+ * This is a smarter approach that works with TipTap's JSON structure
+ */
+export function convertMarkdownInEditor(editorJSON: any): {
+  newJSON: any;
+  conversions: { pattern: string; count: number }[];
+  success: boolean;
+  hasChanges: boolean;
+} {
+  const conversions = new Map<string, number>();
+  let hasChanges = false;
+
+  function processNode(node: any): any {
+    // If it's a text node, check for markdown
+    if (node.type === "text" && node.text) {
+      const text = node.text;
+
+      // Skip if text contains HTML or doesn't have markdown
+      if (!detectMarkdownInText(text)) {
+        return node;
+      }
+
+      // Convert markdown to HTML
+      const result = convertMarkdownToHtml(text);
+
+      if (result.success && result.conversions.length > 0) {
+        hasChanges = true;
+        result.conversions.forEach((conv) => {
+          conversions.set(
+            conv.pattern,
+            (conversions.get(conv.pattern) || 0) + conv.count
+          );
+        });
+
+        // Return the converted HTML (TipTap will parse it)
+        return result.convertedHtml;
+      }
+
+      return node;
+    }
+
+    // If it's a node with content, recursively process children
+    if (node.content && Array.isArray(node.content)) {
+      const processedContent = node.content.map((child: any) =>
+        processNode(child)
+      );
+
+      // Check if any children changed
+      const childrenChanged = processedContent.some(
+        (child: any, index: number) =>
+          typeof child === "string" || child !== node.content[index]
+      );
+
+      if (childrenChanged) {
+        return {
+          ...node,
+          content: processedContent,
+        };
+      }
+    }
+
+    return node;
+  }
+
+  try {
+    const newJSON = processNode(editorJSON);
+
+    return {
+      newJSON,
+      conversions: Array.from(conversions.entries()).map(
+        ([pattern, count]) => ({
+          pattern,
+          count,
+        })
+      ),
+      success: true,
+      hasChanges,
+    };
+  } catch (error) {
+    return {
+      newJSON: editorJSON,
+      conversions: [],
+      success: false,
+      hasChanges: false,
+    };
+  }
+}
+
+/**
  * Gets a human-readable summary of conversions
  */
 export function getConversionSummary(result: ConversionResult): string {
@@ -487,6 +601,8 @@ export default {
   scanForMarkdown,
   convertMarkdownToHtml,
   convertMarkdownInSelection,
+  convertMarkdownInEditor,
+  detectMarkdownInText,
   getConversionSummary,
   INLINE_PATTERNS,
   BLOCK_PATTERNS,

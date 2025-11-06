@@ -519,12 +519,14 @@ export const ImageUploadNode: React.FC<NodeViewProps> = (props) => {
       } else {
         // Fallback to original method if no uploadKey
         const pos = props.getPos();
-        props.editor
-          .chain()
-          .focus()
-          .deleteRange({ from: pos, to: pos + 1 })
-          .insertContentAt(pos, nodes as any)
-          .run();
+        if (pos !== undefined) {
+          props.editor
+            .chain()
+            .focus()
+            .deleteRange({ from: pos, to: pos + 1 })
+            .insertContentAt(pos, nodes as any)
+            .run();
+        }
       }
     }
   };

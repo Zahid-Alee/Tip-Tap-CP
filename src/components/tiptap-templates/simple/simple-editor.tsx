@@ -16,7 +16,7 @@ import { Subscript } from "@tiptap/extension-subscript";
 import { Superscript } from "@tiptap/extension-superscript";
 import { Underline } from "@tiptap/extension-underline";
 import FontFamily from "@tiptap/extension-font-family";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 
 // --- Custom Extensions ---
@@ -98,6 +98,7 @@ import { HoverWordProvider } from "../../tiptap-extension/hover-word/hover-word-
 import {
   convertMarkdownToHtml,
   convertMarkdownInSelection,
+  convertMarkdownInEditor,
   getConversionSummary,
 } from "../../../lib/markdown-scanner-utils";
 
@@ -827,68 +828,101 @@ export const SimpleEditor = forwardRef<EditorRefHandle, SimpleEditorProps>(
         const { from, to } = editor.state.selection;
         const hasSelection = from !== to;
 
-        let result;
         if (hasSelection) {
-          // Convert only selected text
-          const fullText = editor.getText();
-          const beforeSelection = editor.state.doc.textBetween(0, from, "\n");
+          // ✅ Convert only selected text
           const selectionText = editor.state.doc.textBetween(from, to, "\n");
-
-          result = convertMarkdownInSelection(
-            fullText,
-            beforeSelection.length,
-            beforeSelection.length + selectionText.length
-          );
+          const result = convertMarkdownToHtml(selectionText);
 
           if (result.success && result.conversions.length > 0) {
-            // Store cursor position
-            const savedSelection = { from, to };
+            editor
+              .chain()
+              .focus()
+              .deleteRange({ from, to })
+              .insertContentAt(from, result.convertedHtml)
+              .run();
 
-            // Update content
-            editor.commands.setContent(result.convertedHtml);
-
-            // Restore selection (approximately)
-            setTimeout(() => {
-              try {
-                editor.commands.setTextSelection(savedSelection);
-              } catch (e) {
-                // If selection restore fails, just focus
-                editor.commands.focus();
-              }
-            }, 10);
+            console.log(getConversionSummary(result));
+          } else {
+            console.log("No markdown patterns found in selection.");
           }
         } else {
-          // Convert entire document
-          const currentText = editor.getText();
-          result = convertMarkdownToHtml(currentText);
+          // ✅ Smart Full Document Scan
+          // Walk through text nodes and convert only those containing markdown
+          let totalConversions = 0;
+          const conversionsMap = new Map<string, number>();
+          const nodesToConvert: Array<{
+            pos: number;
+            size: number;
+            html: string;
+          }> = [];
 
-          if (result.success && result.conversions.length > 0) {
+          // First pass: Identify all text nodes that need conversion
+          editor.state.doc.descendants((node, pos) => {
+            if (node.isText && node.text) {
+              const text = node.text;
+
+              // Skip text that's already HTML or has no markdown
+              if (/<[^>]+>/.test(text)) return;
+
+              const result = convertMarkdownToHtml(text);
+
+              if (result.success && result.conversions.length > 0) {
+                nodesToConvert.push({
+                  pos,
+                  size: node.nodeSize,
+                  html: result.convertedHtml,
+                });
+
+                result.conversions.forEach((conv) => {
+                  conversionsMap.set(
+                    conv.pattern,
+                    (conversionsMap.get(conv.pattern) || 0) + conv.count
+                  );
+                  totalConversions += conv.count;
+                });
+              }
+            }
+          });
+
+          if (nodesToConvert.length > 0) {
             // Store cursor position
-            const { from } = editor.state.selection;
+            const cursorPos = from;
 
-            // Update content
-            editor.commands.setContent(result.convertedHtml);
+            // Second pass: Apply all conversions in a single transaction
+            // Process in reverse order to maintain correct positions
+            const chain = editor.chain().focus();
 
-            // Restore cursor position (approximately)
+            nodesToConvert.reverse().forEach(({ pos, size, html }) => {
+              chain
+                .deleteRange({ from: pos, to: pos + size })
+                .insertContentAt(pos, html);
+            });
+
+            chain.run();
+
+            // Restore cursor position
             setTimeout(() => {
               try {
                 const docSize = editor.state.doc.content.size;
-                const newPos = Math.min(from, docSize - 1);
+                const newPos = Math.min(cursorPos, docSize - 1);
                 editor.commands.setTextSelection(newPos);
               } catch (e) {
-                // If cursor restore fails, just focus
                 editor.commands.focus();
               }
-            }, 10);
-          }
-        }
+            }, 50);
 
-        // Show notification (this would be handled by EditorHeader in practice)
-        if (result && result.success && result.conversions.length > 0) {
-          const summary = getConversionSummary(result);
-          console.log(summary);
-        } else if (result) {
-          console.log("No markdown patterns found to convert.");
+            // Show summary
+            const patternSummary = Array.from(conversionsMap.entries())
+              .map(([pattern, count]) => `${count} ${pattern}`)
+              .join(", ");
+            console.log(
+              `✓ Converted ${totalConversions} markdown pattern${
+                totalConversions !== 1 ? "s" : ""
+              }: ${patternSummary}`
+            );
+          } else {
+            console.log("No markdown patterns found to convert.");
+          }
         }
       } catch (error) {
         console.error("Markdown scan error:", error);

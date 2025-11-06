@@ -230,7 +230,7 @@ export const AIFeaturesButton: React.FC<AIFeaturesButtonProps> = ({
         editor.commands.insertContent(result);
       } else {
         // Replace the entire document
-        editor.commands.setContent(result, false);
+        editor.commands.setContent(result, { emitUpdate: false });
       }
 
       setPopoverOpen(false);

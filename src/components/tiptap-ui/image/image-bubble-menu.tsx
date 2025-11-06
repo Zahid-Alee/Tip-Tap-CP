@@ -1,11 +1,7 @@
 import * as React from "react";
-import { BubbleMenu, Editor } from "@tiptap/react";
-import {
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  Trash2,
-} from "lucide-react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { Editor } from "@tiptap/react";
+import { AlignLeft, AlignCenter, AlignRight, Trash2 } from "lucide-react";
 
 interface ImageBubbleMenuProps {
   editor: Editor | null;
@@ -25,11 +21,10 @@ const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
         : "hover:bg-gray-100 text-gray-600 dark:text-gray-300 dark:hover:bg-gray-700"
     }`;
 
-
   return (
     <BubbleMenu
       editor={editor}
-      tippyOptions={{ duration: 100, placement: "top" }}
+      options={{ placement: "top" }}
       className="bubble-menu bg-white dark:bg-gray-800 shadow-lg rounded-lg border border-gray-200 dark:border-gray-700 px-2 py-1 flex items-center gap-2"
       shouldShow={({ editor }) => editor.isActive("image")}
     >

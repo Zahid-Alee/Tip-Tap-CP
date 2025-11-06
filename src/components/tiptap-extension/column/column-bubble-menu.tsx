@@ -1,6 +1,6 @@
 // src/components/tiptap-ui/column/column-bubble-menu.tsx
 import * as React from "react";
-import { BubbleMenu, BubbleMenuProps } from "@tiptap/react";
+import { BubbleMenu, BubbleMenuProps } from "@tiptap/react/menus";
 import { ColumnInlineControls } from "./column-ui";
 import { Editor } from "@tiptap/react";
 
@@ -15,24 +15,21 @@ export const ColumnBubbleMenu: React.FC<ColumnBubbleMenuProps> = ({
 }) => {
   const shouldShow = ({ editor }: BubbleMenuProps) => {
     // Only show when columns or column is active and not readonly
-    return !readonly && (editor.isActive("columns") || editor.isActive("column"));
+    return (
+      !readonly && (editor.isActive("columns") || editor.isActive("column"))
+    );
   };
 
   if (readonly) return null;
-  
+
   return (
     <BubbleMenu
       editor={editor}
       pluginKey="columnBubbleMenu"
       shouldShow={shouldShow}
-      tippyOptions={{
+      options={{
         placement: "top",
-        animation: "fade",
-        offset: [0, 10],
-        interactive: true,
-        appendTo: () => document.body,
-        zIndex: 9999,
-        delay: [200, 0], // Small delay before showing
+        offset: 10,
       }}
       className="bg-white flex items-center border border-gray-200 rounded-lg shadow-lg overflow-hidden"
     >
@@ -67,14 +64,18 @@ export const ColumnFloatingMenu: React.FC<ColumnBubbleMenuProps> = ({
       const { view } = editor;
       const { from } = selection;
       const pos = view.coordsAtPos(from);
-      
+
       if (pos) {
         const editorRect = view.dom.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
+        const scrollTop =
+          window.pageYOffset || document.documentElement.scrollTop;
+
         setPosition({
           top: pos.top + scrollTop - 50,
-          left: Math.max(10, pos.left - (menuRef.current?.offsetWidth || 0) / 2),
+          left: Math.max(
+            10,
+            pos.left - (menuRef.current?.offsetWidth || 0) / 2
+          ),
         });
         setIsVisible(true);
 
@@ -122,18 +123,18 @@ export const ColumnFloatingMenu: React.FC<ColumnBubbleMenuProps> = ({
   const getCurrentColumnIndex = (editor: Editor): number => {
     const { selection } = editor.state;
     const { $from } = selection;
-    
+
     // Find the column node
     for (let i = $from.depth; i >= 0; i--) {
       const node = $from.node(i);
-      if (node.type.name === 'column') {
+      if (node.type.name === "column") {
         // Find which column this is by checking siblings
         const parent = $from.node(i - 1);
-        if (parent && parent.type.name === 'columns') {
+        if (parent && parent.type.name === "columns") {
           let columnIndex = 0;
           for (let j = 0; j < parent.content.childCount; j++) {
             const child = parent.content.child(j);
-            if (child.type.name === 'column') {
+            if (child.type.name === "column") {
               if (child === node) {
                 return columnIndex;
               }
@@ -155,7 +156,7 @@ export const ColumnFloatingMenu: React.FC<ColumnBubbleMenuProps> = ({
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
-        transform: 'translateX(-50%)',
+        transform: "translateX(-50%)",
       }}
       onMouseEnter={() => setIsVisible(true)} // Keep visible on hover
     >
@@ -189,16 +190,16 @@ export const ColumnSelectionMenu: React.FC<ColumnBubbleMenuProps> = ({
     const handleMouseMove = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const columnElement = target.closest('[data-type="column"]');
-      
+
       if (columnElement && editor.isActive("columns")) {
         const rect = columnElement.getBoundingClientRect();
         const columnIndex = Array.from(
           columnElement.parentElement?.children || []
-        ).findIndex(child => child === columnElement);
-        
+        ).findIndex((child) => child === columnElement);
+
         if (columnIndex !== -1) {
           clearTimeout(hoverTimeout);
-          
+
           setHoveredColumn(columnIndex);
           setPosition({
             top: rect.top - 35,
@@ -222,13 +223,13 @@ export const ColumnSelectionMenu: React.FC<ColumnBubbleMenuProps> = ({
       }, 200);
     };
 
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
 
     return () => {
       clearTimeout(hoverTimeout);
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
     };
   }, [editor, readonly]);
 
@@ -240,7 +241,7 @@ export const ColumnSelectionMenu: React.FC<ColumnBubbleMenuProps> = ({
       style={{
         top: `${position.top}px`,
         left: `${position.left}px`,
-        transform: 'translateX(-50%)',
+        transform: "translateX(-50%)",
       }}
       onMouseEnter={() => setIsVisible(true)} // Keep visible on hover
       onMouseLeave={() => {
@@ -260,7 +261,11 @@ export const ColumnSelectionMenu: React.FC<ColumnBubbleMenuProps> = ({
         title="Remove this column"
       >
         <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+          <path
+            fillRule="evenodd"
+            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+            clipRule="evenodd"
+          />
         </svg>
       </button>
     </div>

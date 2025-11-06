@@ -349,7 +349,7 @@ export const TranslationModule = ({
 
   const handleRestore = () => {
     if (originalContent) {
-      editor.commands.setContent(originalContent, false);
+      editor.commands.setContent(originalContent, { emitUpdate: false });
       setCurrentLanguage(null);
     }
   };

@@ -1,6 +1,6 @@
 // src/components/tiptap-ui/table/table-bubble-menu.tsx
 import * as React from "react";
-import { BubbleMenu, BubbleMenuProps } from "@tiptap/react";
+import { BubbleMenu, BubbleMenuProps } from "@tiptap/react/menus";
 import { TableCellControls } from "./table-ui";
 import { Editor } from "@tiptap/react";
 
@@ -23,9 +23,8 @@ export const TableBubbleMenu: React.FC<TableBubbleMenuProps> = ({
       editor={editor}
       pluginKey="tableBubbleMenu"
       shouldShow={shouldShow}
-      tippyOptions={{
+      options={{
         placement: "top",
-        animation: "fade",
       }}
       className="bg-white flex items-center p-1 border border-gray-200 rounded-md shadow-md"
     >

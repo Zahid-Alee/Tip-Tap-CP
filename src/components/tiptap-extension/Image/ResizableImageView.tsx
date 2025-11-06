@@ -92,7 +92,10 @@ export function ResizableImageView(props: any) {
   function selectImage() {
     if (!isEditable) return; // prevent selection in read-only mode
     const { editor, getPos } = props;
-    editor.commands.setNodeSelection(getPos());
+    const pos = getPos();
+    if (pos !== undefined) {
+      editor.commands.setNodeSelection(pos);
+    }
   }
 
   const getMaxSize = useCallback(() => {

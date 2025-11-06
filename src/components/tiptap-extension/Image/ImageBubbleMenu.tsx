@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BubbleMenu, Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { Editor } from "@tiptap/react";
 import {
   AlignLeft,
   AlignCenter,
@@ -96,11 +97,8 @@ export const ImageBubbleMenu: React.FC<ImageBubbleMenuProps> = ({ editor }) => {
   return (
     <BubbleMenu
       editor={editor}
-      tippyOptions={{
-        maxWidth: 400,
-        duration: 100,
+      options={{
         placement: "top",
-        interactive: true,
       }}
       className="bg-white shadow-lg rounded-lg border border-gray-200 px-2 py-1"
       shouldShow={({ editor, state }) => {

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { BubbleMenu, Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { Editor } from "@tiptap/react";
 import {
   Plus,
   Edit,
@@ -114,12 +115,8 @@ export const HoverWordBubbleMenu: React.FC<HoverWordBubbleMenuProps> = ({
   return (
     <BubbleMenu
       editor={editor}
-      tippyOptions={{
-        maxWidth: 500,
-        duration: 100,
+      options={{
         placement: "top",
-        interactive: true,
-        appendTo: () => document.body,
       }}
       className="bg-white shadow-xl rounded-lg border border-gray-200"
       shouldShow={({ editor, state }) => {

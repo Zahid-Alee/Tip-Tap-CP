@@ -21,7 +21,13 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   getPos,
 }) => {
   // Use a unique key for this card instance
-  const cardKey = useRef(`card-${getPos ? getPos() : Math.random()}`);
+  const cardKey = useRef(() => {
+    if (getPos) {
+      const pos = getPos();
+      return `card-${pos !== undefined ? pos : Math.random()}`;
+    }
+    return `card-${Math.random()}`;
+  });
 
   // Initialize settings state from sessionStorage if available
   const [showSettings, setShowSettings] = useState(() => {
@@ -424,11 +430,13 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
   const handleDelete = useCallback(() => {
     if (getPos && editor?.isEditable) {
       const pos = getPos();
-      editor
-        .chain()
-        .focus()
-        .deleteRange({ from: pos, to: pos + node.nodeSize })
-        .run();
+      if (pos !== undefined) {
+        editor
+          .chain()
+          .focus()
+          .deleteRange({ from: pos, to: pos + node.nodeSize })
+          .run();
+      }
     }
   }, [getPos, editor, node.nodeSize]);
 
@@ -443,7 +451,9 @@ export const CardNodeComponent: React.FC<CardNodeComponentProps> = ({
           e.stopPropagation();
           if (getPos) {
             const pos = getPos();
-            editor.chain().focus().setNodeSelection(pos).run();
+            if (pos !== undefined) {
+              editor.chain().focus().setNodeSelection(pos).run();
+            }
           } else {
             editor.chain().focus().run();
           }

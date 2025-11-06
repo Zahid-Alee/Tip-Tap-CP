@@ -1,5 +1,6 @@
 import * as React from "react";
-import { BubbleMenu, Editor } from "@tiptap/react";
+import { BubbleMenu } from "@tiptap/react/menus";
+import { Editor } from "@tiptap/react";
 import { MarkButton } from "@/components/tiptap-ui/mark-button";
 import { NodeButton } from "@/components/tiptap-ui/node-button";
 import { HighlightPopover } from "@/components/tiptap-ui/highlight-popover";
@@ -20,8 +21,7 @@ const BubbleToolbar: React.FC<BubbleToolbarProps> = ({ editor }) => {
   return (
     <BubbleMenu
       editor={editor}
-      tippyOptions={{
-        duration: 100,
+      options={{
         placement: "top",
       }}
       className="bg-white shadow-lg rounded-lg border border-gray-200  px-2 py-1 flex gap-2"
