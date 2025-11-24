@@ -107,21 +107,23 @@ const App = () => {
   if (!config.saveUrl) return <EditorLoader />;
 
   return (
-    <SimpleEditor
-      ref={editorRef}
-      saveUrl={config.saveUrl}
-      headers={config.headers}
-      onSaveSuccess={handleSaveSuccess}
-      onSaveError={handleSaveError}
-      onLoadSuccess={handleLoadSuccess}
-      onLoadError={handleLoadError}
-      initialContent={config.initialContent}
-      readOnlyValue={config.readOnly}
-      editorId={config.editorId}
-      onReady={handleEditorReady}
-      title={config.title}
-      translations={config.translations}
-    />
+    <div className="mt-10">
+      <SimpleEditor
+        ref={editorRef}
+        saveUrl={config.saveUrl}
+        headers={config.headers}
+        onSaveSuccess={handleSaveSuccess}
+        onSaveError={handleSaveError}
+        onLoadSuccess={handleLoadSuccess}
+        onLoadError={handleLoadError}
+        initialContent={config.initialContent}
+        readOnlyValue={config.readOnly}
+        editorId={config.editorId}
+        onReady={handleEditorReady}
+        title={config.title}
+        translations={config.translations}
+      />
+    </div>
   );
 };
 
