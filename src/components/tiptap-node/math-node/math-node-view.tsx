@@ -107,6 +107,60 @@ export const MathNodeView = ({
       ref={containerRef}
     >
       {renderFormula()}
+
+      <style jsx>{`
+        .math-formula-wrapper {
+          display: inline-block;
+          padding: 2px 6px;
+          margin: 0 2px;
+          background-color: #f8f9fa;
+          border: 1px solid #e9ecef;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          vertical-align: middle;
+        }
+
+        .math-formula-wrapper.editable:hover {
+          background-color: #e9ecef;
+          border-color: #7c3aed;
+        }
+
+        .math-formula-wrapper.read-only {
+          cursor: default;
+          background-color: transparent;
+          border-color: transparent;
+          padding: 2px 0;
+        }
+
+        .math-formula-wrapper.read-only:hover {
+          background-color: transparent;
+          border-color: transparent;
+        }
+
+        .math-formula-wrapper.math-block {
+          display: block;
+          text-align: center;
+          padding: 16px;
+          margin: 16px 0;
+          background-color: #fafbfc;
+        }
+
+        .math-formula-wrapper.math-block.read-only {
+          background-color: transparent;
+          padding: 16px 0;
+        }
+
+        .math-formula-wrapper .katex {
+          font-size: 1.1em;
+        }
+
+        .math-error {
+          color: #dc2626;
+          font-size: 0.875rem;
+          font-style: italic;
+        }
+      `}</style>
     </NodeViewWrapper>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Info, ExternalLink } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface HoverWordCardProps {
   word: string;
@@ -33,22 +33,18 @@ export const HoverWordCard: React.FC<HoverWordCardProps> = ({
       let top = rect.bottom + padding;
       let left = rect.left;
 
-      // Adjust if card would go off the right edge
       if (left + cardWidth > window.innerWidth) {
         left = window.innerWidth - cardWidth - padding;
       }
 
-      // Adjust if card would go off the left edge
       if (left < padding) {
         left = padding;
       }
 
-      // If card would go off the bottom, show it above the element
       if (top + cardHeight > window.innerHeight) {
         top = rect.top - cardHeight - padding;
       }
 
-      // If still off screen at top, clamp to visible area
       if (top < padding) {
         top = padding;
       }
@@ -57,12 +53,9 @@ export const HoverWordCard: React.FC<HoverWordCardProps> = ({
       setIsVisible(true);
     };
 
-    // Small delay to ensure card is rendered before calculating position
     const timer = setTimeout(calculatePosition, 10);
 
-    const handleScroll = () => {
-      calculatePosition();
-    };
+    const handleScroll = () => calculatePosition();
 
     window.addEventListener("scroll", handleScroll, true);
     window.addEventListener("resize", calculatePosition);
@@ -77,31 +70,40 @@ export const HoverWordCard: React.FC<HoverWordCardProps> = ({
   const cardContent = (
     <div
       ref={cardRef}
-      className={`hover-word-card ${isVisible ? "visible" : ""}`}
+      className={`fixed z-[9999] border-[1px] w-[320px] max-w-[320px] bg-white rounded-xl shadow-xl p-4 font-sans transition-all duration-200
+      pointer-events-auto ${
+        isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+      }`}
       style={{
-        position: "fixed",
         top: `${position.top}px`,
         left: `${position.left}px`,
-        zIndex: 9999,
-      }}
-      onMouseEnter={() => {
-        // Keep card open when hovering over it
       }}
       onMouseLeave={onClose}
     >
-      <div className="hover-word-card-header">
-        <Info size={16} className="hover-word-card-icon" />
-        <h3 className="hover-word-card-title">{title || word}</h3>
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-3">
+        <Info size={16} className="text-blue-500 shrink-0" />
+        <h3 className="text-base font-semibold text-gray-800 m-0 leading-snug">
+          {title || word}
+        </h3>
       </div>
 
+      {/* Description */}
       {description && (
-        <div className="hover-word-card-description">{description}</div>
+        <div className="text-sm leading-relaxed text-gray-600 mb-3">
+          {description}
+        </div>
       )}
 
+      {/* Metadata */}
       {metadata && (
-        <div className="hover-word-card-metadata">
-          <div className="hover-word-card-metadata-label">Additional Info:</div>
-          <div className="hover-word-card-metadata-content">{metadata}</div>
+        <div className="bg-gray-50 rounded-lg p-3 mb-3">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 mb-1">
+            Additional Info:
+          </div>
+          <div className="text-[13px] leading-snug text-gray-700">
+            {metadata}
+          </div>
         </div>
       )}
     </div>

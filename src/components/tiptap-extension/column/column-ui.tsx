@@ -26,221 +26,7 @@ import {
 } from "@/components/tiptap-ui-primitive/dropdown-menu";
 import { Button } from "@/components/tiptap-ui-primitive/button";
 
-<style>{`
-  /* Column layout styles */
-  .column-layout-wrapper {
-    position: relative;
-    margin: 16px 0;
-  }
-  
-  .column-layout-wrapper:first-child {
-    margin-top: 8px;
-  }
-  
-  .column-layout-wrapper:last-child {
-    margin-bottom: 8px;
-  }
-  
-  .tiptap-columns-container {
-    position: relative;
-    width: 100%;
-    min-height: 100px;
-    background: rgba(248, 250, 252, 0.5);
-    border-radius: 6px;
-    transition: all 0.2s ease;
-  }
-  
-  .tiptap-columns-container:hover {
-    background: rgba(248, 250, 252, 0.8);
-  }
-  
-  .tiptap-columns-container.is-focused {
-    background: rgba(59, 130, 246, 0.02);
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-  
-  .tiptap-column {
-    position: relative;
-    min-height: 100px;
-    background: white;
-    border: 1px solid rgba(229, 231, 235, 0.8);
-    border-radius: 4px;
-    padding: 12px;
-    transition: all 0.2s ease;
-  }
-  
-  .tiptap-column:hover {
-    border-color: rgba(156, 163, 175, 0.6);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  }
-  
-  .tiptap-column:focus-within {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-  }
-  
-  .tiptap-column:empty::before {
-    content: 'Start typing...';
-    color: #9ca3af;
-    font-style: italic;
-    pointer-events: none;
-    position: absolute;
-    top: 12px;
-    left: 12px;
-  }
-  
-  .tiptap-column > .ProseMirror-node:first-child {
-    margin-top: 0;
-  }
-  
-  .tiptap-column > .ProseMirror-node:last-child {
-    margin-bottom: 0;
-  }
-  
-  .column-resize-handle {
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    width: 8px;
-    background: rgba(59, 130, 246, 0.3);
-    cursor: col-resize;
-    z-index: 10;
-    border-radius: 2px;
-    opacity: 0.6;
-    transition: all 0.2s ease;
-  }
-  
-  .column-resize-handle::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 2px;
-    height: 20px;
-    background: white;
-    border-radius: 1px;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  }
-  
-  .column-resize-handle:hover {
-    opacity: 1;
-    background: rgba(59, 130, 246, 0.5);
-    width: 10px;
-    margin-left: -1px;
-  }
-  
-  .column-resize-handle.is-resizing {
-    opacity: 1;
-    background: rgba(59, 130, 246, 0.8);
-    width: 10px;
-    margin-left: -1px;
-  }
-  
-  .column-indicators {
-    position: absolute;
-    top: -24px;
-    left: 0;
-    right: 0;
-    height: 20px;
-    display: flex;
-    z-index: 5;
-  }
-  
-  .column-indicators > div {
-    background: rgba(59, 130, 246, 0.1);
-    border: 1px solid rgba(59, 130, 246, 0.3);
-    border-radius: 2px;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #3b82f6;
-    font-weight: 500;
-    transition: all 0.2s ease;
-  }
-  
-  .column-indicators > div:hover {
-    background: rgba(59, 130, 246, 0.2);
-    border-color: rgba(59, 130, 246, 0.5);
-  }
-  
-  @media (max-width: 768px) {
-    .tiptap-columns-container[data-columns="3"],
-    .tiptap-columns-container[data-columns="4"],
-    .tiptap-columns-container[data-columns="5"],
-    .tiptap-columns-container[data-columns="6"] {
-      display: block !important;
-    }
-    
-    .tiptap-columns-container[data-columns="3"] .tiptap-column,
-    .tiptap-columns-container[data-columns="4"] .tiptap-column,
-    .tiptap-columns-container[data-columns="5"] .tiptap-column,
-    .tiptap-columns-container[data-columns="6"] .tiptap-column {
-      margin-bottom: 16px;
-    }
-    
-    .tiptap-columns-container[data-columns="3"] .tiptap-column:last-child,
-    .tiptap-columns-container[data-columns="4"] .tiptap-column:last-child,
-    .tiptap-columns-container[data-columns="5"] .tiptap-column:last-child,
-    .tiptap-columns-container[data-columns="6"] .tiptap-column:last-child {
-      margin-bottom: 0;
-    }
-    
-    .column-resize-handle {
-      display: none;
-    }
-    
-    .column-indicators {
-      display: none;
-    }
-  }
-  
-  @media (prefers-color-scheme: dark) {
-    .tiptap-columns-container {
-      background: rgba(17, 24, 39, 0.5);
-    }
-    
-    .tiptap-columns-container:hover {
-      background: rgba(17, 24, 39, 0.8);
-    }
-    
-    .tiptap-columns-container.is-focused {
-      background: rgba(59, 130, 246, 0.05);
-    }
-    
-    .tiptap-column {
-      background: #1f2937;
-      border-color: rgba(75, 85, 99, 0.8);
-    }
-    
-    .tiptap-column:hover {
-      border-color: rgba(156, 163, 175, 0.8);
-    }
-    
-    .tiptap-column:focus-within {
-      border-color: #60a5fa;
-    }
-    
-    .tiptap-column:empty::before {
-      color: #6b7280;
-    }
-  }
-  
-  @media print {
-    .column-resize-handle,
-    .column-indicators {
-      display: none !important;
-    }
-    
-    .tiptap-columns-container {
-      border: none !important;
-      background: transparent !important;
-      box-shadow: none !important;
-    }
-  }
-`}</style>;
+import "./styles.scss";
 
 interface ColumnButtonProps {
   editor: Editor | null;
@@ -609,34 +395,176 @@ export const ColumnInlineControls: React.FC<ColumnButtonProps> = ({
   const { columns } = currentNode;
 
   return (
-    <div className="flex items-center gap-1 p-1 bg-white border border-gray-200 rounded-md shadow-sm">
-      <div className="text-xs text-gray-500 px-2 py-1 bg-gray-50 rounded">
-        {columns} Columns
+    <div className="tiptap-column-scope">
+      <div className="flex items-center gap-1 p-1 bg-white border border-gray-200 rounded-md shadow-sm">
+        <div className="text-xs text-gray-500 px-2 py-1 bg-gray-50 rounded">
+          {columns} Columns
+        </div>
+
+        <div className="w-px h-5 bg-gray-300"></div>
+
+        <Button
+          className="h-7 w-7 p-0 rounded hover:bg-green-50 hover:text-green-700 transition-colors"
+          onClick={() => editor.chain().focus().addColumn().run()}
+          disabled={columns >= 6}
+          title="Add Column"
+        >
+          <Plus className="h-3 w-3" />
+        </Button>
+
+        <Button
+          className="h-7 w-7 p-0 rounded hover:bg-red-50 hover:text-red-700 transition-colors"
+          onClick={() => editor.chain().focus().removeColumn().run()}
+          disabled={columns <= 1}
+          title="Remove Column"
+        >
+          <Minus className="h-3 w-3" />
+        </Button>
+
+        <div className="w-px h-5 bg-gray-300"></div>
+
+        <ColumnControlsButton editor={editor} />
+
+        <style jsx>{`
+          /* SCOPE EVERYTHING USING THE PARENT WRAPPER */
+          .tiptap-column-scope .column-layout-wrapper {
+            position: relative;
+            margin: 16px 0;
+          }
+
+          .tiptap-column-scope .column-layout-wrapper:first-child {
+            margin-top: 8px;
+          }
+
+          .tiptap-column-scope .column-layout-wrapper:last-child {
+            margin-bottom: 8px;
+          }
+
+          /* Column container */
+          .tiptap-column-scope .tiptap-columns-container {
+            position: relative;
+            width: 100%;
+            min-height: 100px;
+            background: rgba(248, 250, 252, 0.5);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+          }
+
+          .tiptap-column-scope .tiptap-columns-container:hover {
+            background: rgba(248, 250, 252, 0.8);
+          }
+
+          .tiptap-column-scope .tiptap-columns-container.is-focused {
+            background: rgba(59, 130, 246, 0.02);
+            border-color: #3b82f6 !important;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          }
+
+          /* Individual column */
+          .tiptap-column-scope .tiptap-column {
+            position: relative;
+            min-height: 100px;
+            background: #fff;
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            border-radius: 4px;
+            padding: 12px;
+            transition: all 0.2s ease;
+          }
+
+          .tiptap-column-scope .tiptap-column:hover {
+            border-color: rgba(156, 163, 175, 0.6);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+          }
+
+          .tiptap-column-scope .tiptap-column:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+          }
+
+          /* Placeholder */
+          .tiptap-column-scope .tiptap-column:empty::before {
+            content: "Start typing...";
+            color: #9ca3af;
+            font-style: italic;
+            pointer-events: none;
+            position: absolute;
+            top: 12px;
+            left: 12px;
+          }
+
+          .tiptap-column-scope .tiptap-column > .ProseMirror-node:first-child {
+            margin-top: 0;
+          }
+          .tiptap-column-scope .tiptap-column > .ProseMirror-node:last-child {
+            margin-bottom: 0;
+          }
+
+          /* Resize handle */
+          .tiptap-column-scope .column-resize-handle {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            width: 8px;
+            background: rgba(59, 130, 246, 0.3);
+            cursor: col-resize;
+            z-index: 10;
+            border-radius: 2px;
+            opacity: 0.6;
+            transition: all 0.2s ease;
+          }
+
+          .tiptap-column-scope .column-resize-handle::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 20px;
+            background: #fff;
+            border-radius: 1px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+          }
+
+          .tiptap-column-scope .column-resize-handle:hover {
+            opacity: 1;
+            background: rgba(59, 130, 246, 0.5);
+            width: 10px;
+            margin-left: -1px;
+          }
+
+          .tiptap-column-scope .column-resize-handle.is-resizing {
+            opacity: 1;
+            background: rgba(59, 130, 246, 0.8);
+            width: 10px;
+            margin-left: -1px;
+          }
+
+          /* Column indicators */
+          .tiptap-column-scope .column-indicators {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            display: flex;
+            z-index: 5;
+          }
+
+          .tiptap-column-scope .column-indicators > div {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            flex: 1;
+            height: 100%;
+            border-radius: 4px;
+            margin-right: 4px;
+          }
+
+          .tiptap-column-scope .column-indicators > div:last-child {
+            margin-right: 0;
+          }
+        `}</style>
       </div>
-
-      <div className="w-px h-5 bg-gray-300"></div>
-
-      <Button
-        className="h-7 w-7 p-0 rounded hover:bg-green-50 hover:text-green-700 transition-colors"
-        onClick={() => editor.chain().focus().addColumn().run()}
-        disabled={columns >= 6}
-        title="Add Column"
-      >
-        <Plus className="h-3 w-3" />
-      </Button>
-
-      <Button
-        className="h-7 w-7 p-0 rounded hover:bg-red-50 hover:text-red-700 transition-colors"
-        onClick={() => editor.chain().focus().removeColumn().run()}
-        disabled={columns <= 1}
-        title="Remove Column"
-      >
-        <Minus className="h-3 w-3" />
-      </Button>
-
-      <div className="w-px h-5 bg-gray-300"></div>
-
-      <ColumnControlsButton editor={editor} />
     </div>
   );
 };

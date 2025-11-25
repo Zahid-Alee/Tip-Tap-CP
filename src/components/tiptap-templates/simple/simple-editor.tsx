@@ -49,7 +49,6 @@ import "@/components/tiptap-node/paragraph-node/paragraph-node.scss";
 import "@/components/tiptap-node/card-node/card-node.scss";
 import "@/components/tiptap-node/math-node/math-node.scss";
 import "@/components/tiptap-ui/output-block/styles.scss";
-import "@/components/tiptap-extension/hover-word/hover-word.scss";
 
 // --- Hooks ---
 import { useMobile } from "@/hooks/use-mobile";

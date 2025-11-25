@@ -245,6 +245,136 @@ export function ResizableImageView(props: any) {
           </div>
         )}
       </div>
+      <style jsx>{`
+        .image-view {
+          position: relative;
+          display: inline-block;
+          transition: all 0.2s ease;
+        }
+
+        /* Float support */
+        .image-view[style*="float: left"] {
+          margin-right: 1rem;
+          margin-bottom: 0.5rem;
+          clear: left;
+        }
+
+        .image-view[style*="float: right"] {
+          margin-left: 1rem;
+          margin-bottom: 0.5rem;
+          clear: right;
+        }
+
+        .image-view__body {
+          position: relative;
+          display: inline-block;
+          border: 2px solid transparent;
+          border-radius: 4px;
+          transition: border-color 0.2s ease;
+        }
+
+        .image-view__body--focused {
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.2);
+        }
+
+        .image-view__body--resizing {
+          cursor: ew-resize;
+        }
+
+        .image-view__body__image {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          transition: opacity 0.2s ease;
+        }
+
+        .image-resizer {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+
+        .image-resizer__handler {
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          background: #3b82f6;
+          border: 2px solid white;
+          border-radius: 50%;
+          pointer-events: all;
+          cursor: grab;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .image-resizer__handler:hover {
+          background: #2563eb;
+          transform: scale(1.1);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-resizer__handler:active {
+          cursor: grabbing;
+          transform: scale(1.2);
+        }
+
+        .image-resizer__handler--tl {
+          top: -6px;
+          left: -6px;
+          cursor: nw-resize;
+        }
+
+        .image-resizer__handler--tr {
+          top: -6px;
+          right: -6px;
+          cursor: ne-resize;
+        }
+
+        .image-resizer__handler--bl {
+          bottom: -6px;
+          left: -6px;
+          cursor: sw-resize;
+        }
+
+        .image-resizer__handler--br {
+          bottom: -6px;
+          right: -6px;
+          cursor: se-resize;
+        }
+
+        /* Caption */
+        .image-view__caption-wrapper {
+          margin-top: 4px;
+          text-align: center;
+        }
+
+        /* placeholder for contenteditable caption */
+        .image-view__caption-input:empty:before {
+          content: attr(data-placeholder);
+          color: #9ca3af;
+          pointer-events: none;
+        }
+
+        figure.tiptap-image-figure {
+          margin: 0;
+          display: inline-block;
+        }
+
+        figure.tiptap-image-figure[data-float="left"] {
+          float: left;
+          margin-right: 1rem;
+          margin-bottom: 0.5rem;
+          clear: left;
+        }
+
+        figure.tiptap-image-figure[data-float="right"] {
+          float: right;
+          margin-left: 1rem;
+          margin-bottom: 0.5rem;
+          clear: right;
+        }
+      `}</style>
     </NodeViewWrapper>
   );
 }

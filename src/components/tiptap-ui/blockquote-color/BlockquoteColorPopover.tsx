@@ -20,7 +20,7 @@ import {
 import { Separator } from "../../tiptap-ui-primitive/separator";
 
 // --- Styles ---
-import "../highlight-popover/highlight-popover.scss";
+// import "../highlight-popover/highlight-popover.scss";
 
 export interface BlockquoteColor {
   label: string;
