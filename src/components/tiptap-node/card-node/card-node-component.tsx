@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { NodeViewContent, NodeViewWrapper } from "@tiptap/react";
-import { Settings, Palette, X, Trash } from "lucide-react";
-import "./card-node.scss";
 
 interface CardNodeComponentProps {
   node: any;

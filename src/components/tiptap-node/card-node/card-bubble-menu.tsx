@@ -1,6 +1,5 @@
 import React from "react";
 import { BubbleMenu, Editor } from "@tiptap/react";
-import "./card-bubble-menu.scss";
 import {
   Popover,
   PopoverTrigger,
@@ -195,7 +194,7 @@ const BorderRadiusIcon = ({ radius }: { radius: string | null }) => {
     <div className="relative flex items-center justify-center">
       <CornerDownRight className="tiptap-button-icon" />
       {radius && (
-        <div className=" mt-3 text-xs font-mono text-gray-500">
+        <div className="mt-3 text-xs font-mono text-gray-500">
           {radius === "9999px" ? "∞" : radius}
         </div>
       )}
@@ -763,14 +762,14 @@ function BackgroundImageContent({
     <div ref={containerRef} className="tiptap-highlight-content" tabIndex={0}>
       <div className="flex flex-col gap-1 p-1 bg-white border border-gray-200 rounded-md shadow-sm">
         {/* Action Row */}
-        <div className="flex gap-1  justify-between items-center">
+        <div className="flex gap-1 justify-between items-center">
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
             type="button"
             data-style="ghost"
             aria-label="Upload image"
-            className="flex items-center  justify-center bg-gray-100 hover:bg-gray-200 rounded px-2 text-xs h-7 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded px-2 text-xs h-7 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isUploading ? "📤 Uploading..." : "📁 Upload"}
           </button>
@@ -799,7 +798,7 @@ function BackgroundImageContent({
             disabled={!imageUrl.trim() || isUploading}
             type="button"
             data-style="ghost"
-            className="bg-blue-500  text-white hover:bg-blue-600 rounded px-2 text-xs h-7 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            className="bg-blue-500 text-white hover:bg-blue-600 rounded px-2 text-xs h-7 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
             Apply
           </button>
@@ -810,7 +809,7 @@ function BackgroundImageContent({
               disabled={isUploading}
               type="button"
               data-style="ghost"
-              className="bg-red-100 rounded-[50%] h-6 min-w-6  flex-grow-0     text-xs text-red-500 hover:bg-red-200 cursor-pointer"
+              className="bg-red-100 rounded-full h-6 min-w-6 flex-grow-0 text-xs text-red-500 hover:bg-red-200 cursor-pointer"
               aria-label="Remove image"
             >
               ✕
@@ -928,7 +927,7 @@ function OverlayContent({
               onClick={handleRemoveOverlay}
               type="button"
               data-style="ghost"
-              className="h-6 bg-red-100 rounded-[50%]   max-w-6  text-xs text-red-500 hover:bg-red-200 cursor-pointer"
+              className="h-6 bg-red-100 rounded-full max-w-6 text-xs text-red-500 hover:bg-red-200 cursor-pointer"
               aria-label="Remove overlay"
             >
               ✕
@@ -1389,55 +1388,119 @@ export const CardBubbleMenu: React.FC<CardBubbleMenuProps> = ({ editor }) => {
   };
 
   return (
-    <BubbleMenu
-      editor={editor}
-      pluginKey="CardBubbleMenu"
-      shouldShow={({ editor }) => {
-        return editor.isActive("cardNode");
-      }}
-      tippyOptions={{
-        placement: "top",
-        animation: "fade",
-      }}
-      className="card-bubble-menu w-[410px]"
-    >
-      <div className="card-bubble-menu-content">
-        <div className="flex gap-2">
-          {CARD_PRESETS.map((preset) => (
-            <Button
-              key={preset.label}
-              type="button"
-              role="menuitem"
-              aria-label={`Apply ${preset.label} preset`}
-              tabIndex={-1}
-              data-style="ghost"
-              onClick={() => handlePresetSelect(preset)}
-              className="flex-1 text-sm"
-            >
-              {preset.label}
-            </Button>
-          ))}
+    <>
+      <style jsx>{`
+        .card-bubble-menu {
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(151, 131, 131, 0.06);
+          padding: 4px;
+          z-index: 1000;
+        }
+
+        .dark .card-bubble-menu {
+          background: #374151;
+          border-color: #4b5563;
+        }
+
+        .color-trigger-button {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 8px 12px;
+          background: white;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: 14px;
+          color: #374151;
+          cursor: pointer;
+          transition: all 0.15s ease;
+        }
+
+        .color-trigger-button:hover {
+          background: #f9fafb;
+          border-color: #9ca3af;
+        }
+
+        .color-trigger-button:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+
+        .color-trigger-button[data-state="open"] {
+          background: #f3f4f6;
+          border-color: #6b7280;
+        }
+
+        .card-border-color-popover {
+          position: fixed;
+          background: white;
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -2px rgba(0, 0, 0, 0.05);
+          padding: 8px;
+          z-index: 1100;
+        }
+
+        .dark .card-border-color-popover {
+          background: #374151;
+          border-color: #4b5563;
+        }
+      `}</style>
+      <BubbleMenu
+        editor={editor}
+        pluginKey="CardBubbleMenu"
+        shouldShow={({ editor }) => {
+          return editor.isActive("cardNode");
+        }}
+        tippyOptions={{
+          placement: "top",
+          animation: "fade",
+        }}
+        className="card-bubble-menu w-[410px]"
+      >
+        <div className="flex items-center gap-1">
+          <div className="flex gap-2">
+            {CARD_PRESETS.map((preset) => (
+              <Button
+                key={preset.label}
+                type="button"
+                role="menuitem"
+                aria-label={`Apply ${preset.label} preset`}
+                tabIndex={-1}
+                data-style="ghost"
+                onClick={() => handlePresetSelect(preset)}
+                className="flex-1 text-sm"
+              >
+                {preset.label}
+              </Button>
+            ))}
+          </div>
+          <CardColorPopover editor={editor} colorType="background" />
+          <CardColorPopover editor={editor} colorType="border" />
+          <BorderRadiusPopover editor={editor} />
+          <BackgroundImagePopover editor={editor} />
+          <OverlayPopover editor={editor} />
+          <TextAlignmentPopover editor={editor} />
+          <VerticalAlignmentPopover editor={editor} />
+          <Button
+            type="button"
+            role="menuitem"
+            tabIndex={-1}
+            data-style="ghost"
+            className="flex-1 text-sm text-red-500"
+            onClick={handleDelete}
+            aria-label="Delete card"
+          >
+            <Trash size={14} color="red" />
+          </Button>
         </div>
-        <CardColorPopover editor={editor} colorType="background" />
-        <CardColorPopover editor={editor} colorType="border" />
-        <BorderRadiusPopover editor={editor} />
-        <BackgroundImagePopover editor={editor} />
-        <OverlayPopover editor={editor} />
-        <TextAlignmentPopover editor={editor} />
-        <VerticalAlignmentPopover editor={editor} />
-        <Button
-          type="button"
-          role="menuitem"
-          tabIndex={-1}
-          data-style="ghost"
-          className="flex-1 text-sm text-red-500"
-          onClick={handleDelete}
-          aria-label="Delete card"
-        >
-          <Trash size={14} color="red" />
-        </Button>
-      </div>
-    </BubbleMenu>
+      </BubbleMenu>
+    </>
   );
 };
 

@@ -1,48 +1,4 @@
-.tiptap.ProseMirror {
-  --blockquote-bg-color: var(--tt-gray-light-900);
-  --link-text-color: var(--tt-brand-color-500);
-  --separator-color: var(--tt-gray-light-a-200);
-  --thread-text: var(--tt-gray-light-900);
-  --placeholder-color: var(--tt-gray-light-a-400);
-
-  // Highlight variables
-  --tt-highlight-green: #dcfce7;
-  --tt-highlight-green-contrast: #c7fad8;
-  --tt-highlight-blue: #e0f2fe;
-  --tt-highlight-blue-contrast: #ceeafd;
-  --tt-highlight-red: #ffe4e6;
-  --tt-highlight-red-contrast: #ffccd0;
-  --tt-highlight-purple: #f3e8ff;
-  --tt-highlight-purple-contrast: #e4ccff;
-  --tt-highlight-yellow: #fef9c3;
-  --tt-highlight-yellow-contrast: #fbe604;
-
-  // Mathematics variables
-  --tiptap-mathematics-bg-color: var(--tt-gray-light-a-200);
-  --tiptap-mathematics-border-color: var(--tt-brand-color-500);
-
-  .dark & {
-    --blockquote-bg-color: var(--tt-gray-dark-900);
-    --link-text-color: var(--tt-brand-color-400);
-    --separator-color: var(--tt-gray-dark-a-200);
-    --thread-text: var(--tt-gray-dark-900);
-    --placeholder-color: var(--tt-gray-dark-a-400);
-
-    --tt-highlight-green: #509568;
-    --tt-highlight-green-contrast: #47855d;
-    --tt-highlight-blue: #6e92aa;
-    --tt-highlight-blue-contrast: #5e86a1;
-    --tt-highlight-red: #743e42;
-    --tt-highlight-red-contrast: #643539;
-    --tt-highlight-purple: #583e74;
-    --tt-highlight-purple-contrast: #4c3564;
-    --tt-highlight-yellow: #6b6524;
-    --tt-highlight-yellow-contrast: #58531e;
-
-    --tiptap-mathematics-bg-color: var(--tt-gray-dark-a-200);
-    --tiptap-mathematics-border-color: var(--tt-brand-color-400);
-  }
-}
+/* Variables removed - using static colors */
 
 /* =====================
      CORE EDITOR STYLES
@@ -50,7 +6,7 @@
 .tiptap.ProseMirror {
   white-space: pre-wrap;
   outline: none;
-  caret-color: var(--tt-cursor-color);
+  caret-color: rgba(34, 35, 37, 1);
 
   // Paragraph spacing
   p:not(:first-child) {
@@ -63,7 +19,7 @@
   // Selection styles
   &:not(.readonly):not(.ProseMirror-hideselection) {
     ::selection {
-      background-color: var(--tt-selection-color);
+      background-color: rgba(157, 138, 255, 0.2);
     }
 
     .selection::selection {
@@ -73,7 +29,7 @@
 
   .selection {
     display: inline;
-    background-color: var(--tt-selection-color);
+    background-color: rgba(157, 138, 255, 0.2);
   }
 
   .ProseMirror-hideselection {
@@ -84,7 +40,7 @@
   > p.is-editor-empty::before {
     content: attr(data-placeholder);
     pointer-events: none;
-    color: var(--placeholder-color);
+    color: rgba(40, 44, 51, 0.42);
     float: left;
     height: 0;
   }
@@ -162,7 +118,6 @@
     p {
       margin-top: 0;
     }
-
   }
 }
 
@@ -258,13 +213,13 @@
     margin-bottom: 3em;
     border: none;
     height: 1px;
-    background-color: var(--separator-color);
+    background-color: rgba(37, 39, 45, 0.1);
   }
 
   &.ProseMirror-focused {
     hr.ProseMirror-selectednode {
       border-radius: 9999px;
-      outline: 3px solid var(--tt-brand-color-500);
+      outline: 3px solid rgba(98, 41, 255, 1);
       outline-offset: 2px;
     }
   }
@@ -275,7 +230,7 @@
      ===================== */
 .tiptap.ProseMirror {
   a {
-    color: var(--link-text-color);
+    color: rgba(98, 41, 255, 1);
     text-decoration: underline;
   }
 }
@@ -286,7 +241,7 @@
 .tiptap.ProseMirror {
   [data-type="mention"] {
     display: inline-block;
-    color: var(--tt-brand-color-500);
+    color: rgba(98, 41, 255, 1);
   }
 }
 
@@ -296,16 +251,14 @@
 .tiptap.ProseMirror {
   // Base styles for inline threads
   .tiptap-thread.tiptap-thread--unresolved.tiptap-thread--inline {
-    transition:
-      color 0.2s ease-in-out,
-      background-color 0.2s ease-in-out;
-    color: var(--thread-text);
-    border-bottom: 2px dashed var(--tt-color-yellow-base);
+    transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    color: rgba(34, 35, 37, 1);
+    border-bottom: 2px dashed #fef9c3;
     font-weight: 600;
 
     &.tiptap-thread--selected,
     &.tiptap-thread--hovered {
-      background-color: var(--tt-color-yellow-inc-2);
+      background-color: #fef9c3;
       border-bottom-color: transparent;
     }
   }
@@ -313,14 +266,14 @@
   // Block thread styles with images
   .tiptap-thread.tiptap-thread--unresolved.tiptap-thread--block {
     &:has(img) {
-      outline: 0.125rem solid var(--tt-color-yellow-base);
-      border-radius: var(--tt-radius-xs, 0.25rem);
+      outline: 0.125rem solid #fef9c3;
+      border-radius: 0.25rem;
       overflow: hidden;
       width: fit-content;
 
       &.tiptap-thread--selected {
         outline-width: 0.25rem;
-        outline-color: var(--tt-color-yellow-base);
+        outline-color: #fef9c3;
       }
 
       &.tiptap-thread--hovered {
@@ -331,21 +284,21 @@
     // Block thread styles without images
     &:not(:has(img)) {
       border-radius: 0.25rem;
-      border-bottom: 0.125rem dashed var(--tt-color-yellow-base);
+      border-bottom: 0.125rem dashed #fef9c3;
       padding-bottom: 0.5rem;
       outline: 0.25rem solid transparent;
 
       &.tiptap-thread--hovered,
       &.tiptap-thread--selected {
-        background-color: var(--tt-color-yellow-base);
-        outline-color: var(--tt-color-yellow-base);
+        background-color: #fef9c3;
+        outline-color: #fef9c3;
       }
     }
   }
 
   // Resolved thread styles
   .tiptap-thread.tiptap-thread--resolved.tiptap-thread--inline.tiptap-thread--selected {
-    background-color: var(--tt-color-yellow-base);
+    background-color: #fef9c3;
     border-color: transparent;
     opacity: 0.5;
   }
@@ -364,7 +317,7 @@
   .Tiptap-mathematics-editor {
     padding: 0 0.25rem;
     margin: 0 0.25rem;
-    border: 1px solid var(--tiptap-mathematics-border-color);
+    border: 1px solid rgba(98, 41, 255, 1);
     font-family: monospace;
     font-size: 0.875rem;
   }
@@ -377,14 +330,14 @@
       transition: background 0.2s;
 
       &:hover {
-        background: var(--tiptap-mathematics-bg-color);
+        background: rgba(37, 39, 45, 0.1);
       }
     }
   }
 
   .Tiptap-mathematics-editor,
   .Tiptap-mathematics-render {
-    border-radius: var(--tt-radius-xs);
+    border-radius: 0.25rem;
     display: inline-block;
   }
 }
